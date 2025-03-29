@@ -12,16 +12,15 @@ const fs = require("fs");
 // @route   GET /api/products
 // @access  Public
 router.get('/', async (req, res) => {
-  try {
-/*     // Add filtering and pagination if needed
-    const { location } = req.query;  // Get location from query params
-    const filter = location ? { location } : {}; */
+  const limit = req.query.limit ? parseInt(req.query.limit) : null; // Check if limit exists
+  let query = Product.find();
 
-    const products = await Product.find({ isActive: true });
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (limit) {
+    query = query.limit(limit); // Apply limit only if it's provided
   }
+
+  const products = await query; // Execute query
+  res.status(200).json(products);
 });
 
 // @desc    Get single product

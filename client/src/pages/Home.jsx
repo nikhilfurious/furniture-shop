@@ -30,8 +30,9 @@ function Home() {
 
   const fetchFeaturedProducts = async () => {
     try {
-      // limit=6 to only fetch 6 products
-      const response = await axios.get(`${API_URL}/api/products`);
+      // limit to 6 products only
+
+      const response = await axios.get(`${API_URL}/api/products?limit=6`);
       setFeaturedProducts(response.data);
       
     } catch (error) {

@@ -63,7 +63,7 @@ const ProductPage = () => {
         product, 
         selectedTenureOption.months, 
         selectedTenureOption.price,
-        quantit
+        quantity
       );
     } else {
       console.error("Selected tenure option is undefined");

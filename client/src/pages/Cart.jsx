@@ -9,31 +9,91 @@ import { useNavigate } from 'react-router-dom';
 const CartPage = () => {
   const { removeFromCart, getTotalPrice, updateQuantity } = useCart();
   const [cart, setCart] = useState([]);
-  const [loading, setLoading] = useState(true);  // ✅ Add loading state
+  const [loading, setLoading] = useState(true);
+  const [updatingItems, setUpdatingItems] = useState(new Set());
   const API_URL = 'http://localhost:5000';
   const auth = getAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        setLoading(true); // ✅ Set loading before fetching
-        const token = await auth.currentUser?.getIdToken();
-        const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser?.uid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setCart(response.data);
-      } catch (error) {
-        console.error('Error fetching cart:', error);
-      } finally {
-        setLoading(false); // ✅ Set loading to false after fetching
+  const fetchCart = async (initialLoad = false) => {
+    try {
+      if (initialLoad) {
+        setLoading(true);
       }
-    };
-    fetchCart();
-  }, []);
+      
+      const token = await auth.currentUser?.getIdToken();
+      const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser?.uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCart(response.data);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCart(true);
+  }, [auth.currentUser]);
+
+  const handleRemove = async (itemId) => {
+    try {
+      setUpdatingItems(prev => new Set(prev).add(itemId));
+      
+      // Optimistically update UI
+      setCart(currentCart => currentCart.filter(item => item.id !== itemId));
+      
+      // Then update server
+      await removeFromCart(itemId);
+      
+      // No need to refresh the entire cart - we've already removed the item locally
+    } catch (error) {
+      console.error('Error removing item:', error);
+      // If there was an error, refresh to get the correct state
+      fetchCart();
+    } finally {
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    try {
+      setUpdatingItems(prev => new Set(prev).add(itemId));
+      
+      // Optimistically update UI
+      setCart(currentCart => 
+        currentCart.map(item => 
+          item.id === itemId ? { ...item, quantity: newQuantity } : item
+        )
+      );
+      
+      // Then update server
+      await updateQuantity(itemId, newQuantity);
+      
+      // No need to refresh the entire cart - we've already updated the quantity locally
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      // If there was an error, refresh to get the correct state
+      fetchCart();
+    } finally {
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
@@ -42,7 +102,6 @@ const CartPage = () => {
         <h2 className="text-3xl font-bold text-gray-800">Your Cart</h2>
       </div>
 
-      {/* ✅ Show loading message when data is still being fetched */}
       {loading ? (
         <p className="text-xl m-4">Loading cart...</p>
       ) : cart.length === 0 ? (
@@ -86,16 +145,24 @@ const CartPage = () => {
                 </div>
 
                 <div className="col-span-2 flex justify-center">
-                  <QuantitySelector
-                    quantity={item.quantity}
-                    onIncrease={() => updateQuantity(item.id, item.quantity + 1)}
-                    onDecrease={() => {
-                      if (item.quantity > 1) {
-                        updateQuantity(item.id, item.quantity - 1);
-                      }
-                    }}
-                    className="shadow-sm"
-                  />
+                  <div className="relative">
+                    <QuantitySelector
+                      quantity={item.quantity}
+                      onIncrease={() => handleQuantityChange(item.id, item.quantity + 1)}
+                      onDecrease={() => {
+                        if (item.quantity > 1) {
+                          handleQuantityChange(item.id, item.quantity - 1);
+                        }
+                      }}
+                      className={`shadow-sm ${updatingItems.has(item.id) ? 'opacity-50' : ''}`}
+                      disabled={updatingItems.has(item.id)}
+                    />
+                    {updatingItems.has(item.id) && (
+                      <div className="absolute left-0 right-8 top-0 bottom-0 flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="col-span-2 text-right">
@@ -105,10 +172,17 @@ const CartPage = () => {
 
                 <div className="col-span-2 flex justify-end">
                   <button
-                    onClick={() => removeFromCart(item._id)}
-                    className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-red-50 text-red-500 transition-colors"
+                    onClick={() => handleRemove(item.id)}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-md hover:bg-red-50 text-red-500 transition-colors ${
+                      updatingItems.has(item.id) ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={updatingItems.has(item.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {updatingItems.has(item.id) ? (
+                      <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin mr-1"></div>
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                     <span className="hidden sm:inline">Remove</span>
                   </button>
                 </div>
@@ -119,10 +193,7 @@ const CartPage = () => {
           <div className="p-6 bg-gray-50 rounded-b-lg border-t">
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">
-                ₹
-                {cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}
-              </span>
+              <span className="font-medium">₹{calculateTotal()}</span>
             </div>
             <div className="flex justify-between items-center mb-6">
               <span className="text-gray-600">Delivery</span>
@@ -131,10 +202,7 @@ const CartPage = () => {
             <div className="h-px bg-gray-200 mb-6"></div>
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold">Total</span>
-              <span className="text-xl font-bold text-indigo-600">
-                ₹
-                {cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}
-              </span>
+              <span className="text-xl font-bold text-indigo-600">₹{calculateTotal()}</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <button

@@ -66,7 +66,10 @@ function Navbar({ products, openModal, locationData }) {
 
   // Fetch cart data once
   useEffect(() => {
+
     const fetchCart = async () => {
+      if (!auth.currentUser) return; 
+
       try {
         const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser?.uid}`, {
           headers: {
@@ -79,7 +82,7 @@ function Navbar({ products, openModal, locationData }) {
       }
     };
     fetchCart();
-  }, [auth.currentUser]);
+  }, [auth.currentUser,cart]);
 
   // Category change handler
   const handleCategoryChange = (e) => {

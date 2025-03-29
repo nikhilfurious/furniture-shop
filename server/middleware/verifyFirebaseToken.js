@@ -14,7 +14,7 @@ const verifyFirebaseToken = async (req, res, next) => {
     req.user = decodedToken;
 
     // Check if user exists in MongoDB
-    let user = await User.findOne({ firebaseUID: decodedToken.uid });
+    let user = await User.findOne({ email: decodedToken.email });
 
     // If user does not exist, create one
     if (!user) {

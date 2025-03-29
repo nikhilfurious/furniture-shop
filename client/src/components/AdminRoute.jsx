@@ -2,6 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import Firebase auth
+import AdminPanel from "../pages/AdminPanel";
 
 const AdminRoute = () => {
   const [isAdmin, setIsAdmin] = useState(null);
@@ -48,7 +49,7 @@ const AdminRoute = () => {
 
   if (loading) return <p>Loading...</p>;
 
-  return isAdmin ? <Outlet /> : <Navigate to="/login" />;
+  return isAdmin ? <AdminPanel/> : <Navigate to="/login" />;
 };
 
 export default AdminRoute;
