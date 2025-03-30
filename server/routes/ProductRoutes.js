@@ -50,8 +50,6 @@ router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
       category,
       description,
       refundableDeposit,
-      operationType,
-      loadType,
       brand,
       dimensions,
       color,
@@ -75,8 +73,6 @@ router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
       category,
       description,
       refundableDeposit,
-      operationType,
-      loadType,
       brand,
       dimensions,
       color,
@@ -116,7 +112,7 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
     const updateData = {};
     
     // Handle text fields from the request body
-    const allowedFields = ['name', 'description', 'price', 'category', 'refundableDeposit', 'operationType', 'loadType', 'brand', 'dimensions', 'color', 'tenureOptions'];
+    const allowedFields = ['name', 'description', 'price', 'category', 'refundableDeposit', 'brand', 'dimensions', 'color', 'tenureOptions'];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
         // Try to parse JSON if the field could be an object or array

@@ -36,7 +36,7 @@ const PaymentPage = () => {
       if (response.data && Array.isArray(response.data)) {
 
         setProducts(response.data);
-        alert(JSON.stringify(response.data))
+       
       } else {
         setProducts([]);
       }

@@ -13,7 +13,7 @@ const ProductPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(false);
-  const [selectedTenure, setSelectedTenure] = useState(4);
+  const [selectedTenure, setSelectedTenure] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const Navigate = useNavigate();
@@ -65,10 +65,19 @@ const ProductPage = () => {
         selectedTenureOption.price,
         quantity
       );
+      alert("Added to cart!");
     } else {
       console.error("Selected tenure option is undefined");
       alert("Please select a valid tenure option");
     }
+  };
+
+  // Calculate total price based on quantity
+  const getTotalPrice = () => {
+    if (product.tenureOptions && product.tenureOptions[selectedTenure]) {
+      return product.tenureOptions[selectedTenure].price * quantity;
+    }
+    return 'Price not available';
   };
 
   return (
@@ -94,9 +103,7 @@ const ProductPage = () => {
             >
               <ChevronRight className="w-6 h-6" />
             </button>
-            <button className="absolute top-4 right-4 bg-white rounded-full p-2">
-              <Heart className="w-6 h-6" />
-            </button>
+            
           </div>
           <div className="flex gap-2 mt-4 overflow-x-auto">
             {product.images.map((img, index) => (
@@ -118,33 +125,6 @@ const ProductPage = () => {
             {/* Product Title */}
             <h1 className="text-2xl font-medium text-gray-900">{product.name}</h1>
 
-            {/* Refundable Deposit */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 text-sm">100% Refundable deposit</span>
-                <span className="text-gray-900 font-semibold">₹{product.refundableDeposit}</span>
-                <Info className="w-4 h-4 text-gray-400 cursor-pointer" />
-              </div>
-            </div>
-
-            {/* Operation Type and Load Type */}
-            <div className="space-y-6 border-2 p-4 border-gray-100 rounded-lg">
-              <div className="flex gap-6">
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Operation type</p>
-                  <span className="inline-block p-8 py-1.5 bg-blue-50 text-blue-600 text-sm font-medium">
-                    {product.operationType}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Load Type</p>
-                  <span className="inline-block p-8 py-1.5 bg-blue-50 text-blue-600 text-sm font-medium">
-                    {product.loadType}
-                  </span>
-                </div>
-              </div>
-            </div>
-
             {/* Tenure Selector */}
             <div className="space-y-4 border-2 p-4 border-gray-100 rounded-lg">
               <div className="flex items-center justify-between">
@@ -152,9 +132,7 @@ const ProductPage = () => {
                   <h3 className="font-medium">Choose Tenure</h3>
                   <Info className="w-4 h-4 text-gray-400 cursor-pointer" />
                 </div>
-                <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                  Compare All Tenures
-                </button>
+                
               </div>
               
               <div className="relative pt-6">
@@ -248,6 +226,14 @@ const ProductPage = () => {
                   <p className="text-sm text-gray-500">Monthly Rent</p>
                 </div>
               </div>
+              
+              {/* Added total price section */}
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <div className="flex justify-between">
+                  <p className="text-sm font-medium text-gray-700">Total ({quantity} {quantity === 1 ? 'item' : 'items'})</p>
+                  <p className="text-lg font-bold text-gray-900">₹{getTotalPrice()}</p>
+                </div>
+              </div>
             </div>
 
             {/* Book Button */}
@@ -266,63 +252,102 @@ const ProductPage = () => {
                 </button>
               </div>
             </div>
-            <button className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors" onClick={() => Navigate('/cart')}>
-              <ShoppingCart className="w-5 h-5" />
-              Book your plan
-            </button>
+            
           </div>
         </div>
       </div>
 
-      {/* Bottom features */}
-      <div className="grid grid-cols-4 gap-4 mt-12">
-        {[
-          { title: "Products as good as new" },
-          { title: "Free repairs & maintenance" },
-          { title: "Easy Returns, no questions asked" },
-          { title: "Free upgrades & relocation" }
-        ].map((feature, index) => (
-          <div key={index} className="flex flex-col items-center text-center p-4 border rounded-lg">
-            <div className="w-12 h-12 bg-blue-50 rounded-full mb-2" />
-            <p className="text-sm text-gray-600">{feature.title}</p>
+      {/* Styled Product Details Section */}
+      <div className="mt-12 w-full">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800">Product Details</h2>
+            <p className="text-gray-500 text-sm mt-1">Everything you need to know about this product</p>
           </div>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-3 gap-8 mt-12 w-11/12">
-        {/* FAQ Section - Spanning both the first and third row */}
-        <div className="col-span-2 row-span-2">
-          <FAQ />
-        </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {/* Features & Specs */}
+            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
+                <NotebookPen className="text-primary" size={20} />
+                Features & Specs
+              </h3>
+              <ul className="space-y-3">
+                <li className="pb-2 border-b border-gray-100">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Brand</span>
+                    <span className="font-medium">{product.brand || 'Not specified'}</span>
+                  </div>
+                </li>
+                <li className="pb-2 border-b border-gray-100">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Color</span>
+                    <span className="font-medium">{product.color || 'Not specified'}</span>
+                  </div>
+                </li>
+                <li className="pb-2 border-b border-gray-100">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Material</span>
+                    <span className="font-medium">{product.material || 'Premium Quality'}</span>
+                  </div>
+                </li>
+                <li className="pb-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Warranty</span>
+                    <span className="font-medium">{product.warranty || '12 months'}</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
 
-        {/* Special Offers in the second column, first row */}
-        <div className="col-span-1">
-          <SpecialOffers />
-        </div>
+            {/* Dimensions Section */}
+            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
+                <FaTape className="text-primary" size={20} />
+                Dimensions
+              </h3>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p className="text-gray-700 leading-relaxed">
+                  {product.dimensions || 
+                    'Height: 80cm, Width: 120cm, Depth: 60cm. Please allow for minor variations as all measurements are approximate.'}
+                </p>
+              </div>
+              
+              <div className="mt-4">
+                <h4 className="font-medium text-gray-700 mb-2">Packed Dimensions</h4>
+                <p className="text-gray-600">
+                  Our products are carefully packed to ensure safe delivery. Package dimensions may vary slightly from actual product dimensions.
+                </p>
+              </div>
+            </div>
 
-        {/* Product Details in the second column, second row */}
-        <div className="col-span-1 bg-gray-100 p-6 rounded">
-          <h3 className="text-3xl font-medium mb-2">Product Details</h3>
-          <p className='text-gray-500'>Know more about the prodcut below</p>
-          <ul className="list-none p-0 mb-4 space-y-1">
-            <h2 className='font-medium text-xl text-gray-700 mt-2 flex gap-2'><NotebookPen/>Features & Specs</h2>
-            <li>
-              <strong>Brand:</strong> {product.brand}
-            </li>
-            <li>
-              <strong>Color:</strong> {product.color}
-            </li>
-          </ul>
-          <div>
-            <h4 className="text-xl font-medium text-gray-700 mb-1 flex gap-2"><FaTape />Dimension</h4>
-            <p className="text-gray-600 mb-2">
-              {product.dimensions}
-            </p>
-
-            <h4 className="text-xl font-medium text-gray-700 mb-1 flex gap-2"><ShieldCheck />Safety &amp; Usage</h4>
-            <p className="text-gray-600">
-              Provide details about usage guidelines and safety measures.
-            </p>
+            {/* Safety & Usage */}
+            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
+                <ShieldCheck className="text-primary" size={20} />
+                Safety & Usage
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-1">Safe Usage</h4>
+                  <p className="text-gray-600 text-sm">
+                    Always follow the manufacturer's guidelines for proper usage and maintenance. Keep away from children without supervision.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-1">Maintenance</h4>
+                  <p className="text-gray-600 text-sm">
+                    Regular cleaning with a soft, dry cloth is recommended. Avoid using harsh chemicals that may damage the finish.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-1">Care Instructions</h4>
+                  <p className="text-gray-600 text-sm">
+                    {product.care || 'For detailed care instructions, please refer to the user manual included with the product.'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Store, MapPin, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, User, Store, MapPin, ChevronDown, Trash2 } from 'lucide-react';
 import { useAuth } from '../Context/AuthContext';
 import Breadcrumb from './BreadCrumb';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import { useCart } from '../Context/CartContext';
 
 const categories = [
   'All Categories',
@@ -20,12 +21,16 @@ function Navbar({ products, openModal, locationData }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [cart, setCart] = useState([]);
+  const { cart } = useCart();
   const auth = getAuth();
   const navigate = useNavigate();
   const API_URL = 'http://localhost:5000';
+  
+  // Reference to the search input so we can handle blur/focus
+  const searchInputRef = useRef(null);
 
   // Handler for search filtering
   const handleSearch = (query) => {
@@ -38,15 +43,48 @@ function Navbar({ products, openModal, locationData }) {
       product.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredProducts(filtered);
+    setIsSuggestionsVisible(true);
   };
 
-  // When a product is selected from the search dropdown
+  // Handle key press: if Enter is pressed, navigate to search results page
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      if (searchQuery.trim() === '') return;
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setIsSuggestionsVisible(false);
+    }
+  };
+
+  // When a product is selected from the suggestions
   const handleSelectProduct = (product) => {
-    // Clear search state and navigate to the product page
     setSearchQuery('');
     setFilteredProducts([]);
+    setIsSuggestionsVisible(false);
     navigate(`/product/${product.slug}`);
   };
+
+  // Hide suggestions on blur (with a slight delay to allow click events)
+  const handleBlur = () => {
+    setTimeout(() => {
+      setIsSuggestionsVisible(false);
+    }, 200);
+  };
+
+
+
+  // Show suggestions on focus if query exists
+  const handleFocus = () => {
+    if (searchQuery.trim() !== '' && filteredProducts.length > 0) {
+      setIsSuggestionsVisible(true);
+    }
+  };
+
+  const handleSearchIconClick = () => {
+    if (searchQuery.trim() === '') return;
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    setIsSuggestionsVisible(false);
+  };
+  
 
   // Handle scroll visibility for navbar
   useEffect(() => {
@@ -64,16 +102,15 @@ function Navbar({ products, openModal, locationData }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Fetch cart data once
-  useEffect(() => {
-
+  // Fetch cart data once (if needed)
+/*   useEffect(() => {
     const fetchCart = async () => {
-      if (!auth.currentUser) return; 
-
+      if (!auth.currentUser) return;
       try {
-        const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser?.uid}`, {
+        const token = await auth.currentUser.getIdToken();
+        const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser.uid}`, {
           headers: {
-            Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setCart(response.data);
@@ -82,13 +119,12 @@ function Navbar({ products, openModal, locationData }) {
       }
     };
     fetchCart();
-  }, [auth.currentUser,cart]);
+  }, [auth.currentUser]); */
 
   // Category change handler
   const handleCategoryChange = (e) => {
     const category = e.target.value;
     setSelectedCategory(category);
-    // Navigate based on category selection
     if (category === 'All Categories') {
       navigate(`/category`);
     } else {
@@ -96,7 +132,7 @@ function Navbar({ products, openModal, locationData }) {
     }
   };
 
-  // Location dropdown component
+  // Location dropdown component (unchanged)
   function LocationDropdown({ locationData, openModal }) {
     const [selectedLocation, setSelectedLocation] = useState(
       locationData || localStorage.getItem('userLocation') || ''
@@ -104,9 +140,25 @@ function Navbar({ products, openModal, locationData }) {
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
     useEffect(() => {
-      if (locationData) {
-        setSelectedLocation(locationData);
-      }
+      // Function to fetch the location from localStorage
+      const fetchLocation = () => {
+        const loc = localStorage.getItem('userLocation');
+        if (loc) {
+          setSelectedLocation(loc);
+        } else if (locationData) {
+          setSelectedLocation(locationData);
+        }
+      };
+    
+      // Run on mount
+      fetchLocation();
+    
+      // Listen for storage events (changes in localStorage across tabs)
+      window.addEventListener('storage', fetchLocation);
+    
+      return () => {
+        window.removeEventListener('storage', fetchLocation);
+      };
     }, [locationData]);
 
     const cities = [
@@ -142,8 +194,6 @@ function Navbar({ products, openModal, locationData }) {
                     localStorage.setItem('userLocation', city);
                     setSelectedLocation(city);
                     setDropdownVisible(false);
-                    // Optionally open modal if needed
-                    // openModal(city);
                   }}
                   className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center ${
                     selectedLocation === city ? 'bg-blue-50 text-primary' : ''
@@ -197,32 +247,45 @@ function Navbar({ products, openModal, locationData }) {
 
               <div className="relative flex-1">
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    handleSearch(e.target.value);
-                  }}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  onBlur={handleBlur}
+                  onFocus={handleFocus}
                   placeholder="Search for products..."
                   className="w-full px-6 py-3 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
                 />
-                <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer"
+                  onClick={handleSearchIconClick}
+                />
 
-                {filteredProducts?.length > 0 && (
-                  <ul className="absolute w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-auto z-50">
-                    {filteredProducts.map((product) => (
-                      <li key={product.id} className="border-b border-gray-100 last:border-none">
-                        <Link
-                          to={`/product/${product.slug}`}
-                          className="flex items-center px-4 py-3 hover:bg-blue-50 transition-colors"
-                          onClick={() => handleSelectProduct(product)}
-                        >
-                          {product.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                {isSuggestionsVisible && (
+                    <ul className="absolute w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-auto z-50">
+                      {filteredProducts && filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                          <li key={product.id} className="border-b border-gray-100 last:border-none">
+                            <Link
+                              to={`/product/${product.slug}`}
+                              className="block px-4 py-2 hover:bg-blue-50 transition-colors"
+                              onClick={() => {
+                                setSearchQuery('');
+                                setFilteredProducts([]);
+                                setIsSuggestionsVisible(false);
+                              }}
+                            >
+                              {product.name}
+                            </Link>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="px-4 py-2 text-gray-500">No products found</li>
+                      )}
+                    </ul>
+                  )}
+
               </div>
             </div>
           </div>
@@ -245,11 +308,6 @@ function Navbar({ products, openModal, locationData }) {
             <div>
               {user ? (
                 <div className="flex items-center gap-4">
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="w-10 h-10 rounded-full border"
-                  />
                   <button
                     onClick={logout}
                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
@@ -259,7 +317,7 @@ function Navbar({ products, openModal, locationData }) {
                 </div>
               ) : (
                 <Link
-                  to={{ pathname: '/login', state: { from: window.location.pathname } }}
+                  to={{ pathname: '/login', state: { from: window.location.pathname } }}  // for react-router v6, use navigate instead if needed
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
                 >
                   Login

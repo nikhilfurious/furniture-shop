@@ -45,14 +45,6 @@ const ProductSchema = new Schema({
     required: [true, 'Refundable deposit is required'],
     min: [0, 'Deposit cannot be negative']
   },
-  operationType: {
-    type: String,
-    trim: true
-  },
-  loadType: {
-    type: String,
-    trim: true
-  },
   brand:{
     type:String,
     trim:true

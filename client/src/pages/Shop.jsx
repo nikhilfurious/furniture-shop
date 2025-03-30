@@ -16,15 +16,62 @@ function ProductListPage() {
     categories: [],
     months: []
   });
+  const [userLocation, setUserLocation] = useState('');
   const navigate = useNavigate();
+
+  // Set up polling to check for localStorage changes
+  useEffect(() => {
+    // Get initial location
+    const initialLocation = localStorage.getItem('userLocation') || '';
+    setUserLocation(initialLocation);
+
+    // Set up interval to check for location changes
+    const checkLocationInterval = setInterval(() => {
+      const currentLocation = localStorage.getItem('userLocation') || '';
+      if (currentLocation !== userLocation) {
+        setUserLocation(currentLocation);
+      }
+    }, 1000);
+
+    // Add window storage event listener for changes in other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === 'userLocation') {
+        setUserLocation(e.newValue || '');
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Clean up
+    return () => {
+      clearInterval(checkLocationInterval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [userLocation]);
+
+  // Create a custom localStorage wrapper that will update our state
+  const updateUserLocation = useCallback((newLocation) => {
+    localStorage.setItem('userLocation', newLocation);
+    setUserLocation(newLocation);
+  }, []);
+
+  // Expose the wrapper to window object for external scripts to use
+  useEffect(() => {
+    // Add a method to window that other scripts can call to update location
+    window.updateUserLocationAndRefresh = updateUserLocation;
+    
+    return () => {
+      // Clean up
+      delete window.updateUserLocationAndRefresh;
+    };
+  }, [updateUserLocation]);
 
   useEffect(() => {
     // Initialize AOS animation library
     AOS.init({
       duration: 800,
       easing: 'ease-in-out',
-      once: true, // Changed to true to prevent re-animation on filter changes
-      mirror: false, // Changed to false to prevent flickering
+      once: true,
+      mirror: false,
     });
 
     const fetchData = async () => {
@@ -32,7 +79,6 @@ function ProductListPage() {
         setLoading(true);
         const fetchedProducts = await fetchProducts();
         setProducts(fetchedProducts);
-        setFilteredProducts(fetchedProducts);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -48,9 +94,16 @@ function ProductListPage() {
   const applyFiltersAndSort = useCallback(() => {
     if (products.length === 0) return;
     
+    // First filter by user location if available
     let filtered = [...products];
     
-    // Filter by categories if any are selected
+    if (userLocation) {
+      filtered = filtered.filter(product => 
+        product.location && product.location.includes(userLocation)
+      );
+    }
+    
+    // Then apply category filters if any are selected
     if (activeFilters.categories && activeFilters.categories.length > 0) {
       filtered = filtered.filter(product => 
         activeFilters.categories.includes(product.category)
@@ -87,7 +140,7 @@ function ProductListPage() {
     }
     
     setFilteredProducts(filtered);
-  }, [products, activeFilters, sortBy]);
+  }, [products, activeFilters, sortBy, userLocation]);
 
   // Apply filtering and sorting when dependencies change
   useEffect(() => {
@@ -138,15 +191,10 @@ function ProductListPage() {
     setSortBy('featured');
   };
 
-  // Get minimum tenure from product
-  const getMinTenure = (product) => {
-    if (product.tenureOptions && product.tenureOptions.length > 0) {
-      return product.tenureOptions.reduce((min, option) => 
-        option.months < min ? option.months : min, 
-        product.tenureOptions[0].months
-      );
-    }
-    return "N/A";
+  // For testing: allows changing location directly from the UI
+  const handleLocationChange = (e) => {
+    const newLocation = e.target.value;
+    updateUserLocation(newLocation);
   };
 
   if (loading) return (
@@ -180,7 +228,12 @@ function ProductListPage() {
       <section className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-4">Our Product Collection</h2>
-          <p className="text-xl max-w-3xl mx-auto">Quality appliances with flexible rental plans tailored to your needs.</p>
+          <p className="text-xl max-w-3xl mx-auto">
+            Quality appliances with flexible rental plans tailored to your needs
+            
+          </p>
+          
+          
         </div>
       </section>
 
@@ -223,10 +276,15 @@ function ProductListPage() {
                 </div>
                 
                 {/* Display active filters */}
-                {(activeFilters.categories.length > 0 || activeFilters.months?.length > 0) && (
+                {(activeFilters.categories.length > 0 || activeFilters.months?.length > 0 || userLocation) && (
                   <div className="mb-4 pb-4 border-b border-gray-200">
                     <h3 className="font-medium text-gray-700 mb-2">Active Filters:</h3>
                     <div className="flex flex-wrap gap-2">
+                      {userLocation && (
+                        <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">
+                          Location: {userLocation}
+                        </span>
+                      )}
                       {activeFilters.categories.map(category => (
                         <span key={category} className="bg-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full">
                           {category}
@@ -279,6 +337,7 @@ function ProductListPage() {
             <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center">
               <p className="text-gray-700 mb-3 sm:mb-0">
                 <span className="font-bold text-indigo-900">{filteredProducts.length}</span> Products Found
+                {userLocation && <span className="ml-1 text-gray-500">in {userLocation}</span>}
               </p>
               <select 
                 className="w-full sm:w-auto p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none transition-all cursor-pointer md:hidden"
@@ -298,7 +357,11 @@ function ProductListPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h3 className="text-xl font-bold text-gray-700 mb-2">No Products Found</h3>
-                <p className="text-gray-500 mb-4">Try changing your filters or check back later for new items.</p>
+                <p className="text-gray-500 mb-4">
+                  {userLocation ? 
+                    `No products available in ${userLocation}. Try changing your location or filters.` : 
+                    'Try changing your filters or check back later for new items.'}
+                </p>
                 <button 
                   onClick={clearFilters}
                   className="px-6 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg"

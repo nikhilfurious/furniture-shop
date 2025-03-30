@@ -25,6 +25,7 @@ useEffect(()=>{
 
     fetchCart();
   },[])
+
   const fetchCart = async () => {
     if(!auth.currentUser) return;
     try {
@@ -42,8 +43,7 @@ useEffect(()=>{
   
   const addToCart = async (product, tenure, price, quantity) => {
     try {
-        alert(JSON.stringify(product))
-        alert(tenure, price, quantity)
+        
       const { data } = await axios.post(
         `${API_URL}/api/cart/add`, 
         {

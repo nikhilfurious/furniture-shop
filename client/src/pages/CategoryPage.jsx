@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -15,7 +15,11 @@ const CategoryPage = () => {
     priceRange: { min: 0, max: 10000000 },
     inStock: false
   });
+  const [location, setLocation] = useState(localStorage.getItem('userLocation') || '');
 
+
+
+  const navigate = useNavigate();
   const API_URL = "http://localhost:5000";
 
   // Initialize AOS
@@ -56,8 +60,34 @@ const CategoryPage = () => {
     fetchProducts();
   }, [categoryId]);
 
+
+
+// Update the location state whenever it changes in localStorage
+useEffect(() => {
+  const handleLocationChange = () => {
+    const newLocation = localStorage.getItem('userLocation') || '';
+    setLocation(newLocation);
+  };
+
+  // Add an event listener to update location on localStorage change
+  window.addEventListener('storage', handleLocationChange);
+
+  // Update the location initially
+  handleLocationChange();
+
+  // Cleanup the event listener
+  return () => {
+    window.removeEventListener('storage', handleLocationChange);
+  };
+}, []);
+
   // Filter products based on price and stock availability
   const filteredProducts = products?.filter(product => {
+
+    if (location && product.location !== location) {
+      return false;
+    }
+
     if (product.basePrice < filters.priceRange.min || product.basePrice > filters.priceRange.max) {
       return false;
     }
@@ -134,88 +164,7 @@ const CategoryPage = () => {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Filters Sidebar */}
-          <div className="w-full md:w-64 lg:w-72" data-aos="fade-right">
-            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-4">
-              <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-2">Filters</h2>
-              
-              <div className="my-6 border-t border-gray-200 pt-6">
-                <h3 className="font-medium mb-3 text-gray-700">Price Range</h3>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="relative w-full">
-                    <span className="absolute left-3 top-3 text-gray-500">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      className="border rounded-lg p-2 pl-6 w-full bg-gray-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
-                      value={filters.priceRange.min}
-                      onChange={(e) => handlePriceChange(e, 'min')}
-                    />
-                    <label className="block text-xs text-gray-500 mt-1">Min</label>
-                  </div>
-                  <span className="text-gray-400">to</span>
-                  <div className="relative w-full">
-                    <span className="absolute left-3 top-3 text-gray-500">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      className="border rounded-lg p-2 pl-6 w-full bg-gray-50 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition"
-                      value={filters.priceRange.max}
-                      onChange={(e) => handlePriceChange(e, 'max')}
-                    />
-                    <label className="block text-xs text-gray-500 mt-1">Max</label>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100000"
-                    step="10"
-                    className="w-full accent-blue-500"
-                    value={filters.priceRange.min}
-                    onChange={(e) => handlePriceChange(e, 'min')}
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="100000"
-                    step="10"
-                    className="w-full accent-blue-500"
-                    value={filters.priceRange.max}
-                    onChange={(e) => handlePriceChange(e, 'max')}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>$0</span>
-                  <span>$500</span>
-                  <span>$100000</span>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={filters.inStock}
-                    onChange={handleStockChange}
-                  />
-                  <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600"></div>
-                  <span className="ml-3 text-sm font-medium text-gray-700">In Stock Only</span>
-                </label>
-              </div>
-
-              <button
-                className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2"
-                onClick={resetFilters}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Reset Filters
-              </button>
-            </div>
-          </div>
+          
 
           {/* Products Listing */}
           <div className="flex-grow">
@@ -247,6 +196,10 @@ const CategoryPage = () => {
                 </svg>
                 <h3 className="text-xl font-semibold text-gray-700">No products match your filters</h3>
                 <p className="text-gray-500 mt-2">Try adjusting your filters or browse all products</p>
+                <button className=" m-4 cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-md hover:from-indigo-700 hover:to-purple-700 flex-1 transition duration-300 shadow-md hover:shadow-lg"
+                  onClick={()=>{navigate('/product')}}>
+                    View Other Products
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

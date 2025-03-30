@@ -21,6 +21,8 @@ import { fetchProducts } from './services/Productapi';
 import AdminRoute from './components/AdminRoute';
 import PaymentPage from './pages/PaymentPage';
 import AllCategory from './pages/AllCategory';
+import SearchResultsPage from './pages/SearchResultsPage';
+import FAQ from './components/Faq';
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -82,6 +84,8 @@ const App = () => {
                 <Route path="/category/" element={<AllCategory />} />
                 <Route path="/category/:categoryId" element={<CategoryPage />} />
                 <Route path="/product/:productId" element={<ProductPage />} />
+                <Route path="/search" element={<SearchResultsPage />} />
+                <Route path='/faq' element={<FAQ/>}/>
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<PaymentPage/>} />
                 <Route path="/about" element={<AboutPage/>} />

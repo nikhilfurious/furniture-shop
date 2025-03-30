@@ -38,8 +38,6 @@ const AdminPanel = () => {
     category: '',
     description: '',
     refundableDeposit: 0,
-    operationType: '',
-    loadType: '',
     brand: '',
     dimensions: '',
     color: '',
@@ -125,8 +123,6 @@ const AdminPanel = () => {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('refundableDeposit', formData.refundableDeposit);
-      formDataToSend.append('operationType', formData.operationType);
-      formDataToSend.append('loadType', formData.loadType);
       formDataToSend.append('brand', formData.brand);
       formDataToSend.append('dimensions', formData.dimensions);
       formDataToSend.append('color', formData.color);
@@ -172,7 +168,7 @@ const AdminPanel = () => {
       const formDataToSend = new FormData();
       
       // Add basic text fields
-      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'operationType', 'loadType', 'brand', 'dimensions', 'color',];
+      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color',];
       textFields.forEach(field => {
         if (formData[field] !== undefined && formData[field] !== null) {
           formDataToSend.append(field, formData[field]);
@@ -479,8 +475,6 @@ const AdminPanel = () => {
       category: '',
       description: '',
       refundableDeposit: 0,
-      operationType: '',
-      loadType: '',
       brand: '',
       dimensions: '',
       color: '',
@@ -721,31 +715,7 @@ const AdminPanel = () => {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Operation Type
-                  </label>
-                  <input
-                    type="text"
-                    name="operationType"
-                    value={formData.operationType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Load Type
-                  </label>
-                  <input
-                    type="text"
-                    name="loadType"
-                    value={formData.loadType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Brand
