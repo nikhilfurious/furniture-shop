@@ -158,7 +158,7 @@ function Home() {
       },
       {
         title: "Bedroom Furniture",
-        route: "/category/bedroom",
+        route: "/category/bedroom-furniture",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="35" width="50" height="20" stroke="#000" strokeWidth="2" />
@@ -171,7 +171,7 @@ function Home() {
       },
       {
         title: "Dining Room Furniture",
-        route: "/category/dining-room",
+        route: "/category/dining-room-furniture",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="30" y="20" width="20" height="5" fill="#FFC107" stroke="#000" strokeWidth="2" />
@@ -187,7 +187,7 @@ function Home() {
       },
       {
         title: "Office Furniture",
-        route: "/category/office",
+        route: "/category/office-furniture",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="25" y="45" width="30" height="5" stroke="#000" strokeWidth="2" />
@@ -199,7 +199,7 @@ function Home() {
       },
       {
         title: "Outdoor Furniture",
-        route: "/category/outdoor",
+        route: "/category/outdoor-furniture",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 40H60L55 60H25L20 40Z" stroke="#000" strokeWidth="2" />
@@ -212,7 +212,7 @@ function Home() {
       },
       {
         title: "Storage & Organization",
-        route: "/category/storage",
+        route: "/category/storage-organization",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="20" y="20" width="40" height="50" rx="2" stroke="#000" strokeWidth="2" />
