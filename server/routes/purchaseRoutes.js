@@ -7,6 +7,7 @@ require('jspdf-autotable');
 const fs = require('fs');
 const path = require('path');
 const { PDFDocument, StandardFonts,rgb } = require("pdf-lib");
+const Orders = require('../models/Orders');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -63,7 +64,7 @@ router.post('/update-user-phone', async (req, res) => {
 
 router.post("/process-purchase", async (req, res) => {
     try {
-        const { products, customer, adminEmail } = req.body;
+        const { userId, totalAmount,products, customer, adminEmail } = req.body;
         
         // Generate invoice details
         const invoiceNumber = `INV-${Date.now().toString().substr(-6)}`;
@@ -225,7 +226,7 @@ router.post("/process-purchase", async (req, res) => {
             <p>Please find your invoice attached.</p>
             <p>Order details:</p>
             <ul>
-                ${products.map(product => `<li><strong>${product.productid?.name}</strong> - $${product.price.toFixed(2)}</li>`).join("")}
+                ${products.map(product => `<li><strong>${product?.name}</strong> - $${product.price.toFixed(2)}</li>`).join("")}
             </ul>
             <p><strong>Total:</strong> $${total.toFixed(2)}</p>
             <p>If you have any questions, please contact support.</p>
@@ -234,7 +235,7 @@ router.post("/process-purchase", async (req, res) => {
         // **Send Invoice to Customer**
         await transporter.sendMail({
             from: `"Your Company" <${process.env.SMTP_USER}>`,
-            to: "iampragathish@gmail.com",
+            to: customer.email,
             subject: `Invoice #${invoiceNumber} for Your Purchase`,
             html: emailContent,
             attachments: [
@@ -261,10 +262,39 @@ router.post("/process-purchase", async (req, res) => {
             ]
         });
 
-        res.json({ success: true, invoiceNumber });
+        const newOrder = new Orders({
+            userId,
+            productIds: products.map(product => product.productId),
+            totalAmount:total,
+            orderDate: new Date(),
+            invoiceNumber,
+            status: 'Pending',
+        });
+
+        // Save the order to the database
+        const savedOrder = await newOrder.save();
+
+        res.status(201).json({ success: true, message: 'Order placed successfully',invoiceNumber: invoiceNumber });
+
     } catch (error) {
         console.error("Error processing purchase:", error);
         res.status(500).json({ success: false, message: "Failed to process purchase" });
+    }
+});
+
+
+// GET: Get Orders by User ID
+router.get("/orders/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find orders for the given user
+        const orders = await Orders.find({ userId }).populate("productIds");
+
+        res.json({ success: true, orders });
+    } catch (error) {
+        console.error("Error retrieving orders:", error);
+        res.status(500).json({ success: false, message: "Failed to fetch orders" });
     }
 });
 

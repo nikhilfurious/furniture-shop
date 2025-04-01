@@ -1,8 +1,26 @@
-import React from "react";
-import { useAuth } from "../Context/AuthContext";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../Context/AuthContext';
+import axios from 'axios';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const API_URL = 'http://localhost:5000';
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/orders/${user.uid}`);
+        setOrders(response.data.orders);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [user.uid]);
 
   return (
     <div className="max-w-3xl mx-auto py-10">
@@ -16,8 +34,37 @@ const Dashboard = () => {
       >
         Logout
       </button>
+
+      <h3 className="text-2xl font-semibold mt-8">Your Orders</h3>
+      {loading ? (
+        <p>Loading orders...</p>
+      ) : orders.length === 0 ? (
+        <p>No orders found.</p>
+      ) : (
+        <table className="w-full mt-4 border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2">Invoice Number</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Total</th>
+              <th className="p-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr key={order.invoiceNumber} className="border-t">
+                <td className="p-2">{order.invoiceNumber}</td>
+                <td className="p-2">{new Date(order.orderDate).toLocaleDateString()}</td>
+                
+                <td className="p-2">${order.totalAmount.toFixed(2)}</td>
+                <td className="p-2">{order.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
 
-export default Dashboard
+export default Dashboard;

@@ -84,7 +84,9 @@ useEffect(() => {
   // Filter products based on price and stock availability
   const filteredProducts = products?.filter(product => {
 
-    if (location && product.location !== location) {
+    const productLocations = Array.isArray(product.location) ? product.location : [product.location];
+  
+    if (location && !productLocations.some(loc => loc.toLowerCase() === location.toLowerCase())) {
       return false;
     }
 

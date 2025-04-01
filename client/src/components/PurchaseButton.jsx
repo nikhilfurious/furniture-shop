@@ -56,6 +56,8 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
 
         // Step 2: Proceed with the purchase if phone verification was successful
         const response = await axios.post(`${API_URL}/api/process-purchase`, {
+            userId: customer.userId,
+            totalPrice,
             products,
             customer: {
                 ...customer,
