@@ -126,6 +126,7 @@ const AdminPanel = () => {
       formDataToSend.append('brand', formData.brand);
       formDataToSend.append('dimensions', formData.dimensions);
       formDataToSend.append('color', formData.color);
+      formDataToSend.append('location', JSON.stringify(formData.location));
       
       // Add tenure options as JSON string
       formDataToSend.append('tenureOptions', JSON.stringify(formData.tenureOptions));
@@ -168,12 +169,21 @@ const AdminPanel = () => {
       const formDataToSend = new FormData();
       
       // Add basic text fields
-      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color',];
-      textFields.forEach(field => {
-        if (formData[field] !== undefined && formData[field] !== null) {
+      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color', 'location'];
+    textFields.forEach(field => {
+      if (formData[field] !== undefined && formData[field] !== null) {
+        if (field === 'location') {
+          // If location is a comma-separated string, split it into an array
+          let locations = formData[field];
+          if (!Array.isArray(locations)) {
+            locations = locations.split(',').map(loc => loc.trim()).filter(loc => loc !== "");
+          }
+          formDataToSend.append(field, JSON.stringify(locations));
+        } else {
           formDataToSend.append(field, formData[field]);
         }
-      });
+      }
+    });
       
       // Handle any complex objects that need to be stringified
       const objectFields = ['tenureOptions'];
@@ -478,6 +488,7 @@ const AdminPanel = () => {
       brand: '',
       dimensions: '',
       color: '',
+      location: '',
       images: [],
       existingImages: [],
       tenureOptions: [
@@ -748,6 +759,18 @@ const AdminPanel = () => {
                     type="text"
                     name="color"
                     value={formData.color}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
                     onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />

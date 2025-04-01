@@ -21,9 +21,9 @@ const transporter = nodemailer.createTransport({
 });
 
 // Update user's phone number
-router.post('/update-user-phone', async (req, res) => {
+router.post('/update-user-details', async (req, res) => {
     try {
-        const { userId, phoneNumber } = req.body;
+        const { userId, phoneNumber, address } = req.body;
 
         if (!userId || !phoneNumber) {
             return res.status(400).json({ success: false, message: "User ID and phone number are required" });
@@ -36,27 +36,52 @@ router.post('/update-user-phone', async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // If the user already has a phone number, check if it matches the entered one
-        if (existingUser.phoneNumber) {
-            if (existingUser.phoneNumber !== phoneNumber) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Entered phone number does not match the existing one" 
-                });
-            }
-        } else {
-            // If no phone number exists, update with the new one
-            existingUser.phoneNumber = phoneNumber;
-            await existingUser.save();
+        // Update phone number and address
+        existingUser.phoneNumber = phoneNumber;
+        
+        if (address) {
+            existingUser.address = address;
         }
 
-        res.json({ success: true, user: existingUser, message: "Phone number updated successfully" });
+        await existingUser.save();
+
+        res.json({ success: true, user: existingUser, message: "User details updated successfully" });
     } catch (error) {
-        console.error('Error updating phone number:', error);
-        res.status(500).json({ success: false, message: 'Failed to update phone number' });
+        console.error('Error updating user details:', error);
+        res.status(500).json({ success: false, message: 'Failed to update user details' });
     }
 });
 
+
+router.get('/get-user-details', async (req, res) => {
+    try {
+      const { userId } = req.query;
+  
+      if (!userId) {
+        return res.status(400).json({ success: false, message: 'User ID is required' });
+      }
+  
+      // Fetch user details from the database
+      const user = await User.findOne({firebaseUID: userId});
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      // Send the user details as a response
+      res.json({
+        success: true,
+        userDetails: {
+          phoneNumber: user.phoneNumber || '+91',
+          address: user.address || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+  
 
 // Process purchase and generate invoice
 

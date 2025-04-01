@@ -43,9 +43,10 @@ router.get('/:id', async (req, res) => {
 // @desc    Create new product
 // @route   POST /api/products
 // @access  Private/Admin
-router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
+router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
   try {
-    const { name,
+    const {
+      name,
       basePrice,
       category,
       description,
@@ -54,18 +55,30 @@ router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
       dimensions,
       color,
       tenureOptions,
+      location,
     } = req.body;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'At least one image is required' });
     }
 
-    const imageUrls = await Promise.all(
-      req.files?.map(async (file) => {
-        const result = await cloudinary.uploader.upload(file.path);
-        return result.secure_url;
-      })
-    );
+    // Upload images to Cloudinary using the same function as in PUT request
+    const uploadPromises = req.files.map(file => cloudinary.uploadToCloudinary(file.path));
+    const imageUrls = await Promise.all(uploadPromises);
+
+
+    let parsedLocation = [];
+    if (location) {
+      try {
+        parsedLocation = JSON.parse(location);
+        if (!Array.isArray(parsedLocation)) {
+          parsedLocation = [parsedLocation];
+        }
+      } catch (e) {
+        // If parsing fails, assume it's a plain string
+        parsedLocation = [location];
+      }
+    }
 
     const product = new Product({
       name,
@@ -78,6 +91,7 @@ router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
       color,
       images: imageUrls,
       tenureOptions: JSON.parse(tenureOptions),
+      location: parsedLocation,
     });
 
     await product.save();
@@ -87,10 +101,11 @@ router.post('/', storage.array('images',5) ,checkAdmin, async (req, res) => {
   }
 });
 
+
 // @desc    Update product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
-router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
+router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
   try {
     const productId = req.params.id;
     
@@ -112,16 +127,41 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
     const updateData = {};
     
     // Handle text fields from the request body
-    const allowedFields = ['name', 'description', 'price', 'category', 'refundableDeposit', 'brand', 'dimensions', 'color', 'tenureOptions'];
+    const allowedFields = [
+      'name',
+      'description',
+      'price',
+      'category',
+      'quantity',
+      'refundableDeposit',
+      'brand',
+      'dimensions',
+      'color',
+      'location'
+    ];
     allowedFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        // Try to parse JSON if the field could be an object or array
-        if (typeof req.body[field] === 'string' && 
-            (req.body[field].startsWith('{') || req.body[field].startsWith('['))) {
+      if (req.body[field] !== undefined && req.body[field] !== null) {
+        if (field === 'location') {
+          // Parse location field and ensure it is stored as an array
           try {
-            updateData[field] = JSON.parse(req.body[field]);
+            // Try to parse the value in case it's sent as a JSON string
+            let parsed = JSON.parse(req.body[field]);
+            if (!Array.isArray(parsed)) {
+              // If parsed value is not an array, check if it's a comma-separated string
+              if (typeof parsed === 'string') {
+                parsed = parsed.split(',').map(loc => loc.trim()).filter(loc => loc !== "");
+              } else {
+                parsed = [parsed];
+              }
+            }
+            updateData[field] = parsed;
           } catch (e) {
-            updateData[field] = req.body[field];
+            // If parsing fails, treat it as a comma-separated string or a single value
+            let locations = req.body[field];
+            if (typeof locations === 'string') {
+              locations = locations.split(',').map(loc => loc.trim()).filter(loc => loc !== "");
+            }
+            updateData[field] = Array.isArray(locations) ? locations : [locations];
           }
         } else {
           updateData[field] = req.body[field];
@@ -136,7 +176,6 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
     if (req.body.existingImages) {
       try {
         const existingImages = JSON.parse(req.body.existingImages);
-        // Validate that existingImages is an array
         if (Array.isArray(existingImages)) {
           finalImages = existingImages;
         } else {
@@ -146,7 +185,6 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
         return res.status(400).json({ message: 'Failed to parse existingImages JSON' });
       }
     } else {
-      // If no existingImages provided, use current images
       finalImages = [...product.images];
     }
     
@@ -167,8 +205,6 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map(file => cloudinary.uploadToCloudinary(file.path));
       const newImageUrls = await Promise.all(uploadPromises);
-      
-      // Add new image URLs to final images array
       finalImages = [...finalImages, ...newImageUrls];
     }
     
@@ -206,6 +242,7 @@ router.put('/:id', checkAdmin, upload.array('images',5), async (req, res) => {
     });
   }
 });
+
 
 
 
