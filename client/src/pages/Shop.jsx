@@ -96,12 +96,17 @@ function ProductListPage() {
     
     // First filter by user location if available
     let filtered = [...products];
-    
-    if (userLocation) {
-      filtered = filtered.filter(product => 
-        product.location && product.location.includes(userLocation)
+    // add it case insensitive
+    const userLocationLower = userLocation.toLowerCase();
+    if (userLocationLower) {
+      filtered = filtered.filter(product =>
+        product.location && product.location.some(location => 
+          location.toLowerCase().includes(userLocationLower)
+        )
       );
     }
+    
+    
     
     // Then apply category filters if any are selected
     if (activeFilters.categories && activeFilters.categories.length > 0) {
