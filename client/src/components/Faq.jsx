@@ -80,7 +80,7 @@ const FAQ = () => {
 
   const Plus = () => {
     return (
-      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-600 text-white">
+      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-600 text-white">
         <span className="text-lg font-semibold">+</span>
       </div>
     );
@@ -88,7 +88,7 @@ const FAQ = () => {
 
   const Minus = () => {
     return (
-      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-600 text-white">
+      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-600 text-white">
         <span className="text-lg font-semibold">-</span>
       </div>
     );
@@ -123,7 +123,7 @@ const FAQ = () => {
             <div className="relative">
               <input
                 type="text"
-                className="w-full py-3 px-4 pr-10 rounded-full border-2 border-gray-300 focus:outline-none focus:border-indigo-500 transition duration-300"
+                className="w-full py-3 px-4 pr-10 rounded-full border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300"
                 placeholder="Search for questions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -153,7 +153,7 @@ const FAQ = () => {
                       onClick={() => toggleAnswer(`search-${index}`)}
                     >
                       <div>
-                        <span className="text-xs font-medium text-indigo-600 bg-indigo-100 rounded-full py-1 px-2 mr-2">
+                        <span className="text-xs font-medium text-green-600 bg-green-100 rounded-full py-1 px-2 mr-2">
                           {item.category}
                         </span>
                         <h4 className="inline text-md font-semibold text-gray-800">{item.question}</h4>
@@ -230,13 +230,13 @@ const FAQ = () => {
         )}
 
         {/* Still Have Questions Section */}
-        <div className="mt-16 bg-indigo-600 rounded-xl text-center py-10 px-6 shadow-lg">
+        <div className="mt-16 bg-green-600 rounded-xl text-center py-10 px-6 shadow-lg">
           <h2 className="text-2xl font-bold text-white mb-4">Still Have Questions?</h2>
-          <p className="text-indigo-100 mb-6 max-w-2xl mx-auto">
+          <p className="text-green-100 mb-6 max-w-2xl mx-auto">
             We're here to help. If you couldn't find the answer to your question, please reach out to our customer support team.
           </p>
           <div className="space-x-4">
-            <button className="bg-white text-indigo-600 font-medium py-2 px-6 rounded-full hover:bg-indigo-50 transition duration-300 cursor-pointer" onClick={()=>{navigate('/contact')}}>
+            <button className="bg-white text-green-600 font-medium py-2 px-6 rounded-full hover:bg-green-50 transition duration-300 cursor-pointer" onClick={()=>{navigate('/contact')}}>
               Contact Support
             </button>
             

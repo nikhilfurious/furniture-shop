@@ -15,7 +15,7 @@ import ContactPage from './pages/Contact';
 import AdminPanel from './pages/AdminPanel';
 
 import ProductList from './pages/Shop';
-import Demo from './pages/demo';
+
 import ForgotPassword from './pages/ForgotPassword';
 import { fetchProducts } from './services/Productapi';
 import AdminRoute from './components/AdminRoute';
@@ -71,8 +71,9 @@ const App = () => {
 
   return (
     <AuthProvider>
+
         <Router>
-        <div className="">
+        <div className=" min-h-screen">
           <Navbar products={products} openModal={() => setShowLocationModal(true)} locationData={locationData}/>
           
           <LocationModal isOpen={showLocationModal} onLocationSelect={handleLocationSelect} onClose={() => setShowLocationModal(false)} />

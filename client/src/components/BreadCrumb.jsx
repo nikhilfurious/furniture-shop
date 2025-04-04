@@ -58,7 +58,7 @@ const Breadcrumb = () => {
           <motion.div variants={itemVariants}>
             <Link
               to="/"
-              className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+              className="flex items-center text-gray-600 hover:text-green-600 transition-colors"
             >
               <Home className="w-4 h-4" />
             </Link>
@@ -84,11 +84,11 @@ const Breadcrumb = () => {
 
                 <motion.div variants={itemVariants}>
                   {isLast ? (
-                    <span className="text-blue-600 font-medium">{displayName}</span>
+                    <span className="text-green-600 font-medium">{displayName}</span>
                   ) : (
                     <Link
                       to={routeTo}
-                      className="text-gray-600 hover:text-blue-600 transition-colors"
+                      className="text-gray-600 hover:text-green-600 transition-colors"
                     >
                       {displayName}
                     </Link>

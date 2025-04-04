@@ -72,8 +72,6 @@ function Navbar({ products, openModal, locationData }) {
     }, 200);
   };
 
-
-
   // Show suggestions on focus if query exists
   const handleFocus = () => {
     if (searchQuery.trim() !== '' && filteredProducts.length > 0) {
@@ -87,7 +85,6 @@ function Navbar({ products, openModal, locationData }) {
     setIsSuggestionsVisible(false);
   };
   
-
   // Handle scroll visibility for navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -137,7 +134,7 @@ function Navbar({ products, openModal, locationData }) {
     }
   };
 
-  // Location dropdown component (unchanged)
+  // Location dropdown component (unchanged structure but styled for green)
   function LocationDropdown({ locationData, openModal }) {
     const [selectedLocation, setSelectedLocation] = useState(
       locationData || localStorage.getItem('userLocation') || ''
@@ -178,18 +175,18 @@ function Navbar({ products, openModal, locationData }) {
     return (
       <div className="relative">
         <button
-          className="flex items-center text-gray-700 hover:text-primary transition-colors"
+          className="flex items-center text-gray-700 hover:text-green-600 transition-colors"
           onClick={() => setDropdownVisible(!dropdownVisible)}
         >
-          <MapPin className="h-5 w-5 mr-1" />
+          <MapPin className="h-5 w-5 mr-1 text-green-500" />
           <span className="font-medium mr-1">
             {selectedLocation || 'Select Location'}
           </span>
-          <ChevronDown className={`h-4 w-4 transition-transform ${dropdownVisible ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 transition-transform ${dropdownVisible ? 'rotate-180' : ''} text-green-500`} />
         </button>
 
         {dropdownVisible && (
-          <div className="absolute mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 z-50">
+          <div className="absolute mt-2 w-64 bg-white rounded-lg shadow-lg border border-green-100 z-50">
             <div className="py-2">
               <div className="font-medium text-sm text-gray-500 px-4 py-1">Popular Cities</div>
               {cities.map((city) => (
@@ -200,14 +197,14 @@ function Navbar({ products, openModal, locationData }) {
                     setSelectedLocation(city);
                     setDropdownVisible(false);
                   }}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center ${
-                    selectedLocation === city ? 'bg-blue-50 text-primary' : ''
+                  className={`w-full text-left px-4 py-2 hover:bg-green-50 transition-colors flex items-center ${
+                    selectedLocation === city ? 'bg-green-50 text-green-600' : ''
                   }`}
                 >
-                  <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                  <MapPin className="h-4 w-4 mr-2 text-green-400" />
                   {city}
                   {selectedLocation === city && (
-                    <span className="ml-auto text-primary text-sm">✓</span>
+                    <span className="ml-auto text-green-600 text-sm">✓</span>
                   )}
                 </button>
               ))}
@@ -220,7 +217,7 @@ function Navbar({ products, openModal, locationData }) {
 
   return (
     <nav
-      className={`fixed top-0 w-full bg-white shadow-lg transition-transform duration-300 z-50 ${
+      className={`fixed top-0 w-full bg-white border-b border-green-100 shadow-md transition-transform duration-300 z-50 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
@@ -228,8 +225,8 @@ function Navbar({ products, openModal, locationData }) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <Store className="h-8 w-8 text-primary" />
-            <span className="font-display text-2xl font-bold">ShopHub</span>
+            <Store className="h-8 w-8 text-green-600" />
+            <span className="font-display text-2xl font-bold text-green-700">Spot Furnish</span>
           </Link>
 
           {/* Location Dropdown */}
@@ -237,11 +234,11 @@ function Navbar({ products, openModal, locationData }) {
 
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl mx-8">
-            <div className="flex items-center bg-white rounded-xl hover:shadow-lg transition-shadow duration-200 border-2 border-gray-100">
+            <div className="flex items-center bg-white rounded-xl hover:shadow-lg transition-shadow duration-200 border-2 border-green-100 focus-within:border-green-300">
               <select
                 value={selectedCategory}
                 onChange={handleCategoryChange}
-                className="px-4 py-3 rounded-l-xl bg-gray-50 border-r border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 py-3 rounded-l-xl bg-green-50 border-r border-green-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer hover:bg-green-100 transition-colors"
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -260,51 +257,50 @@ function Navbar({ products, openModal, locationData }) {
                   onBlur={handleBlur}
                   onFocus={handleFocus}
                   placeholder="Search for products..."
-                  className="w-full px-6 py-3 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                  className="w-full px-6 py-3 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-green-400 placeholder-gray-400"
                 />
                 <Search
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500 cursor-pointer hover:text-green-600"
                   onClick={handleSearchIconClick}
                 />
 
                 {isSuggestionsVisible && (
-                    <ul className="absolute w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-auto z-50">
-                      {filteredProducts && filteredProducts.length > 0 ? (
-                        filteredProducts.map((product) => (
-                          <li key={product.id} className="border-b border-gray-100 last:border-none">
-                            <Link
-                              to={`/product/${product.slug}`}
-                              className="block px-4 py-2 hover:bg-blue-50 transition-colors"
-                              onClick={() => {
-                                setSearchQuery('');
-                                setFilteredProducts([]);
-                                setIsSuggestionsVisible(false);
-                              }}
-                            >
-                              {product.name}
-                            </Link>
-                          </li>
-                        ))
-                      ) : (
-                        <li className="px-4 py-2 text-gray-500">No products found</li>
-                      )}
-                    </ul>
-                  )}
-
+                  <ul className="absolute w-full bg-white mt-2 rounded-xl shadow-xl border border-green-100 max-h-48 overflow-auto z-50">
+                    {filteredProducts && filteredProducts.length > 0 ? (
+                      filteredProducts.map((product) => (
+                        <li key={product.id} className="border-b border-green-100 last:border-none">
+                          <Link
+                            to={`/product/${product.slug}`}
+                            className="block px-4 py-2 hover:bg-green-50 transition-colors"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setFilteredProducts([]);
+                              setIsSuggestionsVisible(false);
+                            }}
+                          >
+                            {product.name}
+                          </Link>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2 text-gray-500">No products found</li>
+                    )}
+                  </ul>
+                )}
               </div>
             </div>
           </div>
 
           {/* Right Icons */}
           <div className="flex items-center space-x-6">
-            <Link to="/dashboard" className="text-gray-600 hover:text-primary">
+            <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">
               <User className="h-6 w-6" />
             </Link>
-            <Link to="/cart" className="text-gray-600 hover:text-primary relative">
+            <Link to="/cart" className="text-gray-600 hover:text-green-600 transition-colors relative">
               <div className="relative">
                 <ShoppingCart className="h-6 w-6" />
                 {cart.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2">
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full px-2">
                     {cart.length}
                   </span>
                 )}
@@ -313,17 +309,17 @@ function Navbar({ products, openModal, locationData }) {
             <div>
               {user ? (
                 <div className="flex items-center gap-4">
-                  <button
+                  <span
                     onClick={logout}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                    className="cursor-pointer text-red-600 hover:text-green-600 transition-colors font-medium underline"
                   >
                     Logout
-                  </button>
+                  </span>
                 </div>
               ) : (
                 <Link
-                  to={{ pathname: '/login', state: { from: window.location.pathname } }}  // for react-router v6, use navigate instead if needed
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                  to="/login"
+                  className="text-gray-600 hover:text-green-600 transition-colors font-medium"
                 >
                   Login
                 </Link>
@@ -332,7 +328,9 @@ function Navbar({ products, openModal, locationData }) {
           </div>
         </div>
       </div>
-      <Breadcrumb />
+      <div className="bg-green-50">
+        <Breadcrumb />
+      </div>
     </nav>
   );
 }

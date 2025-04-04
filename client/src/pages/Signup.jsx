@@ -29,9 +29,9 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Header Section */}
-        <div className="bg-indigo-600 px-6 py-8 text-center">
+        <div className="bg-green-600 px-6 py-8 text-center">
           <h1 className="text-3xl font-bold text-white">Create Account</h1>
-          <p className="text-indigo-200 mt-2">Join our community today</p>
+          <p className="text-green-200 mt-2">Join our community today</p>
         </div>
         
         {/* Form Section */}
@@ -53,7 +53,7 @@ const Signup = () => {
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150"
                 required
               />
             </div>
@@ -68,7 +68,7 @@ const Signup = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150"
                 required
               />
             </div>
@@ -83,7 +83,7 @@ const Signup = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150"
                 required
               />
               <p className="mt-2 text-xs text-gray-500">
@@ -95,7 +95,7 @@ const Signup = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ${
+                className={`w-full py-3 px-4 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ${
                   isLoading ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >
@@ -107,11 +107,11 @@ const Signup = () => {
           <div className="mt-6">
             <p className="text-sm text-gray-600">
               By signing up, you agree to our{" "}
-              <a href="/terms" className="font-medium text-indigo-600 hover:text-indigo-800">
+              <a href="/terms" className="font-medium text-green-600 hover:text-green-800">
                 Terms of Service
               </a>{" "}
               and{" "}
-              <a href="/privacy" className="font-medium text-indigo-600 hover:text-indigo-800">
+              <a href="/privacy" className="font-medium text-green-600 hover:text-green-800">
                 Privacy Policy
               </a>
             </p>
@@ -122,7 +122,7 @@ const Signup = () => {
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-800">
+            <a href="/login" className="font-medium text-green-600 hover:text-green-800">
               Sign in
             </a>
           </p>

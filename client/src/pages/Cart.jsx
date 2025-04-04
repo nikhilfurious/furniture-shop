@@ -98,7 +98,7 @@ const CartPage = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
       <div className="flex items-center gap-3 mb-8">
-        <ShoppingBag className="h-8 w-8 text-indigo-600" />
+        <ShoppingBag className="h-8 w-8 text-green-600" />
         <h2 className="text-3xl font-bold text-gray-800">Your Cart</h2>
       </div>
 
@@ -110,7 +110,7 @@ const CartPage = () => {
           <p className="text-xl text-gray-500 font-medium">Your cart is empty</p>
           <p className="text-gray-400 mt-2">Add some items to get started</p>
           <button
-            className="mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            className="mt-6 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
             onClick={() => navigate('/product')}
           >
             Continue Shopping
@@ -202,7 +202,7 @@ const CartPage = () => {
             <div className="h-px bg-gray-200 mb-6"></div>
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold">Total</span>
-              <span className="text-xl font-bold text-indigo-600">₹{calculateTotal()}</span>
+              <span className="text-xl font-bold text-green-600">₹{calculateTotal()}</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
@@ -212,7 +212,7 @@ const CartPage = () => {
                 Continue Shopping
               </button>
               <button
-                className="px-6 py-3 cursor-pointer bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex-1"
+                className="px-6 py-3 cursor-pointer bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex-1"
                 onClick={() => navigate('/checkout')}
               >
                 Proceed to Checkout

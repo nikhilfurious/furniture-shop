@@ -110,9 +110,9 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
 
   return (
     <>
-      <Button type="primary" size="large" disabled={disabled} onClick={showModal}>
+      <button className='bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-600 flex-1 transition duration-300 shadow-md hover:shadow-l' size="large" disabled={disabled} onClick={showModal}>
         {children}
-      </Button>
+      </button>
 
       <Modal
         title="Confirm Your Purchase"
@@ -166,9 +166,9 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
             <Button onClick={handleCancel} style={{ marginRight: 10 }}>
               Cancel
             </Button>
-            <Button type="primary" onClick={handleConfirm} loading={isLoading}>
+            <button className='bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-600 flex-1 transition duration-300 shadow-md hover:shadow-l' onClick={handleConfirm} loading={isLoading}>
               Confirm Purchase
-            </Button>
+            </button>
           </div>
         </Form>
       </Modal>

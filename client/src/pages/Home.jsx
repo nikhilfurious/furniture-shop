@@ -112,7 +112,7 @@ function Home() {
                   {category.description}
                 </p>
                 
-                <div className="flex items-center text-blue-600 font-medium group-hover:text-blue-700">
+                <div className="flex items-center text-green-600 font-medium group-hover:text-green-700">
                   Shop Now
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -191,7 +191,7 @@ function Home() {
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="25" y="45" width="30" height="5" stroke="#000" strokeWidth="2" />
-            <rect x="35" y="20" width="10" height="25" fill="#FFC107" stroke="#000" strokeWidth="2" />
+            <rect x="35" y="20" widtinuh="10" height="25" fill="#FFC107" stroke="#000" strokeWidth="2" />
             <line x1="40" y1="50" x2="40" y2="60" stroke="#000" strokeWidth="2" />
             <path d="M25 40C25 35.5817 28.5817 32 33 32H47C51.4183 32 55 35.5817 55 40V45H25V40Z" stroke="#000" strokeWidth="2" />
           </svg>
@@ -246,8 +246,8 @@ function Home() {
     return(
       <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center" data-aos="fade-up" data-aos-delay="300">
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
@@ -256,8 +256,8 @@ function Home() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -266,8 +266,8 @@ function Home() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>

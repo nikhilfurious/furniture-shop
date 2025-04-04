@@ -96,10 +96,13 @@ function ProductListPage() {
     
     // First filter by user location if available
     let filtered = [...products];
-    
-    if (userLocation) {
-      filtered = filtered.filter(product => 
-        product.location && product.location.includes(userLocation)
+    // add it case insensitive
+    const userLocationLower = userLocation.toLowerCase();
+    if (userLocationLower) {
+      filtered = filtered.filter(product =>
+        product.location && product.location.some(location => 
+          location.toLowerCase().includes(userLocationLower)
+        )
       );
     }
     
@@ -198,10 +201,10 @@ function ProductListPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-50 to-emerald-50">
       <div className="text-center">
-        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-xl text-indigo-800 font-medium">Loading products...</p>
+        <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-xl text-green-800 font-medium">Loading products...</p>
       </div>
     </div>
   );
@@ -213,7 +216,7 @@ function ProductListPage() {
         <h2 className="text-2xl font-bold text-red-700 mb-2">Oops!</h2>
         <p className="text-gray-700">{error}</p>
         <button 
-          className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
+          className="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
           onClick={() => window.location.reload()}
         >
           Try Again
@@ -223,17 +226,14 @@ function ProductListPage() {
   );
 
   return (
-    <div className="min-h-screen">
-      {/* Banner */}
-      <section className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-12">
+    <div className="min-h-screen bg-gray-50">
+      {/* Banner with green gradient */}
+      <section className="bg-gradient-to-r from-[#32706f] to-[#519116] text-white py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4">Our Product Collection</h2>
-          <p className="text-xl max-w-3xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4" data-aos="fade-up">Our Product Collection</h2>
+          <p className="text-xl max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
             Quality appliances with flexible rental plans tailored to your needs
-            
           </p>
-          
-          
         </div>
       </section>
 
@@ -242,7 +242,7 @@ function ProductListPage() {
         <div className="md:hidden mb-6">
           <button 
             onClick={toggleMobileFilters} 
-            className="w-full py-3 bg-indigo-600 text-white rounded-lg shadow-md flex items-center justify-center"
+            className="w-full py-3 bg-green-600 text-white rounded-lg shadow-md flex items-center justify-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -264,11 +264,11 @@ function ProductListPage() {
             `}>
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-indigo-900">Filters</h2>
+                  <h2 className="text-xl font-bold text-green-900">Filters</h2>
                   {(activeFilters.categories.length > 0 || activeFilters.months?.length > 0 || sortBy !== 'featured') && (
                     <button 
                       onClick={clearFilters}
-                      className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                      className="text-sm text-green-600 hover:text-green-800 font-medium"
                     >
                       Clear All
                     </button>
@@ -286,12 +286,12 @@ function ProductListPage() {
                         </span>
                       )}
                       {activeFilters.categories.map(category => (
-                        <span key={category} className="bg-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full">
+                        <span key={category} className="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full">
                           {category}
                         </span>
                       ))}
                       {activeFilters.months.map(month => (
-                        <span key={month} className="bg-purple-100 text-purple-800 text-xs px-3 py-1 rounded-full">
+                        <span key={month} className="bg-teal-100 text-teal-800 text-xs px-3 py-1 rounded-full">
                           {month} months
                         </span>
                       ))}
@@ -308,7 +308,7 @@ function ProductListPage() {
                 <div className="mt-6">
                   <h3 className="font-bold text-gray-700 mb-3">Sort By</h3>
                   <select 
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-300 focus:border-green-500 outline-none transition-all cursor-pointer"
                     value={sortBy}
                     onChange={handleSortChange}
                   >
@@ -336,11 +336,11 @@ function ProductListPage() {
           <div className="flex-1">
             <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center">
               <p className="text-gray-700 mb-3 sm:mb-0">
-                <span className="font-bold text-indigo-900">{filteredProducts.length}</span> Products Found
+                <span className="font-bold text-green-900">{filteredProducts.length}</span> Products Found
                 {userLocation && <span className="ml-1 text-gray-500">in {userLocation}</span>}
               </p>
               <select 
-                className="w-full sm:w-auto p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none transition-all cursor-pointer md:hidden"
+                className="w-full sm:w-auto p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-300 focus:border-green-500 outline-none transition-all cursor-pointer md:hidden"
                 value={sortBy}
                 onChange={handleSortChange}
               >
@@ -364,7 +364,7 @@ function ProductListPage() {
                 </p>
                 <button 
                   onClick={clearFilters}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg"
+                  className="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
                 >
                   Clear Filters
                 </button>
@@ -376,6 +376,7 @@ function ProductListPage() {
                     key={product._id} 
                     className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
                     onClick={() => handleProductClick(product._id)}
+                    data-aos="fade-up"
                   >
                     {/* Product Image */}
                     <div className="relative h-56 bg-gray-100 overflow-hidden group">
@@ -384,26 +385,25 @@ function ProductListPage() {
                         alt={product.name} 
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                       />
-                      <div className="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 m-3 rounded-full text-sm font-medium">
+                      <div className="absolute top-0 right-0 bg-green-600 text-white px-3 py-1 m-3 rounded-full text-sm font-medium">
                         {product.category}
                       </div>
                     </div>
                     
                     {/* Product Info */}
                     <div className="p-6">
-                      <h3 className="font-bold text-lg mb-2 text-gray-800 hover:text-indigo-600 transition-colors line-clamp-1">{product.name}</h3>
+                      <h3 className="font-bold text-lg mb-2 text-gray-800 hover:text-green-600 transition-colors line-clamp-1">{product.name}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.description}</p>
                       
                       <div className="flex justify-between items-center mb-3">
                         <div>
-                          <span className="text-xl font-bold text-indigo-700">₹{product.basePrice}</span>
+                          <span className="text-xl font-bold text-green-700">₹{product.basePrice}</span>
                           <span className="text-gray-500 text-sm">/month</span>
                         </div>
-                        
                       </div>
                       
                       <div className="flex items-center text-sm text-gray-600 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -413,10 +413,10 @@ function ProductListPage() {
                       </div>
                       
                       <div className="flex space-x-2">
-                        <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-md hover:from-indigo-700 hover:to-purple-700 flex-1 transition duration-300 shadow-md hover:shadow-lg">
+                        <button className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-600 flex-1 transition duration-300 shadow-md hover:shadow-lg">
                           View Details
                         </button>
-                        <button className="border border-gray-300 text-gray-600 p-2 rounded-md hover:bg-gray-50 transition duration-300 hover:border-indigo-400 hover:text-indigo-600">
+                        <button className="border border-gray-300 text-gray-600 p-2 rounded-md hover:bg-gray-50 transition duration-300 hover:border-green-400 hover:text-green-600">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
@@ -435,7 +435,7 @@ function ProductListPage() {
                   <button className="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors">
                     Previous
                   </button>
-                  <button className="px-4 py-2 border-t border-b bg-indigo-600 text-white">
+                  <button className="px-4 py-2 border-t border-b bg-green-600 text-white">
                     1
                   </button>
                   <button className="px-4 py-2 border-t border-b text-gray-700 hover:bg-gray-50 transition-colors">

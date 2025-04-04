@@ -10,8 +10,8 @@ const TermsAndPrivacy = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-center space-x-4 mb-6">
-        <button className={`px-4 py-2 rounded ${activeTab === 'terms' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`} onClick={() => handleTabClick('terms')}>Terms and Conditions</button>
-        <button className={`px-4 py-2 rounded ${activeTab === 'privacy' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`} onClick={() => handleTabClick('privacy')}>Privacy Policy</button>
+        <button className={`px-4 py-2 rounded ${activeTab === 'terms' ? 'bg-green-500 text-white' : 'bg-gray-300'}`} onClick={() => handleTabClick('terms')}>Terms and Conditions</button>
+        <button className={`px-4 py-2 rounded ${activeTab === 'privacy' ? 'bg-green-500 text-white' : 'bg-gray-300'}`} onClick={() => handleTabClick('privacy')}>Privacy Policy</button>
       </div>
 
       {activeTab === 'terms' && (

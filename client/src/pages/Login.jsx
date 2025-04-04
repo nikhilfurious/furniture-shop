@@ -30,9 +30,9 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Header Section */}
-        <div className="bg-indigo-600 px-6 py-8 text-center">
+        <div className="bg-green-600 px-6 py-8 text-center">
           <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="text-indigo-200 mt-2">Sign in to access your account</p>
+          <p className="text-green-200 mt-2">Sign in to access your account</p>
         </div>
         
         {/* Form Section */}
@@ -54,7 +54,7 @@ const Login = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:emerald-500 focus:border-green-500 transition duration-150"
                 required
               />
             </div>
@@ -64,7 +64,7 @@ const Login = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <a href="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-800">
+                <a href="/forgot-password" className="text-xs text-green-600 hover:text-green-800">
                   Forgot password?
                 </a>
               </div>
@@ -74,7 +74,7 @@ const Login = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:emerald-500 focus:border-green-500 transition duration-150"
                 required
               />
             </div>
@@ -83,7 +83,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ${
+                className={`w-full py-3 px-4 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:emerald-500 focus:ring-offset-2 transition duration-150 ${
                   isLoading ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >
@@ -123,7 +123,7 @@ const Login = () => {
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-800">
+            <a href="/signup" className="font-medium text-green-600 hover:text-green-800">
               Create one
             </a>
           </p>

@@ -162,58 +162,70 @@ const ProductPage = () => {
                 <style>
                   {`
                     .custom-range {
-                      -webkit-appearance: none;
-                      width: 100%;
-                      height: 6px;
-                      background: #e5e7eb;
-                      border-radius: 9999px;
-                      outline: none;
-                      padding: 0;
-                      margin: 0;
-                      transition: background 0.3s ease;
-                    }
+                          -webkit-appearance: none;
+                          width: 100%;
+                          height: 6px;
+                          background: #e5e7eb;
+                          border-radius: 9999px;
+                          outline: none;
+                          padding: 0;
+                          margin: 0;
+                          transition: background 0.3s ease;
+                        }
 
-                    .custom-range::-webkit-slider-thumb {
-                      -webkit-appearance: none;
-                      appearance: none;
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 50%;
-                      background: #ef4444;
-                      cursor: pointer;
-                      border: 3px solid white;
-                      box-shadow: 0 0 0 1px #ef4444;
-                      margin-top: -7px;
-                      transition: all 0.3s ease;
-                    }
+                        .custom-range::-webkit-slider-thumb {
+                          -webkit-appearance: none;
+                          appearance: none;
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 50%;
+                          background: #22c55e;  /* Changed to green-600 */
+                          cursor: pointer;
+                          border: 3px solid white;
+                          box-shadow: 0 0 0 1px #22c55e;  /* Changed to green-600 */
+                          margin-top: -7px;
+                          transition: all 0.3s ease;
+                        }
 
-                    .custom-range::-moz-range-thumb {
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 50%;
-                      background: #ef4444;
-                      cursor: pointer;
-                      border: 3px solid white;
-                      box-shadow: 0 0 0 1px #ef4444;
-                      margin-top: -7px;
-                      transition: all 0.3s ease;
-                    }
+                        .custom-range::-moz-range-thumb {
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 50%;
+                          background: #22c55e;  /* Changed to green-600 */
+                          cursor: pointer;
+                          border: 3px solid white;
+                          box-shadow: 0 0 0 1px #22c55e;  /* Changed to green-600 */
+                          margin-top: -7px;
+                          transition: all 0.3s ease;
+                        }
 
-                    .custom-range::-webkit-slider-runnable-track {
-                      width: 100%;
-                      height: 6px;
-                      background: linear-gradient(to right, #ef4444 0%, #ef4444 ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
-                      border-radius: 9999px;
-                      transition: background 0.3s ease;
-                    }
+                        .custom-range::-webkit-slider-runnable-track {
+                          width: 100%;
+                          height: 6px;
+                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
+                          border-radius: 9999px;
+                          transition: background 0.3s ease;
+                        }
 
-                    .custom-range::-moz-range-track {
-                      width: 100%;
-                      height: 6px;
-                      background: linear-gradient(to right, #ef4444 0%, #ef4444 ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
-                      border-radius: 9999px;
-                      transition: background 0.3s ease;
-                    }
+                        .custom-range::-moz-range-track {
+                          width: 100%;
+                          height: 6px;
+                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
+                          border-radius: 9999px;
+                          transition: background 0.3s ease;
+                        }
+
+                        /* Optional hover effect for better user experience */
+                        .custom-range:hover::-webkit-slider-thumb {
+                          background: #16a34a;  /* Green-700 for hover state */
+                          box-shadow: 0 0 0 1px #16a34a;
+                        }
+
+                        .custom-range:hover::-moz-range-thumb {
+                          background: #16a34a;  /* Green-700 for hover state */
+                          box-shadow: 0 0 0 1px #16a34a;
+                        }
+                    
                   `}
                 </style>
                 {tenureOptions && tenureOptions.length > 0 && (
@@ -231,7 +243,7 @@ const ProductPage = () => {
                       {tenureOptions.map((option, index) => (
                         <div 
                           key={index} 
-                          className={`flex flex-col items-center ${selectedTenure === index ? 'text-red-500 font-bold' : ''}`}
+                          className={`flex flex-col items-center ${selectedTenure === index ? 'text-green-500 font-bold' : ''}`}
                           onClick={() => setSelectedTenure(index)}
                         >
                           <span className="text-sm font-medium">{option.months}</span>

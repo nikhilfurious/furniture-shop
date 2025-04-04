@@ -142,4 +142,38 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
+
+/* Custom Scrollbar - Thin green style */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f8f4; /* Light green background */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4ade80; /* Green-500 color */
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #22c55e; /* Green-600 for hover state */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4ade80 #f1f8f4;
+}
+
+/* For specific containers with scrollable content */
+.scrollable-container {
+  scrollbar-width: thin;
+  scrollbar-color: #4ade80 #f1f8f4;
+}
   

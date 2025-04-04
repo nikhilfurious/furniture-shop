@@ -142,11 +142,11 @@ const PaymentPage = () => {
                   placeholder="Coupon code"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <button
                   onClick={applyCoupon}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                 >
                   Apply
                 </button>
@@ -191,11 +191,11 @@ const PaymentPage = () => {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={() => setTermsAccepted(!termsAccepted)}
-                    className="mt-1 h-4 w-4 text-indigo-600"
+                    className="mt-1 h-4 w-4 text-green-600"
                   />
                   <span className="ml-2 text-sm text-gray-600">
-                    I agree to the <a href="/policy" target='_blank' className="text-indigo-600 hover:underline">Terms and Conditions</a> and
-                    <a href="/policy"target='_blank' className="text-indigo-600 hover:underline"> Privacy Policy</a>
+                    I agree to the <a href="/policy" target='_blank' className="text-green-600 hover:underline">Terms and Conditions</a> and
+                    <a href="/policy"target='_blank' className="text-green-600 hover:underline"> Privacy Policy</a>
                   </span>
                 </label>
               </div>

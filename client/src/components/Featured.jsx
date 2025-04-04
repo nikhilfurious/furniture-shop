@@ -21,7 +21,7 @@ const FeaturedProducts = ({featuredProducts}) => {
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-display font-bold">Featured Products</h2>
         <button 
-          className="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
+          className="text-green-600 hover:text-green-800 transition-colors text-sm font-medium"
           onClick={() => navigate('/category/all')}
         >
           View All Products →
@@ -53,13 +53,13 @@ const FeaturedProducts = ({featuredProducts}) => {
                   // Add to cart logic here
                 }}
               >
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
+                <ShoppingCart className="h-5 w-5 text-green-600" />
               </button>
             </div>
 
             <div className="p-4">
               <div className="text-sm text-gray-500 mb-1">{product.category}</div>
-              <h3 className="font-medium text-lg mb-2 group-hover:text-blue-600 transition-colors">
+              <h3 className="font-medium text-lg mb-2 group-hover:text-green-600 transition-colors">
                 {product.name}
               </h3>
               <p className="text-sm text-gray-600 mb-3 line-clamp-2">

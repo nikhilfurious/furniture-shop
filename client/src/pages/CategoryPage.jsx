@@ -144,7 +144,7 @@ useEffect(() => {
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
       </div>
     );
 
@@ -161,7 +161,7 @@ useEffect(() => {
         {/* Header */}
         <div className="mb-8 text-center" data-aos="fade-down">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">{displayCategoryName(categoryId)}</h1>
-          <div className="h-1 w-24 bg-blue-500 mx-auto rounded"></div>
+          <div className="h-1 w-24 bg-green-500 mx-auto rounded"></div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
@@ -172,13 +172,13 @@ useEffect(() => {
           <div className="flex-grow">
             <div className="bg-white p-4 rounded-xl shadow-md mb-6 flex flex-col sm:flex-row justify-between items-center" data-aos="fade-up">
               <p className="text-gray-600 mb-4 sm:mb-0">
-                <span className="font-semibold text-blue-500">{sortedProducts.length}</span> products found
+                <span className="font-semibold text-green-500">{sortedProducts.length}</span> products found
               </p>
               <div className="flex items-center">
                 <label htmlFor="sort" className="mr-3 text-gray-700">Sort by:</label>
                 <select
                   id="sort"
-                  className="border rounded-lg p-2 pr-8 bg-gray-50 focus:ring-2 focus:ring-blue-300 transition"
+                  className="border rounded-lg p-2 pr-8 bg-gray-50 focus:ring-2 focus:ring-green-300 transition"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                 >
@@ -198,7 +198,7 @@ useEffect(() => {
                 </svg>
                 <h3 className="text-xl font-semibold text-gray-700">No products match your filters</h3>
                 <p className="text-gray-500 mt-2">Try adjusting your filters or browse all products</p>
-                <button className=" m-4 cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-md hover:from-indigo-700 hover:to-purple-700 flex-1 transition duration-300 shadow-md hover:shadow-lg"
+                <button className=" m-4 cursor-pointer bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-700 flex-1 transition duration-300 shadow-md hover:shadow-lg"
                   onClick={()=>{navigate('/product')}}>
                     View Other Products
                 </button>
@@ -233,9 +233,9 @@ useEffect(() => {
                       )}
                     </div>
                     <div className="p-4">
-                      <h2 className="text-lg font-semibold text-gray-800 hover:text-blue-600 transition">{product.name}</h2>
+                      <h2 className="text-lg font-semibold text-gray-800 hover:text-green-600 transition">{product.name}</h2>
                       <div className="mt-2 flex items-baseline gap-2">
-                        <p className="text-lg font-bold text-blue-600">${(product.price || product.basePrice || 0).toFixed(2)}</p>
+                        <p className="text-lg font-bold text-green-600">${(product.price || product.basePrice || 0).toFixed(2)}</p>
                         {product.originalPrice && (
                           <p className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</p>
                         )}
