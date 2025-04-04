@@ -111,7 +111,7 @@ const CartPage = () => {
           <p className="text-gray-400 mt-2">Add some items to get started</p>
           <button
             className="mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-            onClick={() => navigate('/products')}
+            onClick={() => navigate('/product')}
           >
             Continue Shopping
           </button>
@@ -207,7 +207,7 @@ const CartPage = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 className="px-6 py-3 cursor-pointer bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                onClick={() => navigate('/products')}
+                onClick={() => navigate('/product')}
               >
                 Continue Shopping
               </button>

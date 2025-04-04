@@ -58,7 +58,7 @@ const ProductSchema = new Schema({
     trim:true
   },
 
-  tenureOptions: {
+/*   tenureOptions: {
     type: [TenureOptionSchema],
     validate: {
       validator: function(options) {
@@ -66,7 +66,7 @@ const ProductSchema = new Schema({
       },
       message: 'At least one tenure option is required'
     }
-  },
+  }, */
   isActive: {
     type: Boolean,
     default: true

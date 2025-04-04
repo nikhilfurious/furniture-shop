@@ -54,7 +54,6 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       brand,
       dimensions,
       color,
-      tenureOptions,
       location,
     } = req.body;
 
@@ -90,7 +89,6 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       dimensions,
       color,
       images: imageUrls,
-      tenureOptions: JSON.parse(tenureOptions),
       location: parsedLocation,
     });
 

@@ -23,6 +23,7 @@ import PaymentPage from './pages/PaymentPage';
 import AllCategory from './pages/AllCategory';
 import SearchResultsPage from './pages/SearchResultsPage';
 import FAQ from './components/Faq';
+import TermsAndPrivacy from './pages/TermsAndPrivacy';
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -91,6 +92,7 @@ const App = () => {
                 <Route path="/about" element={<AboutPage/>} />
                 <Route path='/product' element={<ProductList/>} />
                 <Route path="/contact" element={<ContactPage/>} />
+                <Route path="/policy" element={<TermsAndPrivacy/>} />
                 <Route path="/forgot-password" element={<ForgotPassword/>} />
                 
                   <Route 

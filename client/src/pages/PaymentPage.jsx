@@ -194,8 +194,8 @@ const PaymentPage = () => {
                     className="mt-1 h-4 w-4 text-indigo-600"
                   />
                   <span className="ml-2 text-sm text-gray-600">
-                    I agree to the <a href="#" className="text-indigo-600 hover:underline">Terms and Conditions</a> and
-                    <a href="#" className="text-indigo-600 hover:underline"> Privacy Policy</a>
+                    I agree to the <a href="/policy" target='_blank' className="text-indigo-600 hover:underline">Terms and Conditions</a> and
+                    <a href="/policy"target='_blank' className="text-indigo-600 hover:underline"> Privacy Policy</a>
                   </span>
                 </label>
               </div>

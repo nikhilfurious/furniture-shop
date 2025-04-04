@@ -24,7 +24,9 @@ function Navbar({ products, openModal, locationData }) {
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const { cart } = useCart();
+  //const { cart } = useCart();
+  const [cart, setCart] = useState([]);
+  
   const auth = getAuth();
   const navigate = useNavigate();
   const API_URL = 'http://localhost:5000';
@@ -103,9 +105,12 @@ function Navbar({ products, openModal, locationData }) {
   }, [lastScrollY]);
 
   // Fetch cart data once (if needed)
-/*   useEffect(() => {
+  useEffect(() => {
     const fetchCart = async () => {
-      if (!auth.currentUser) return;
+      if (!auth.currentUser) {
+        setCart([]); 
+        return;
+      }
       try {
         const token = await auth.currentUser.getIdToken();
         const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser.uid}`, {
@@ -119,7 +124,7 @@ function Navbar({ products, openModal, locationData }) {
       }
     };
     fetchCart();
-  }, [auth.currentUser]); */
+  }, [auth.currentUser]);
 
   // Category change handler
   const handleCategoryChange = (e) => {
