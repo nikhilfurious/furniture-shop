@@ -24,7 +24,7 @@ export const CartProvider = ({ children }) => {
 useEffect(()=>{
 
     fetchCart();
-  },[])
+  },[auth.currentUser])
 
   const fetchCart = async () => {
     if(!auth.currentUser) return;

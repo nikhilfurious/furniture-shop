@@ -76,8 +76,8 @@ const App = () => {
         <div className=" min-h-screen">
           <Navbar products={products} openModal={() => setShowLocationModal(true)} locationData={locationData}/>
           
-          <LocationModal isOpen={showLocationModal} onLocationSelect={handleLocationSelect} onClose={() => setShowLocationModal(false)} />
-          <main className="w-[92vw] mt-32 px-4 sm:px-6 flex flex-col justify-center mx-auto">
+          
+          <main className="w-[92vw] mt-16 px-4 sm:px-6 flex flex-col justify-center mx-auto">
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
                 <Route path="/" element={<Home />} />

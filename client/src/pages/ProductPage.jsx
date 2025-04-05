@@ -7,6 +7,7 @@ import QuantitySelector from '../components/QuantitySelector';
 import SpecialOffers from '../components/SpecialOffers';
 import { fetchProducts, getProduct } from '../services/Productapi';
 import { FaTape } from 'react-icons/fa';
+import { getAuth } from 'firebase/auth';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -16,8 +17,10 @@ const ProductPage = () => {
   const [selectedTenure, setSelectedTenure] = useState(0);
   const [tenureOptions, setTenureOptions] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const { addToCart } = useCart();
   const Navigate = useNavigate();
+  const user = getAuth().currentUser;
   
   // Define the available tenure months
   const availableMonths = [3, 6, 9, 12];
@@ -72,8 +75,45 @@ const ProductPage = () => {
     setSelectedTenure(Number(e.target.value));
   };
 
+
+  const LoginPopup = ({ isOpen, onClose, onLogin }) => {
+    if (!isOpen) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-white bg-opacity-80 backdrop-blur-md p-6 rounded-lg shadow-lg max-w-md w-full border border-white border-opacity-20">
+          <h2 className="text-xl font-bold mb-4">Login Required</h2>
+          <p className="mb-6">Please login to add items to your cart.</p>
+          <div className="flex justify-end space-x-4">
+            <button 
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={onLogin}
+              className="px-4 py-2 bg-green-600 bg-opacity-90 text-white rounded hover:bg-green-700"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
   const handleAddToCart = () => {
-    // Make sure tenureOptions exists and selectedTenure is valid
+    
+  
+  if (!user) {
+
+    setIsLoginPopupOpen(true);
+    return;
+  }
+
+
     if (tenureOptions && tenureOptions[selectedTenure]) {
       const selectedTenureOption = tenureOptions[selectedTenure];
       addToCart(
@@ -104,8 +144,20 @@ const ProductPage = () => {
       : { months: 0, price: 0 };
   };
 
+  const handleLogin = () => {
+    // Redirect to login page or open login modal
+    setIsLoginPopupOpen(false);
+    window.location.href = '/login';
+    
+  };
+
   return (
     <div className="w-[92vw] p-4">
+      <LoginPopup 
+          isOpen={isLoginPopupOpen} 
+          onClose={() => setIsLoginPopupOpen(false)}
+          onLogin={handleLogin}
+      />
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left side - Image gallery */}
         <div className="md:w-[75%]">
