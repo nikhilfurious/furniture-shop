@@ -5,7 +5,6 @@ import { useAuth } from '../Context/AuthContext';
 import Breadcrumb from './BreadCrumb';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
-import { useCart } from '../Context/CartContext';
 
 const categories = [
   'All Categories',
@@ -34,6 +33,62 @@ function Navbar({ products, openModal, locationData }) {
   
   // Reference to the search input so we can handle blur/focus
   const searchInputRef = useRef(null);
+  
+  // Create a ref to store the interval ID
+  const cartIntervalRef = useRef(null);
+
+  // Fetch cart data function
+  const fetchCart = async () => {
+    if (!auth.currentUser) {
+      setCart([]);
+      return;
+    }
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser.uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCart(response.data);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    }
+  };
+
+  // Set up interval to poll for cart updates
+  useEffect(() => {
+    // Fetch cart immediately on mount
+    fetchCart();
+    
+    // Set up interval to check for cart updates every 2 seconds
+    cartIntervalRef.current = setInterval(() => {
+      fetchCart();
+    }, 2000);
+    
+    // Clean up interval on unmount
+    return () => {
+      if (cartIntervalRef.current) {
+        clearInterval(cartIntervalRef.current);
+      }
+    };
+  }, [auth.currentUser]); // Re-initialize if user changes
+
+  // Additional useEffect to listen for specific cart update events if you have them
+  useEffect(() => {
+    // Function to handle custom cart update events
+    const handleCartUpdate = () => {
+      fetchCart();
+    };
+    
+    // Add event listener for custom cart update events
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    // Clean up event listener
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, []);
 
   // Handler for search filtering
   const handleSearch = (query) => {
@@ -106,28 +161,6 @@ function Navbar({ products, openModal, locationData }) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
-
-  // Fetch cart data once (if needed)
-  useEffect(() => {
-    const fetchCart = async () => {
-      if (!auth.currentUser) {
-        setCart([]); 
-        return;
-      }
-      try {
-        const token = await auth.currentUser.getIdToken();
-        const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser.uid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setCart(response.data);
-      } catch (error) {
-        console.error('Error fetching cart:', error);
-      }
-    };
-    fetchCart();
-  }, [auth.currentUser]);
 
   // Category change handler
   const handleCategoryChange = (e) => {
@@ -332,7 +365,7 @@ function Navbar({ products, openModal, locationData }) {
               <Link to="/cart" className="text-gray-600 hover:text-green-600 transition-colors relative">
                 <div className="relative">
                   <ShoppingCart className="h-6 w-6" />
-                  {cart.length > 0 && (
+                  {cart && cart.length > 0 && (
                     <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full px-2 py-0.5 flex items-center justify-center min-w-5 h-5">
                       {cart.length}
                     </span>
@@ -515,14 +548,13 @@ function Navbar({ products, openModal, locationData }) {
                   >
                     <ShoppingCart className="h-5 w-5 mr-2 text-green-500" />
                     <span>Shopping Cart</span>
-                    {cart.length > 0 && (
+                    {cart && cart.length > 0 && (
                       <span className="ml-auto bg-green-500 text-white text-xs font-bold rounded-full px-2 py-1">
                         {cart.length}
                       </span>
                     )}
                   </Link>
                 </li>
-               
               </ul>
             </div>
           </div>
