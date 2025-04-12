@@ -16,7 +16,7 @@ const PaymentPage = () => {
   const [customer, setCustomer] = useState(null);
   const navigate = useNavigate();
   const auth = getAuth();
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
 
   const adminEmail = "pragarajesh779jd@gmail.com";
 

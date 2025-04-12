@@ -6,7 +6,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
 
   useEffect(() => {
     const fetchOrders = async () => {
