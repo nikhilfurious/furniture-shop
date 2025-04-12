@@ -8,7 +8,7 @@ const SearchResultsPage = () => {
   const query = searchParams.get('q') || '';
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
+  const API_URL = 'http://localhost:5000/api';
   const Navigate = useNavigate()
 
   useEffect(() => {
