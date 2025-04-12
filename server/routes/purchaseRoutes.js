@@ -91,148 +91,223 @@ router.post("/process-purchase", async (req, res) => {
     try {
         const { userId, totalAmount,products, customer, adminEmail } = req.body;
         
-        // Generate invoice details
         const invoiceNumber = `INV-${Date.now().toString().substr(-6)}`;
-        const date = new Date().toLocaleDateString();
-
-        // **Generate PDF Document**
+        const today = new Date();
+        // Example date format: 27th Feb 2025 (customize as needed)
+        const date = today.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+    
+        // --- 1) Create a new PDF document ---
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([595, 842]); // A4 Size
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        page.setFont(font);
-
-        let yPos = 770;
-        const lineHeight = 20;
+        const page = pdfDoc.addPage([595, 842]); // A4 size
+        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    
+        // Colors & positions
+        const textColor = rgb(0, 0, 0); // Black
         const marginLeft = 50;
-        const textColor = rgb(0.2, 0.2, 0.2); // Dark gray color for text
-
-        // **Company Logo Placeholder**
-        page.setFontSize(24);
-        page.drawText("Company Name", { x: marginLeft, y: yPos, color: textColor });
+        let yPos = 780; 
+        const lineHeight = 15;
+    
+        page.setFont(helveticaFont);
         page.setFontSize(12);
-        page.drawText("123 Business St, City, Country", { x: marginLeft, y: yPos - 20 });
-        page.drawText("Email: support@company.com | Phone: +1 234 567 890", { x: marginLeft, y: yPos - 35 });
-
-        yPos -= 80; // Space before invoice title
-
-        // **Invoice Title & Info**
-        page.setFontSize(20);
-        page.drawText("INVOICE", { x: 240, y: yPos, color: textColor });
-
+    
+        // --- 2) Header: "Spot Furnish Rentals" + Address + Phones ---
+        page.setFontSize(16);
+        page.drawText("Spot Furnish Rentals", {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
+        });
+    
         page.setFontSize(12);
-        yPos -= 30;
-        page.drawText(`Invoice Number: ${invoiceNumber}`, { x: marginLeft, y: yPos });
-        page.drawText(`Date: ${date}`, { x: marginLeft, y: yPos - 15 });
-
-        yPos -= 40; // Space before customer info
-
-        // **Customer Information**
-        page.setFontSize(12);
-        page.drawText("Bill To:", { x: marginLeft, y: yPos, color: textColor });
         yPos -= lineHeight;
-        page.drawText(`${customer.email}`, { x: marginLeft, y: yPos - 15 });
-        page.drawText(`${customer.phoneNumber}`, { x: marginLeft, y: yPos - 30 });
-
-        yPos -= 50; // Space before table
-
-        // **Table Header**
-        const tableHeaders = ["Item", "Price", "Quantity", "Total"];
-        let xPositions = [50, 250, 350, 450];
-
-        page.setFontSize(12);
-        page.drawText("Item", { x: xPositions[0], y: yPos, color: textColor });
-        page.drawText("Price", { x: xPositions[1], y: yPos, color: textColor });
-        page.drawText("Quantity", { x: xPositions[2], y: yPos, color: textColor });
-        page.drawText("Total", { x: xPositions[3], y: yPos, color: textColor });
-
+        page.drawText("8th Main, Ramamurthy Nagar main Road", {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
+        });
+    
         yPos -= lineHeight;
-
-        // **Draw Table Separator**
-        page.drawLine({
-            start: { x: 50, y: yPos + 5 },
-            end: { x: 545, y: yPos + 5 },
-            thickness: 1,
-            color: textColor,
+        page.drawText("Bengaluru, Karnataka 560016", {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
         });
-
-        yPos -= 10;
-
-        // **Function to Wrap Text**
-        function drawWrappedText(page, text, x, y, maxWidth, lineHeight) {
-            const words = text.split(" ");
-            let line = "";
-            let yOffset = 0;
-
-            for (let word of words) {
-                let testLine = line.length > 0 ? line + " " + word : word;
-                let textWidth = font.widthOfTextAtSize(testLine, 12); // Adjust font size if needed
-
-                if (textWidth > maxWidth) {
-                    page.drawText(line, { x, y: y - yOffset, color: textColor });
-                    line = word;
-                    yOffset += lineHeight;
-                } else {
-                    line = testLine;
-                }
-            }
-
-            if (line) {
-                page.drawText(line, { x, y: y - yOffset, color: textColor });
-            }
-
-            return yOffset;
-        }
-
-        // **Product Table Rows**
-        let subtotal = 0;
-        products.forEach((product) => {
-            let total = product.price * product.quantity;
-            subtotal += total;
-
-            // **Wrap product name & calculate space used**
-            const wrappedHeight = drawWrappedText(page, product.name, xPositions[0], yPos, 180, lineHeight); // 180px max width
-
-            // **Align other columns**
-            page.drawText(`$${product.price.toFixed(2)}`, { x: xPositions[1], y: yPos, color: textColor });
-            page.drawText(`${product.quantity}`, { x: xPositions[2], y: yPos, color: textColor });
-            page.drawText(`$${total.toFixed(2)}`, { x: xPositions[3], y: yPos, color: textColor });
-
-            // **Reduce yPos by total wrapped height**
-            yPos -= lineHeight + wrappedHeight;
+    
+        yPos -= lineHeight;
+        page.drawText("+91 8123096928 | +91 9844311785", {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
         });
-
-        // **Table Footer Separator**
-        page.drawLine({
-            start: { x: 50, y: yPos + 5 },
-            end: { x: 545, y: yPos + 5 },
-            thickness: 1,
-            color: textColor,
-        });
-
-        yPos -= 20; // Space before totals
-
-        // **Invoice Totals**
-        const tax = 0; // 10% Tax
-        const total = subtotal + tax;
-
-        page.setFontSize(12);
-        page.drawText("Subtotal:", { x: 350, y: yPos, color: textColor });
-        page.drawText(`$${subtotal.toFixed(2)}`, { x: 450, y: yPos, color: textColor });
-        page.drawText("Tax (10%):", { x: 350, y: yPos - 15, color: textColor });
-        page.drawText(`$${tax.toFixed(2)}`, { x: 450, y: yPos - 15, color: textColor });
-        page.drawText("Total:", { x: 350, y: yPos - 30, color: textColor });
-
+    
+        // --- 3) Quotation / Invoice Title & Date ---
+        yPos -= (lineHeight * 2);
         page.setFontSize(14);
-        page.drawText(`$${total.toFixed(2)}`, { x: 450, y: yPos - 30, color: rgb(0, 0, 0.8) }); // Dark blue for emphasis
-
-        yPos -= 60; // Space before footer
-
-        // **Footer Section**
-        page.setFontSize(10);
-        page.drawText("Thank you for your business!", { x: 200, y: yPos, color: textColor });
-        page.drawText("Payment is due within 30 days.", { x: 200, y: yPos - 15, color: textColor });
-
-        // **Save PDF in Memory**
+        page.drawText("Quotation", {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
+        });
+    
+        yPos -= lineHeight;
+        page.drawText(`Date: ${date}`, {
+          x: marginLeft,
+          y: yPos,
+          color: textColor,
+        });
+    
+        // Example: If you want to show "To: Some Company Name"
+        // yPos -= lineHeight;
+        // page.drawText(`To: ${customer.company ?? "Client Company"}`, {
+        //   x: marginLeft,
+        //   y: yPos,
+        //   color: textColor,
+        // });
+    
+        // --- 4) Table / Items Section ---
+        // Adjust as per your needs, e.g., Premium Office Chair, monthly rent, etc.
+        yPos -= (lineHeight * 2);
+        const tableHeaderX = [50, 250, 350, 450];
+        page.drawText("Item Description", { x: tableHeaderX[0], y: yPos });
+        page.drawText("Price", { x: tableHeaderX[1], y: yPos });
+        page.drawText("Quantity", { x: tableHeaderX[2], y: yPos });
+        page.drawText("Total", { x: tableHeaderX[3], y: yPos });
+    
+        yPos -= (lineHeight + 5);
+        page.drawLine({
+          start: { x: 50, y: yPos },
+          end: { x: 545, y: yPos },
+          thickness: 1,
+          color: textColor,
+        });
+        yPos -= 10;
+    
+        // Helper to wrap text for item name, if needed
+        function drawWrappedText(text, x, y, maxWidth) {
+          const words = text.split(" ");
+          let line = "";
+          let linesUsed = 0;
+    
+          for (let word of words) {
+            const testLine = line ? `${line} ${word}` : word;
+            const width = helveticaFont.widthOfTextAtSize(testLine, 12);
+            if (width > maxWidth) {
+              page.drawText(line, { x, y: y - (linesUsed * lineHeight) });
+              line = word;
+              linesUsed += 1;
+            } else {
+              line = testLine;
+            }
+          }
+    
+          if (line) {
+            page.drawText(line, { x, y: y - (linesUsed * lineHeight) });
+          }
+          return linesUsed * lineHeight;
+        }
+    
+        // Suppose you're calculating totals from the `products`
+        let subtotal = 0;
+        for (const product of products) {
+          const itemTotal = product.price * product.quantity;
+          subtotal += itemTotal;
+    
+          // Wrap item name if it's long
+          const textWrapHeight = drawWrappedText(
+            product.name,
+            tableHeaderX[0],
+            yPos,
+            180 // maximum width for item description
+          );
+    
+          // Price
+          page.drawText(`$${product.price.toFixed(2)}`, {
+            x: tableHeaderX[1],
+            y: yPos,
+          });
+    
+          // Quantity
+          page.drawText(`${product.quantity}`, {
+            x: tableHeaderX[2],
+            y: yPos,
+          });
+    
+          // Total
+          page.drawText(`$${itemTotal.toFixed(2)}`, {
+            x: tableHeaderX[3],
+            y: yPos,
+          });
+    
+          // Update yPos based on how much vertical space the item text used
+          yPos -= (lineHeight + textWrapHeight);
+        }
+    
+        // Draw line under table
+        yPos -= 5;
+        page.drawLine({
+          start: { x: 50, y: yPos },
+          end: { x: 545, y: yPos },
+          thickness: 1,
+          color: textColor,
+        });
+        yPos -= (lineHeight + 5);
+    
+        // --- 5) Totals Section (if you have taxes or other fees) ---
+        const tax = 0; // or compute if needed
+        const grandTotal = subtotal + tax;
+    
+        page.drawText(`Subtotal:  $${subtotal.toFixed(2)}`, {
+          x: 350,
+          y: yPos,
+        });
+        yPos -= lineHeight;
+    
+        page.drawText(`Tax:       $${tax.toFixed(2)}`, {
+          x: 350,
+          y: yPos,
+        });
+        yPos -= lineHeight;
+    
+        page.setFontSize(14);
+        page.drawText(`Total:     $${grandTotal.toFixed(2)}`, {
+          x: 350,
+          y: yPos,
+          color: rgb(0, 0, 0.8), // or keep black
+        });
+        page.setFontSize(12);
+    
+        yPos -= (lineHeight * 2);
+    
+        // --- 6) Additional Notes (Bank Details, Payment Terms, etc.) ---
+        page.drawText("Payment / Bank Details:", { x: marginLeft, y: yPos });
+        yPos -= lineHeight;
+        page.drawText("Bank: ICICI Bank", { x: marginLeft, y: yPos });
+        yPos -= lineHeight;
+        page.drawText("Account Name: Spot Furnish Rentals", { x: marginLeft, y: yPos });
+        yPos -= lineHeight;
+        page.drawText("A/C: 919010043469563 | IFSC: UTIB0003569", {
+          x: marginLeft,
+          y: yPos,
+        });
+        yPos -= lineHeight;
+    
+        // Example disclaimers
+        yPos -= (lineHeight);
+        page.drawText("Rent will be due at the beginning of the month.", {
+          x: marginLeft,
+          y: yPos,
+        });
+        yPos -= lineHeight;
+        page.drawText("Please pay before the 5th of every month to avoid a late fee.", {
+          x: marginLeft,
+          y: yPos,
+        });
+    
+        // --- 7) Finish the PDF and attach to email ---
         const pdfBytes = await pdfDoc.save();
 
 
@@ -253,7 +328,7 @@ router.post("/process-purchase", async (req, res) => {
             <ul>
                 ${products.map(product => `<li><strong>${product?.name}</strong> - $${product.price.toFixed(2)}</li>`).join("")}
             </ul>
-            <p><strong>Total:</strong> $${total.toFixed(2)}</p>
+            <p><strong>Total:</strong> $${grandTotal.toFixed(2)}</p>
             <p>If you have any questions, please contact support.</p>
         `;
 
@@ -290,7 +365,7 @@ router.post("/process-purchase", async (req, res) => {
         const newOrder = new Orders({
             userId,
             productIds: products.map(product => product.productId),
-            totalAmount:total,
+            totalAmount:grandTotal,
             orderDate: new Date(),
             invoiceNumber,
             status: 'Pending',

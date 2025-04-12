@@ -5,7 +5,7 @@ import axios from 'axios';
 const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000';
 
   // Calculate total price from all products
   const totalPrice = products?.reduce((sum, product) => sum + (product.price || 0), 0);
