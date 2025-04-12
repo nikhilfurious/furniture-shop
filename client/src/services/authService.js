@@ -13,7 +13,7 @@ export const sendAuthRequest = async () => {
     const token = await user.getIdToken(); // Get Firebase ID token
     console.log("🔹 Sending request with token:", token);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("https://furniture-shop-dvh6.vercel.app/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

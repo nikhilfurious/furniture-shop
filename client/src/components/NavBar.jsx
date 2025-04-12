@@ -29,7 +29,7 @@ function Navbar({ products, openModal, locationData }) {
   
   const auth = getAuth();
   const navigate = useNavigate();
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
   
   // Reference to the search input so we can handle blur/focus
   const searchInputRef = useRef(null);
