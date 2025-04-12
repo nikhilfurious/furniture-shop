@@ -88,11 +88,11 @@ const ContactPage = () => {
           {/* Contact Information */}
           <div data-aos="fade-right">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Contact Information</h2>
-            <div className="w-20 h-1 bg-yellow-500 mb-8"></div>
+            <div className="w-20 h-1 bg-green-500 mb-8"></div>
             
             <div className="space-y-8">
               <div className="flex items-start">
-                <div className="flex-shrink-0 bg-yellow-500 p-3 rounded-full">
+                <div className="flex-shrink-0 bg-green-500 p-3 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -106,7 +106,7 @@ const ContactPage = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 bg-yellow-500 p-3 rounded-full">
+                <div className="flex-shrink-0 bg-green-500 p-3 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                   </svg>
@@ -119,7 +119,7 @@ const ContactPage = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 bg-yellow-500 p-3 rounded-full">
+                <div className="flex-shrink-0 bg-green-500 p-3 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                   </svg>
@@ -132,7 +132,7 @@ const ContactPage = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 bg-yellow-500 p-3 rounded-full">
+                <div className="flex-shrink-0 bg-green-500 p-3 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
@@ -195,7 +195,7 @@ const ContactPage = () => {
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                         placeholder="John Doe"
                       />
                     </div>
@@ -210,7 +210,7 @@ const ContactPage = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                         placeholder="john@example.com"
                       />
                     </div>
@@ -227,7 +227,7 @@ const ContactPage = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                         placeholder="+91 98765 43210"
                       />
                     </div>
@@ -242,7 +242,7 @@ const ContactPage = () => {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                         placeholder="How can we help you?"
                       />
                     </div>
@@ -259,7 +259,7 @@ const ContactPage = () => {
                       onChange={handleChange}
                       rows="5"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                       placeholder="Please provide details about your inquiry..."
                     ></textarea>
                   </div>
@@ -267,7 +267,7 @@ const ContactPage = () => {
                   <div>
                     <button
                       type="submit"
-                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
+                      className="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105"
                     >
                       Send Message
                     </button>
@@ -283,7 +283,7 @@ const ContactPage = () => {
       <div className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100">
         <div className="max-w-7xl mx-auto text-center mb-12" data-aos="fade-up">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Visit Our Showrooms</h2>
-          <div className="w-20 h-1 bg-yellow-500 mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Experience our furniture collections in person at one of our elegant showrooms
           </p>
@@ -309,7 +309,7 @@ const ContactPage = () => {
       <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-12" data-aos="fade-up">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Frequently Asked Questions</h2>
-          <div className="w-20 h-1 bg-yellow-500 mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Find quick answers to common questions about our services
           </p>
@@ -347,7 +347,7 @@ const ContactPage = () => {
         
         <div className="text-center mt-12" data-aos="fade-up">
           <p className="text-gray-600 mb-4">Still have questions? We're here to help!</p>
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
+          <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
             View All FAQs
           </button>
         </div>
@@ -364,10 +364,10 @@ const ContactPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
             <input
               type="email"
-              className="flex-grow px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500"
+              className="flex-grow px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your email address"
             />
-            <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300">
+            <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300">
               Subscribe
             </button>
           </div>

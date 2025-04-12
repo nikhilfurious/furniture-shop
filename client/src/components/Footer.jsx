@@ -133,9 +133,9 @@ const Footer = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <ul className="flex space-x-6">
-              <li><a href="/privacy" className="hover:text-green-400 transition duration-300">Privacy Policy</a></li>
-              <li><a href="/terms" className="hover:text-green-400 transition duration-300">Terms of Service</a></li>
-              <li><a href="/sitemap" className="hover:text-green-400 transition duration-300">Sitemap</a></li>
+              <li><a href="/policy" className="hover:text-green-400 transition duration-300">Privacy Policy</a></li>
+              <li><a href="/policy" className="hover:text-green-400 transition duration-300">Terms of Service</a></li>
+              
             </ul>
           </div>
         </div>

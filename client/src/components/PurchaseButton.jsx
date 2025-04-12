@@ -110,7 +110,12 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
 
   return (
     <>
-      <button className='bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-600 flex-1 transition duration-300 shadow-md hover:shadow-l' size="large" disabled={disabled} onClick={showModal}>
+      <button 
+        type="button"
+        disabled={disabled}
+        onClick={showModal}
+        className={`bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md flex-1 transition duration-300 shadow-md hover:shadow-lg ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:from-green-700 hover:to-emerald-600'}`}
+      >
         {children}
       </button>
 
@@ -166,9 +171,15 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
             <Button onClick={handleCancel} style={{ marginRight: 10 }}>
               Cancel
             </Button>
-            <button className='bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md hover:from-green-700 hover:to-emerald-600 flex-1 transition duration-300 shadow-md hover:shadow-l' onClick={handleConfirm} loading={isLoading}>
-              Confirm Purchase
+            <button 
+              type="button"
+              disabled={isLoading}
+              onClick={handleConfirm}
+              className={`bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md transition duration-300 shadow-md ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:from-green-700 hover:to-emerald-600 hover:shadow-lg'}`}
+            >
+              {isLoading ? 'Processing...' : 'Confirm Purchase'}
             </button>
+
           </div>
         </Form>
       </Modal>

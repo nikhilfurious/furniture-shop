@@ -31,7 +31,7 @@ const AboutPage = () => {
             <p className="text-xl text-gray-200 mb-8">
               Where quality craftsmanship meets innovative design
             </p>
-            <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
+            <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
               Our Collections
             </button>
           </div>
@@ -54,7 +54,7 @@ const AboutPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div data-aos="fade-right">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Our Story</h2>
-            <div className="w-20 h-1 bg-yellow-500 mb-8"></div>
+            <div className="w-20 h-1 bg-green-500 mb-8"></div>
             <p className="text-gray-600 mb-6">
               Founded in 2010, FurnishRent began with a simple idea: everyone deserves access to beautiful, high-quality furniture without the burden of ownership. What started as a small collection in a garage has grown into the premier furniture rental destination across India.
             </p>
@@ -71,7 +71,7 @@ const AboutPage = () => {
               alt="Craftsman working on wooden furniture" 
               className="rounded-lg shadow-xl w-full h-auto"
             />
-            <div className="absolute -bottom-6 -left-6 bg-yellow-500 rounded-lg p-6 shadow-lg">
+            <div className="absolute -bottom-6 -left-6 bg-green-500 rounded-lg p-6 shadow-lg">
               <p className="text-3xl font-bold text-gray-900">12+</p>
               <p className="text-gray-800 font-medium">Years of Excellence</p>
             </div>
@@ -83,7 +83,7 @@ const AboutPage = () => {
       <div className="bg-gray-100 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center mb-16" data-aos="fade-up">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Our Core Values</h2>
-          <div className="w-20 h-1 bg-yellow-500 mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             The principles that guide everything we do
           </p>
@@ -91,7 +91,7 @@ const AboutPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105" data-aos="fade-up" data-aos-delay="100">
-            <div className="h-40 bg-yellow-400 flex items-center justify-center p-6">
+            <div className="h-40 bg-green-400 flex items-center justify-center p-6">
               <svg className="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
               </svg>
@@ -138,7 +138,7 @@ const AboutPage = () => {
      {/*  <div className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16" data-aos="fade-up">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Meet Our Team</h2>
-          <div className="w-20 h-1 bg-yellow-500 mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             The passionate people behind our success
           </p>
@@ -195,13 +195,13 @@ const AboutPage = () => {
       <div className="bg-gray-800 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center mb-16" data-aos="fade-up">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">What Our Customers Say</h2>
-          <div className="w-20 h-1 bg-yellow-500 mx-auto mb-6"></div>
+          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
         </div>
         
         <div className="max-w-5xl mx-auto" data-aos="fade-up">
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl p-8 md:p-12">
-              <svg className="w-12 h-12 text-yellow-500 mb-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-12 h-12 text-green-500 mb-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
               <p className="text-xl md:text-2xl text-gray-700 mb-8 italic">
@@ -227,22 +227,22 @@ const AboutPage = () => {
       <div className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div data-aos="fade-up" data-aos-delay="100">
-            <p className="text-5xl font-bold text-yellow-500 mb-2">15,000+</p>
+            <p className="text-5xl font-bold text-green-500 mb-2">15,000+</p>
             <p className="text-xl text-gray-600">Happy Customers</p>
           </div>
           
           <div data-aos="fade-up" data-aos-delay="200">
-            <p className="text-5xl font-bold text-yellow-500 mb-2">7</p>
+            <p className="text-5xl font-bold text-green-500 mb-2">7</p>
             <p className="text-xl text-gray-600">Cities Served</p>
           </div>
           
           <div data-aos="fade-up" data-aos-delay="300">
-            <p className="text-5xl font-bold text-yellow-500 mb-2">2,500+</p>
+            <p className="text-5xl font-bold text-green-500 mb-2">2,500+</p>
             <p className="text-xl text-gray-600">Furniture Pieces</p>
           </div>
           
           <div data-aos="fade-up" data-aos-delay="400">
-            <p className="text-5xl font-bold text-yellow-500 mb-2">98%</p>
+            <p className="text-5xl font-bold text-green-500 mb-2">98%</p>
             <p className="text-xl text-gray-600">Satisfaction Rate</p>
           </div>
         </div>
@@ -267,7 +267,7 @@ const AboutPage = () => {
             Discover our extensive collection of premium furniture available for rent. Create the home of your dreams without the long-term commitment.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
+            <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
               Browse Collections
             </button>
             <button className="bg-transparent border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
