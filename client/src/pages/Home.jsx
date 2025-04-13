@@ -25,7 +25,7 @@ function Home() {
   };
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const API_URL = 'http://localhost:5000'; // Update this to your API URL
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Update this to your API URL
 
   const fetchFeaturedProducts = async () => {
     try {

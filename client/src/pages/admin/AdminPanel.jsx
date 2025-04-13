@@ -100,7 +100,7 @@ const AdminPanel = () => {
     });
   };
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  
