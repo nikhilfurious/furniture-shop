@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Pencil, Trash2, Plus, Home, Package, User, LogOut, X } from 'lucide-react';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import LocationSelector from '../../components/LocationSelector';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -12,32 +13,14 @@ const AdminPanel = () => {
   const [previewImages, setPreviewImages] = useState([]);
   const [error, setError] = useState('');
 
-  // Define categories and locations arrays
-  const categories = [
-    'Electronics',
-    'Living Room Furniture',
-    'Bedroom Furniture',
-    'Office Furniture',
-    'Dining Room Furniture',
-    'Outdoor Furniture',
-    'Storage and Optimisations'
-  ];
-
-  const cities = [
-    'Chennai',
-    'Delhi',
-    'Mumbai',
-    'Bangalore',
-    'Kolkata',
-    'Hyderabad',
-  ];
-
   const fileInputRef = useRef(null);
   const auth = getAuth();
   const user = auth.currentUser;
 
   useEffect(() => {
+    
     const checkAdminStatus = async () => {
+    
       setTimeout(() => {
         setIsAdmin(true);
         setIsLoading(false);
@@ -47,18 +30,21 @@ const AdminPanel = () => {
     checkAdminStatus();
   }, []);
 
-  // Product form state - removed tenureOptions
+  // Product form state
   const [formData, setFormData] = useState({
     name: '',
     basePrice: 0,
-    category: categories[0], // Default to first category
+    category: '',
     description: '',
     refundableDeposit: 0,
     brand: '',
     dimensions: '',
     color: '',
-    locations: [cities[0]], // Changed to array for multiple locations
-    images: []
+    images: [],
+    locations: [],
+    tenureOptions: [
+      { months: '', price: 0 }
+    ]
   });
 
   const handleInputChange = (e) => {
@@ -69,24 +55,59 @@ const AdminPanel = () => {
     });
   };
 
-  // Handle multiple location selection
-  const handleLocationChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-    setFormData((prev) => ({
-      ...prev,
-      locations: selectedOptions,
-    }));
+  // Location handlers
+  const handleSelectLocation = (location) => {
+    setFormData({
+      ...formData,
+      locations: [...formData.locations, location]
+    });
   };
-  
 
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
+  const handleRemoveLocation = (locationId) => {
+    setFormData({
+      ...formData,
+      locations: formData.locations.filter(loc => loc.id !== locationId)
+    });
+  };
+
+  const handleTenureChange = (index, field, value) => {
+    const updatedTenureOptions = [...formData.tenureOptions];
+    updatedTenureOptions[index] = {
+      ...updatedTenureOptions[index],
+      [field]: field === 'price' ? Number(value) : value
+    };
+    
+    setFormData({
+      ...formData,
+      tenureOptions: updatedTenureOptions
+    });
+  };
+
+  const addTenureOption = () => {
+    setFormData({
+      ...formData,
+      tenureOptions: [...formData.tenureOptions, { months: '', price: 0 }]
+    });
+  };
+
+  const removeTenureOption = (index) => {
+    const updatedTenureOptions = [...formData.tenureOptions];
+    updatedTenureOptions.splice(index, 1);
+    
+    setFormData({
+      ...formData,
+      tenureOptions: updatedTenureOptions
+    });
+  };
+
+  const API_URL = 'http://localhost:5000/api';
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "z1ae4o1x"); 
-    formData.append("cloud_name", "dtzzmimzt"); 
+    formData.append("upload_preset", "z1ae4o1x"); // Set your Cloudinary upload preset
+    formData.append("cloud_name", "dtzzmimzt"); // Set your Cloudinary cloud name
   
     try {
       const response = await fetch("https://api.cloudinary.com/v1_1/dtzzmimzt/image/upload", {
@@ -95,7 +116,7 @@ const AdminPanel = () => {
       });
   
       const data = await response.json();
-      return data.secure_url; 
+      return data.secure_url; // Cloudinary image URL
     } catch (error) {
       console.error("Error uploading image:", error);
       return null;
@@ -108,27 +129,27 @@ const AdminPanel = () => {
     setError('');
   
     try {
+      // Create FormData object for sending files and other data
       const formDataToSend = new FormData();
-    
-      // Check for each field before adding to FormData
-      const textFields = [
-        'name', 'basePrice', 'category', 
-        'description', 'refundableDeposit', 
-        'brand', 'dimensions', 'color'
-      ];
-      textFields.forEach(field => {
-        if (formData[field]) {
-          formDataToSend.append(field, formData[field]);
-        }
-      });
-  
-      // Add locations as a JSON array string if not empty or undefined
-      if (formData.locations && formData.locations.length > 0) {
-        formDataToSend.append('location', JSON.stringify(formData.locations));
-      }
+      
+      // Add text fields directly to FormData
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('basePrice', formData.basePrice);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('refundableDeposit', formData.refundableDeposit);
+      formDataToSend.append('brand', formData.brand);
+      formDataToSend.append('dimensions', formData.dimensions);
+      formDataToSend.append('color', formData.color);
+      
+      // Add locations data
+      formDataToSend.append('locations', JSON.stringify(formData.locations));
+      
+      // Add tenure options as JSON string
+      formDataToSend.append('tenureOptions', JSON.stringify(formData.tenureOptions));
       
       // Add each image file with unique field names
-      formData.images.forEach((image) => {
+      formData.images.forEach((image, index) => {
         formDataToSend.append(`images`, image);
       });
       
@@ -165,15 +186,20 @@ const AdminPanel = () => {
       const formDataToSend = new FormData();
       
       // Add basic text fields
-      const textFields = ['name', 'description', 'basePrice', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color'];
+      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color',];
       textFields.forEach(field => {
         if (formData[field] !== undefined && formData[field] !== null) {
           formDataToSend.append(field, formData[field]);
         }
       });
       
-      // Add locations as JSON array
-      formDataToSend.append('locations', JSON.stringify(formData.locations));
+      // Handle any complex objects that need to be stringified
+      const objectFields = ['tenureOptions', 'locations'];
+      objectFields.forEach(field => {
+        if (formData[field] && Object.keys(formData[field]).length > 0) {
+          formDataToSend.append(field, JSON.stringify(formData[field]));
+        }
+      });
       
       // Track which existing images to keep
       if (formData.existingImages && Array.isArray(formData.existingImages)) {
@@ -203,6 +229,7 @@ const AdminPanel = () => {
               (progressEvent.loaded * 100) / progressEvent.total
             );
             console.log(`Upload Progress: ${percentCompleted}%`);
+            // You could set this to state if you want to show a progress bar
           }
         }
       );
@@ -264,9 +291,7 @@ const AdminPanel = () => {
           ...productData,
           existingImages: productData.images || [], // Store existing image URLs
           images: [], // Reset images array for new file uploads
-          // Ensure locations is an array
-          locations: Array.isArray(productData.locations) ? productData.locations : 
-                    (productData.location ? [productData.location] : [cities[0]])
+          locations: productData.locations || [] // Ensure locations are included
         });
         
         // Set preview images from existing URLs
@@ -466,15 +491,18 @@ const AdminPanel = () => {
     setFormData({
       name: '',
       basePrice: 0,
-      category: categories[0], // Reset to first category
+      category: '',
       description: '',
       refundableDeposit: 0,
       brand: '',
       dimensions: '',
       color: '',
-      locations: [cities[0]], // Reset to first city as array
       images: [],
-      existingImages: []
+      existingImages: [],
+      locations: [],
+      tenureOptions: [
+        { months: '', price: 0 }
+      ]
     });
     
     setPreviewImages([]);
@@ -554,7 +582,7 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {activeView === 'products' && (
+{activeView === 'products' && (
           <div>
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">Products ({products.length})</h1>
@@ -620,8 +648,8 @@ const AdminPanel = () => {
                         ${product.basePrice}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {Array.isArray(product.locations) 
-                          ? product.locations.join(', ')
+                        {Array.isArray(product.location) 
+                          ? product.location.join(', ')
                           : product.location || 'N/A'
                         }
                       </td>
@@ -678,19 +706,14 @@ const AdminPanel = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Category
                   </label>
-                  <select
+                  <input
+                    type="text"
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                     required
-                  >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
                 
                 <div>
@@ -720,7 +743,7 @@ const AdminPanel = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Brand
@@ -757,34 +780,22 @@ const AdminPanel = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
                 </div>
-                <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Locations (multiple)
-                </label>
-                <select
-                  multiple
-                  name="locations"
-                  value={formData.locations || []}
-                  onChange={handleLocationChange}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm hover:shadow-md transition duration-150 ease-in-out"
-                  required
-                  size={4}
-                >
-                  {cities.map((city) => (
-                    <option 
-                      key={city} 
-                      value={city} 
-                      className="p-2 hover:bg-indigo-100 cursor-pointer"
-                    >
-                      {city}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Hold Ctrl/Cmd to select multiple locations
-                </p>
-              </div>
 
+                {/* Location Selector - Full width in mobile, half width in desktop */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Available Locations
+                  </label>
+                  <LocationSelector
+                    selectedLocations={formData.locations}
+                    onSelectLocation={handleSelectLocation}
+                    onRemoveLocation={handleRemoveLocation}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Select locations where this product is available
+                  </p>
+                </div>
               </div>
               
               <div className="mt-6">
@@ -801,7 +812,64 @@ const AdminPanel = () => {
                 ></textarea>
               </div>
               
-              <RenderImageSection />
+              <RenderImageSection/>
+              
+              <div className="mt-6">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Tenure Options
+                  </label>
+                  <button 
+                    type="button" 
+                    onClick={addTenureOption}
+                    className="text-sm bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md flex items-center"
+                  >
+                    <Plus size={16} className="mr-1" />
+                    Add Option
+                  </button>
+                </div>
+              
+                
+                {formData.tenureOptions.map((option, index) => (
+                  <div key={index} className="flex items-center mb-3 gap-4">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-1">
+                        Months
+                      </label>
+                      <input
+                        type="text"
+                        value={option.months}
+                        onChange={(e) => handleTenureChange(index, 'months', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-1">
+                        Price ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={option.price}
+                        onChange={(e) => handleTenureChange(index, 'price', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+                    
+                    {formData.tenureOptions.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => removeTenureOption(index)}
+                        className="mt-5 text-red-600 hover:text-red-900 p-2"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
               
               <div className="mt-8 flex justify-end">
                 <button 

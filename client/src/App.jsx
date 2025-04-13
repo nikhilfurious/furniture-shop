@@ -4,7 +4,7 @@ import Navbar from './components/NavBar';
 import LocationModal from './components/LocationModal';
 import { AuthProvider } from './Context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Dashboard from './pages/Dashboard';
+import UserDashboard from './pages/UserDashboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Footer from './components/Footer';
@@ -12,7 +12,7 @@ import CartPage from './pages/Cart';
 import Breadcrumb from './components/BreadCrumb';
 import AboutPage from './pages/About';
 import ContactPage from './pages/Contact';
-import AdminPanel from './pages/AdminPanel';
+import AdminPanel from './pages/admin/AdminPanel';
 
 import ProductList from './pages/Shop';
 
@@ -111,7 +111,7 @@ const App = () => {
                     path="/dashboard"
                     element={
                       <ProtectedRoute>
-                        <Dashboard />
+                        <UserDashboard />
                       </ProtectedRoute>
                     }
                   />

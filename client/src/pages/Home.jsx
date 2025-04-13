@@ -25,13 +25,13 @@ function Home() {
   };
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000'; // Update this to your API URL
 
   const fetchFeaturedProducts = async () => {
     try {
       // limit to 6 products only
 
-      const response = await axios.get(`${API_URL}/api/products?limit=6`);
+      const response = await axios.get(`${API_URL}/api/products?limit=6&sort=-createdAt`);
       setFeaturedProducts(response.data);
       
     } catch (error) {

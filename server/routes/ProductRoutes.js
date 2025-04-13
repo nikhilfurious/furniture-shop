@@ -13,11 +13,13 @@ const fs = require("fs");
 // @access  Public
 router.get('/', async (req, res) => {
   const limit = req.query.limit ? parseInt(req.query.limit) : null; // Check if limit exists
-  let query = Product.find();
+  const sort = req.query.sort || '-createdAt'; // Default sort field
+  let query = Product.find().sort(sort);
 
   if (limit) {
     query = query.limit(limit); // Apply limit only if it's provided
   }
+
 
   const products = await query; // Execute query
   res.status(200).json(products);
@@ -54,6 +56,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       brand,
       dimensions,
       color,
+      tenureOptions,
       location,
     } = req.body;
 
@@ -79,6 +82,20 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       }
     }
 
+    let parsedTenureOptions = [];
+    if (tenureOptions) {
+      try {
+        parsedTenureOptions = JSON.parse(tenureOptions);
+        // Ensure it's an array (or a valid structure you expect)
+        if (!Array.isArray(parsedTenureOptions)) {
+          parsedTenureOptions = [parsedTenureOptions];
+        }
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid JSON format for tenureOptions' });
+      }
+    }
+
+
     const product = new Product({
       name,
       basePrice,
@@ -88,6 +105,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       brand,
       dimensions,
       color,
+      tenureOptions: parsedTenureOptions, 
       images: imageUrls,
       location: parsedLocation,
     });
@@ -134,6 +152,7 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
       'refundableDeposit',
       'brand',
       'dimensions',
+      'tenureOptions',
       'color',
       'location'
     ];

@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import Firebase auth
-import AdminPanel from "../pages/AdminPanel";
+import AdminPanel from "../pages/admin/AdminPanel";
 
 const AdminRoute = () => {
   const [isAdmin, setIsAdmin] = useState(null);
