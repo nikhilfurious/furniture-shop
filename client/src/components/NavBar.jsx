@@ -5,6 +5,7 @@ import { useAuth } from '../Context/AuthContext';
 import Breadcrumb from './BreadCrumb';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import { useCart } from '../Context/CartContext';
 
 const categories = [
   'All Categories',
@@ -23,7 +24,8 @@ function Navbar({ products, openModal, locationData }) {
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
+  const {cart} = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   
@@ -38,7 +40,7 @@ function Navbar({ products, openModal, locationData }) {
   const cartIntervalRef = useRef(null);
 
   // Fetch cart data function
-  const fetchCart = async () => {
+/*   const fetchCart = async () => {
     if (!auth.currentUser) {
       setCart([]);
       return;
@@ -72,11 +74,11 @@ function Navbar({ products, openModal, locationData }) {
         clearInterval(cartIntervalRef.current);
       }
     };
-  }, [auth.currentUser]); // Re-initialize if user changes
+  }, [auth.currentUser]); 
 
   // Additional useEffect to listen for specific cart update events if you have them
   useEffect(() => {
-    // Function to handle custom cart update events
+    
     const handleCartUpdate = () => {
       fetchCart();
     };
@@ -89,6 +91,8 @@ function Navbar({ products, openModal, locationData }) {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
   }, []);
+
+  */
 
   // Handler for search filtering
   const handleSearch = (query) => {

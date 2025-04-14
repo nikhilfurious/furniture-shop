@@ -22,7 +22,9 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
       });
 
     // Transform data into a single array response
-    const formattedCartItems = cartItems.map(item => {
+    const formattedCartItems = cartItems
+    .filter(item => item.productId !== null)
+    .map(item => {
       const product = item.productId;
       
       // Extract tenure-based pricing if applicable
