@@ -13,6 +13,17 @@ const AdminPanel = () => {
   const [previewImages, setPreviewImages] = useState([]);
   const [error, setError] = useState('');
 
+  // Define product categories
+  const productCategories = [
+    'Electronics',
+    'Living Room Furniture',
+    'Bedroom Furniture',
+    'Office Furniture',
+    'Dining Room Furniture',
+    'Outdoor Furniture',
+    'Storage and Organization',
+  ];
+
   const fileInputRef = useRef(null);
   const auth = getAuth();
   const user = auth.currentUser;
@@ -184,69 +195,97 @@ const AdminPanel = () => {
   
     try {
       const formDataToSend = new FormData();
-      
+  
       // Add basic text fields
-      const textFields = ['name', 'description', 'price', 'category', 'quantity', 'refundableDeposit', 'brand', 'dimensions', 'color',];
+      const textFields = [
+        'name',
+        'description',
+        'price',
+        'category',
+        'quantity',
+        'refundableDeposit',
+        'brand',
+        'dimensions',
+        'color'
+      ];
       textFields.forEach(field => {
         if (formData[field] !== undefined && formData[field] !== null) {
           formDataToSend.append(field, formData[field]);
         }
       });
-      
-      // Handle any complex objects that need to be stringified
-      const objectFields = ['tenureOptions', 'locations'];
-      objectFields.forEach(field => {
-        if (formData[field] && Object.keys(formData[field]).length > 0) {
-          formDataToSend.append(field, JSON.stringify(formData[field]));
+  
+      // Handle tenureOptions specifically to make sure it's in the correct format
+      if (formData.tenureOptions) {
+
+        
+        formDataToSend.append('tenureOptions', JSON.stringify(formData.tenureOptions));
+      }
+  
+      // Handle location separately as well
+      if (formData.location) {
+        let locationValue = formData.location;
+        
+        // Convert to array if it's a string
+        if (typeof locationValue === 'string') {
+          try {
+            locationValue = JSON.parse(locationValue);
+          } catch {
+            locationValue = locationValue.split(',').map(l => l.trim()).filter(Boolean);
+          }
         }
-      });
-      
+        
+        // Ensure locationValue is an array
+        if (!Array.isArray(locationValue)) {
+          locationValue = [locationValue];
+        }
+        
+        formDataToSend.append('location', JSON.stringify(locationValue));
+      }
+  
       // Track which existing images to keep
       if (formData.existingImages && Array.isArray(formData.existingImages)) {
-        formDataToSend.append('existingImages', JSON.stringify(formData.existingImages));
+        formDataToSend.append("existingImages", JSON.stringify(formData.existingImages));
       }
-      
+  
       // Add new image files
       if (formData.images && Array.isArray(formData.images)) {
         formData.images.forEach((image) => {
           if (image instanceof File) {
-            formDataToSend.append('images', image);
+            formDataToSend.append("images", image);
           }
         });
       }
-      
+  
+      // Log what we're sending to help with debugging
+      console.log("FormData being sent:");
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+  
       // Make the API request
       const response = await axios.put(
         `${API_URL}/products/${currentProduct}`,
         formDataToSend,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${await user.getIdToken()}`
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload Progress: ${percentCompleted}%`);
-            // You could set this to state if you want to show a progress bar
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${await user.getIdToken()}`
           }
         }
       );
-      
+  
       if (response.data && response.data.product) {
         // Update local products state
         const updatedProducts = products.map((product) =>
-          product.id === currentProduct ? response.data.product : product
+          product._id === currentProduct ? response.data.product : product
         );
-        
+  
         setProducts(updatedProducts);
         setCurrentProduct(null);
         setActiveView("products");
         resetForm();
-        
-        // Use toast notification if available, otherwise use alert
-        if (typeof toast !== 'undefined') {
+  
+        if (typeof toast !== "undefined") {
           toast.success("Product updated successfully!");
         } else {
           alert("Product updated successfully!");
@@ -255,13 +294,17 @@ const AdminPanel = () => {
     } catch (error) {
       console.error("Error updating product:", error);
       
-      const errorMsg = error.response?.data?.message || 
-                      error.message || 
-                      "An unknown error occurred";
-      
+      // Log more details about the error
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+      }
+  
+      const errorMsg =
+        error.response?.data?.message || error.message || "An unknown error occurred";
+  
       setError(errorMsg);
-      
-      if (typeof toast !== 'undefined') {
+  
+      if (typeof toast !== "undefined") {
         toast.error(`Error: ${errorMsg}`);
       } else {
         alert(`Error updating product: ${errorMsg}`);
@@ -270,6 +313,7 @@ const AdminPanel = () => {
       setIsLoading(false);
     }
   };
+  
   
   
   // Edit Product function - fetch the latest data from backend
@@ -706,14 +750,20 @@ const AdminPanel = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Category
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                     required
-                  />
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {productCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div>
@@ -851,7 +901,7 @@ const AdminPanel = () => {
                       </label>
                       <input
                         type="number"
-                        value={option.price}
+                        value={option.price === 0 ? '' : option.price}
                         onChange={(e) => handleTenureChange(index, 'price', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         required

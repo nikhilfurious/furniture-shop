@@ -57,7 +57,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       dimensions,
       color,
       tenureOptions,
-      location,
+      locations,
     } = req.body;
 
     if (!req.files || req.files.length === 0) {
@@ -70,15 +70,15 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
 
 
     let parsedLocation = [];
-    if (location) {
+    if (locations) {
       try {
-        parsedLocation = JSON.parse(location);
+        parsedLocation = JSON.parse(locations);
         if (!Array.isArray(parsedLocation)) {
           parsedLocation = [parsedLocation];
         }
       } catch (e) {
         // If parsing fails, assume it's a plain string
-        parsedLocation = [location];
+        parsedLocation = [locations];
       }
     }
 
@@ -124,13 +124,12 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
 router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
   try {
     const productId = req.params.id;
-    
+
     // Find the product to update
     const product = await Product.findById(productId);
-    
     if (!product) {
       // Clean up any uploaded files before responding
-      if (req.files && req.files.length > 0) {
+      if (req.files && req.files.length) {
         req.files.forEach(file => {
           if (fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
@@ -141,8 +140,8 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
     }
 
     const updateData = {};
-    
-    // Handle text fields from the request body
+
+    // Update basic fields (text, numbers, etc.)
     const allowedFields = [
       'name',
       'description',
@@ -152,44 +151,52 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
       'refundableDeposit',
       'brand',
       'dimensions',
-      'tenureOptions',
-      'color',
-      'location'
+      'color'
     ];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined && req.body[field] !== null) {
-        if (field === 'location') {
-          // Parse location field and ensure it is stored as an array
-          try {
-            // Try to parse the value in case it's sent as a JSON string
-            let parsed = JSON.parse(req.body[field]);
-            if (!Array.isArray(parsed)) {
-              // If parsed value is not an array, check if it's a comma-separated string
-              if (typeof parsed === 'string') {
-                parsed = parsed.split(',').map(loc => loc.trim()).filter(loc => loc !== "");
-              } else {
-                parsed = [parsed];
-              }
-            }
-            updateData[field] = parsed;
-          } catch (e) {
-            // If parsing fails, treat it as a comma-separated string or a single value
-            let locations = req.body[field];
-            if (typeof locations === 'string') {
-              locations = locations.split(',').map(loc => loc.trim()).filter(loc => loc !== "");
-            }
-            updateData[field] = Array.isArray(locations) ? locations : [locations];
-          }
-        } else {
-          updateData[field] = req.body[field];
-        }
+        updateData[field] = req.body[field];
       }
     });
-    
-    // Handle images - start with existing images
+
+    // Handle tenureOptions field and ensure it is stored as an array of objects
+    if (req.body.tenureOptions !== undefined && req.body.tenureOptions !== null) {
+      try {
+        let parsedTenure = JSON.parse(req.body.tenureOptions);
+        if (!Array.isArray(parsedTenure)) {
+          // In case a single tenure option is sent as an object
+          parsedTenure = [parsedTenure];
+        }
+        updateData.tenureOptions = parsedTenure;
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid JSON format for tenureOptions' });
+      }
+    }
+
+    // Optionally handle location field if needed (similar to tenureOptions)
+    if (req.body.location !== undefined && req.body.location !== null) {
+      try {
+        let parsedLocation = JSON.parse(req.body.location);
+        if (!Array.isArray(parsedLocation)) {
+          if (typeof parsedLocation === 'string') {
+            parsedLocation = parsedLocation.split(',').map(l => l.trim()).filter(Boolean);
+          } else {
+            parsedLocation = [parsedLocation];
+          }
+        }
+        updateData.location = parsedLocation;
+      } catch (e) {
+        let locValue = req.body.location;
+        if (typeof locValue === 'string') {
+          locValue = locValue.split(',').map(l => l.trim()).filter(Boolean);
+        }
+        updateData.location = Array.isArray(locValue) ? locValue : [locValue];
+      }
+    }
+
+    // Handle images
+    // Start with existing images if provided, otherwise keep current product images.
     let finalImages = [];
-    
-    // Parse existingImages if provided, otherwise keep current product images
     if (req.body.existingImages) {
       try {
         const existingImages = JSON.parse(req.body.existingImages);
@@ -199,60 +206,55 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
           return res.status(400).json({ message: 'existingImages must be an array' });
         }
       } catch (error) {
-        return res.status(400).json({ message: 'Failed to parse existingImages JSON' });
+        return res.status(400).json({ message: 'Invalid JSON format for existingImages' });
       }
     } else {
       finalImages = [...product.images];
     }
-    
-    // Find images to remove (images in the database but not in existingImages)
+
+    // Identify images to remove (images present in DB but not in finalImages)
     const imagesToRemove = product.images.filter(img => !finalImages.includes(img));
-    
-    // Delete removed images from Cloudinary
     for (const imageUrl of imagesToRemove) {
       try {
         await cloudinary.deleteFromCloudinary(imageUrl);
       } catch (error) {
         console.error('Error deleting image from Cloudinary:', error);
-        // Continue with update even if image deletion fails
+        // Continue even if some deletions fail
       }
     }
-    
-    // Upload new images to Cloudinary
+
+    // Upload any new images (sent via multipart/form-data)
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map(file => cloudinary.uploadToCloudinary(file.path));
       const newImageUrls = await Promise.all(uploadPromises);
       finalImages = [...finalImages, ...newImageUrls];
     }
-    
-    // Update the product data with the final images array
+
     updateData.images = finalImages;
     updateData.updatedAt = new Date();
-    
-    // Update the product in the database
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      updateData,
-      { new: true, runValidators: true }
-    );
-    
+
+    // Update the product document
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, {
+      new: true,
+      runValidators: true
+    });
+
     return res.status(200).json({
       message: 'Product updated successfully',
       product: updatedProduct
     });
-    
   } catch (error) {
     console.error('Error updating product:', error);
-    
+
     // Clean up any uploaded files in case of error
-    if (req.files && req.files.length > 0) {
+    if (req.files && req.files.length) {
       req.files.forEach(file => {
         if (fs.existsSync(file.path)) {
           fs.unlinkSync(file.path);
         }
       });
     }
-    
+
     return res.status(500).json({
       message: 'Server error while updating product',
       error: error.message

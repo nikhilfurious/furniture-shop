@@ -15,15 +15,11 @@ const ProductPage = () => {
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedTenure, setSelectedTenure] = useState(0);
-  const [tenureOptions, setTenureOptions] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const { addToCart } = useCart();
   const Navigate = useNavigate();
   const user = getAuth().currentUser;
-  
-  // Define the available tenure months
-  const availableMonths = [3, 6, 9, 12];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -33,15 +29,9 @@ const ProductPage = () => {
         const fetchedProduct = await getProduct(productId);
         setProduct(fetchedProduct);
         
-        // Generate tenure options based on base price
-        if (fetchedProduct && fetchedProduct.basePrice) {
-          const basePrice = fetchedProduct.basePrice || 999; // Default price if not available
-          const options = availableMonths.map(months => ({
-            months,
-            price: Math.round(basePrice * months) 
-          }));
-          
-          setTenureOptions(options);
+        // If tenureOptions exist and have at least one option, set the default selected tenure to the first one
+        if (fetchedProduct.tenureOptions && fetchedProduct.tenureOptions.length > 0) {
+          setSelectedTenure(0);
         }
         
         setLoading(false);
@@ -105,17 +95,14 @@ const ProductPage = () => {
 
 
   const handleAddToCart = () => {
-    
-  
-  if (!user) {
+    if (!user) {
+      setIsLoginPopupOpen(true);
+      return;
+    }
 
-    setIsLoginPopupOpen(true);
-    return;
-  }
-
-
-    if (tenureOptions && tenureOptions[selectedTenure]) {
-      const selectedTenureOption = tenureOptions[selectedTenure];
+    // Check if product has tenureOptions and if the selected tenure is valid
+    if (product.tenureOptions && product.tenureOptions[selectedTenure]) {
+      const selectedTenureOption = product.tenureOptions[selectedTenure];
       addToCart(
         product, 
         selectedTenureOption.months, 
@@ -131,16 +118,16 @@ const ProductPage = () => {
 
   // Calculate total price based on quantity
   const getTotalPrice = () => {
-    if (tenureOptions && tenureOptions[selectedTenure]) {
-      return tenureOptions[selectedTenure].price * quantity;
+    if (product.tenureOptions && product.tenureOptions[selectedTenure]) {
+      return product.tenureOptions[selectedTenure].price * quantity;
     }
     return 'Price not available';
   };
 
   // Get the current selected tenure option
   const getCurrentTenure = () => {
-    return tenureOptions && tenureOptions[selectedTenure] 
-      ? tenureOptions[selectedTenure] 
+    return product.tenureOptions && product.tenureOptions[selectedTenure] 
+      ? product.tenureOptions[selectedTenure] 
       : { months: 0, price: 0 };
   };
 
@@ -148,7 +135,6 @@ const ProductPage = () => {
     // Redirect to login page or open login modal
     setIsLoginPopupOpen(false);
     window.location.href = '/login';
-    
   };
 
   return (
@@ -254,7 +240,7 @@ const ProductPage = () => {
                         .custom-range::-webkit-slider-runnable-track {
                           width: 100%;
                           height: 6px;
-                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
+                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (product.tenureOptions?.length - 1 || 1)) * 100}%, #e5e7eb ${(selectedTenure / (product.tenureOptions?.length - 1 || 1)) * 100}%, #e5e7eb 100%);
                           border-radius: 9999px;
                           transition: background 0.3s ease;
                         }
@@ -262,7 +248,7 @@ const ProductPage = () => {
                         .custom-range::-moz-range-track {
                           width: 100%;
                           height: 6px;
-                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(selectedTenure / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%);
+                          background: linear-gradient(to right, #22c55e 0%, #22c55e ${(selectedTenure / (product.tenureOptions?.length - 1 || 1)) * 100}%, #e5e7eb ${(selectedTenure / (product.tenureOptions?.length - 1 || 1)) * 100}%, #e5e7eb 100%);
                           border-radius: 9999px;
                           transition: background 0.3s ease;
                         }
@@ -277,22 +263,21 @@ const ProductPage = () => {
                           background: #16a34a;  /* Green-700 for hover state */
                           box-shadow: 0 0 0 1px #16a34a;
                         }
-                    
                   `}
                 </style>
-                {tenureOptions && tenureOptions.length > 0 && (
+                {product.tenureOptions && product.tenureOptions.length > 0 ? (
                   <>
                     <input
                       type="range"
                       min="0"
-                      max={tenureOptions.length - 1}
+                      max={product.tenureOptions.length - 1}
                       value={selectedTenure}
                       step="1"
                       onChange={handleSliderChange}
                       className="custom-range"
                     />
                     <div className="flex justify-between mt-4">
-                      {tenureOptions.map((option, index) => (
+                      {product.tenureOptions.map((option, index) => (
                         <div 
                           key={index} 
                           className={`flex flex-col items-center ${selectedTenure === index ? 'text-green-500 font-bold' : ''}`}
@@ -303,6 +288,8 @@ const ProductPage = () => {
                       ))}
                     </div>
                   </>
+                ) : (
+                  <div className="text-center text-gray-500">No tenure options available</div>
                 )}
               </div>
             </div>
@@ -313,13 +300,13 @@ const ProductPage = () => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-gray-900">
-                      {tenureOptions && tenureOptions[selectedTenure] 
-                        ? `₹${tenureOptions[selectedTenure].price}` 
+                      {product.tenureOptions && product.tenureOptions[selectedTenure] 
+                        ? `₹${product.tenureOptions[selectedTenure].price}` 
                         : 'Price not available'}
                     </span>
                     <span className="text-base text-gray-400 line-through">
-                      ₹{tenureOptions && tenureOptions[selectedTenure] 
-                        ? Math.round(tenureOptions[selectedTenure].price * 1.2) 
+                      ₹{product.tenureOptions && product.tenureOptions[selectedTenure] 
+                        ? Math.round(product.tenureOptions[selectedTenure].price * 1.2) 
                         : '1337'}
                     </span>
                   </div>
