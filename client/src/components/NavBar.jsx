@@ -24,8 +24,8 @@ function Navbar({ products, openModal, locationData }) {
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  //const [cart, setCart] = useState([]);
-  const {cart} = useCart()
+  const [cart, setCart] = useState([]);
+  //const {cart} = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   
@@ -40,7 +40,7 @@ function Navbar({ products, openModal, locationData }) {
   const cartIntervalRef = useRef(null);
 
   // Fetch cart data function
-/*   const fetchCart = async () => {
+  const fetchCart = async () => {
     if (!auth.currentUser) {
       setCart([]);
       return;
@@ -92,7 +92,7 @@ function Navbar({ products, openModal, locationData }) {
     };
   }, []);
 
-  */
+ 
 
   // Handler for search filtering
   const handleSearch = (query) => {
