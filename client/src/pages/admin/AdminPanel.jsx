@@ -3,7 +3,7 @@ import { Pencil, Trash2, Plus, Home, Package, User, LogOut, X } from 'lucide-rea
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import LocationSelector from '../../components/LocationSelector';
-import CarouselAdmin from '../../components/carouselAdmin';
+import CarouselAdmin from '../../components/CarouselAdmin';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
