@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_URL = "http://localhost:5000";
+  const API_URL = "https://furniture-shop-dvh6.vercel.app";
   
   const auth = getAuth();
   

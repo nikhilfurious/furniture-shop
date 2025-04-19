@@ -3,7 +3,7 @@ import { Pencil, Trash2, Plus, Home, Package, User, LogOut, X } from 'lucide-rea
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import LocationSelector from '../../components/LocationSelector';
-import CarouselAdmin from '../../components/carouselAdmin';
+import CarouselAdmin from '../../components/CarouselAdmin';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -167,7 +167,7 @@ const AdminPanel = () => {
     });
   };
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  

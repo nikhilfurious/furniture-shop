@@ -8,7 +8,7 @@ const Breadcrumb = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
   const [lastName, setLastName] = useState('');
-  const API_URL = 'http://localhost:5000'; // Replace with your API URL
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Replace with your API URL
 
   // If the route is /products/:id, fetch the product name.
   useEffect(() => {
