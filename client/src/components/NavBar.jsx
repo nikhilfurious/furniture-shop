@@ -173,7 +173,7 @@ function Navbar({ products, openModal, locationData }) {
     if (category === 'All Categories') {
       navigate(`/category`);
     } else {
-      navigate(`/category/${category}`);
+      navigate(`/product?category=${encodeURIComponent(category)}`);
     }
     setMobileMenuOpen(false);
   };
