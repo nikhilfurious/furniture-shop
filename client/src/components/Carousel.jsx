@@ -6,7 +6,7 @@ const Carousel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const API_URL = 'http://localhost:5000'; // Adjust this to your API URL
+  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Adjust this to your API URL
 
   useEffect(() => {
     // Fetch carousel items when component mounts
