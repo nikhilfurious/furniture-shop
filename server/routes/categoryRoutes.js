@@ -7,6 +7,8 @@ const Product = require('../models/Product'); // Ensure Product model is set up
 router.get('/', async (req, res) => {
   try {
     // find all the categories and their product counts from the products collection
+    // returun just array
+    
     const categories = await Product.aggregate([
     { $group: { _id: "$category", count: { $sum: 1 } } },
     { $project: { category: "$_id", count: 1, _id: 0 } }

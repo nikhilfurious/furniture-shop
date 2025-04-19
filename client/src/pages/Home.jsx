@@ -25,7 +25,7 @@ function Home() {
   };
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Update this to your API URL
+  const API_URL = 'http://localhost:5000'; // Update this to your API URL
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -47,7 +47,7 @@ function Home() {
   
 /*   const CategorySection = () => {
 
-    const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+    const API_URL = 'http://localhost:5000';
 
 
     const fetchCategories = async () => {
@@ -142,7 +142,7 @@ function Home() {
   };
   
   const CategorySection = () => {
-    const categories = [
+    const rawCategories = [
       {
         title: "Living Room Furniture",
         route: "/category/living-room",
@@ -226,20 +226,25 @@ function Home() {
   
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Categories</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
-            <CategoryCard 
-              key={index} 
-              title={category.title} 
-              icon={category.icon} 
-              route={category.route} 
+      <h1 className="text-3xl font-bold mb-8">Categories</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rawCategories.map(({ title, icon }, idx) => {
+          // build query-param route on the fly
+          const route = `/product?category=${encodeURIComponent(title)}`;
+          return (
+            <CategoryCard
+              key={idx}
+              title={title}
+              icon={icon}
+              route={route}
             />
-          ))}
-        </div>
+          );
+        })}
       </div>
-    );
-  };
+    </div>
+  );
+};
+  
 
 
   const Cardsection = () =>{

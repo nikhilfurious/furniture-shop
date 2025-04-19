@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { fetchProducts } from '../services/Productapi';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import ProductFilter from '../components/Filters';
@@ -12,8 +12,10 @@ function ProductListPage() {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category');
   const [activeFilters, setActiveFilters] = useState({
-    categories: [],
+    categories: initialCategory ? [initialCategory] : [],
     months: []
   });
   const [userLocation, setUserLocation] = useState('');
@@ -162,6 +164,15 @@ function ProductListPage() {
     navigate(`/product/${productId}`);
   };
 
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    setActiveFilters({
+      categories: cat ? [cat] : [],
+      
+    });
+  }, [searchParams]);
+
   const handleFilterChange = (filters) => {
     setActiveFilters(prevFilters => {
       // Only update if the filters actually changed
@@ -290,11 +301,11 @@ function ProductListPage() {
                           {category}
                         </span>
                       ))}
-                      {activeFilters.months.map(month => (
+                      {/* {activeFilters.months.map(month => (
                         <span key={month} className="bg-teal-100 text-teal-800 text-xs px-3 py-1 rounded-full">
                           {month} months
                         </span>
-                      ))}
+                      ))} */}
                     </div>
                   </div>
                 )}
@@ -428,28 +439,7 @@ function ProductListPage() {
               </div>
             )}
 
-            {/* Pagination */}
-            {filteredProducts.length > 0 && (
-              <div className="mt-12 flex justify-center">
-                <nav className="flex items-center" aria-label="Pagination">
-                  <button className="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors">
-                    Previous
-                  </button>
-                  <button className="px-4 py-2 border-t border-b bg-green-600 text-white">
-                    1
-                  </button>
-                  <button className="px-4 py-2 border-t border-b text-gray-700 hover:bg-gray-50 transition-colors">
-                    2
-                  </button>
-                  <button className="px-4 py-2 border-t border-b text-gray-700 hover:bg-gray-50 transition-colors">
-                    3
-                  </button>
-                  <button className="px-4 py-2 border rounded-r-md bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                    Next
-                  </button>
-                </nav>
-              </div>
-            )}
+           
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Pencil, Trash2, Plus, Home, Package, User, LogOut, X } from 'lucide-rea
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import LocationSelector from '../../components/LocationSelector';
+import CarouselAdmin from '../../components/carouselAdmin';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -12,9 +13,11 @@ const AdminPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const [error, setError] = useState('');
+  const [newCategory, setNewCategory] = useState('');
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
 
   // Define product categories
-  const productCategories = [
+  const defaultCategories = [
     'Electronics',
     'Living Room Furniture',
     'Bedroom Furniture',
@@ -23,15 +26,26 @@ const AdminPanel = () => {
     'Outdoor Furniture',
     'Storage and Organization',
   ];
+  
+  // State for custom categories
+  const [customCategories, setCustomCategories] = useState([]);
+  
+  // Combined categories for dropdown
+  const productCategories = [...defaultCategories, ...customCategories];
 
   const fileInputRef = useRef(null);
+  const categoryInputRef = useRef(null);
   const auth = getAuth();
   const user = auth.currentUser;
 
   useEffect(() => {
+    // Load custom categories from localStorage when component mounts
+    const savedCategories = localStorage.getItem('customCategories');
+    if (savedCategories) {
+      setCustomCategories(JSON.parse(savedCategories));
+    }
     
     const checkAdminStatus = async () => {
-    
       setTimeout(() => {
         setIsAdmin(true);
         setIsLoading(false);
@@ -64,6 +78,48 @@ const AdminPanel = () => {
       ...formData,
       [name]: value
     });
+  };
+
+  // Add a new category
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !productCategories.includes(newCategory.trim())) {
+      const updatedCategories = [...customCategories, newCategory.trim()];
+      setCustomCategories(updatedCategories);
+      
+      // Save to localStorage
+      localStorage.setItem('customCategories', JSON.stringify(updatedCategories));
+      
+      // Set the new category as the selected category
+      setFormData({
+        ...formData,
+        category: newCategory.trim()
+      });
+      
+      // Reset input and hide it
+      setNewCategory('');
+      setShowCategoryInput(false);
+    }
+  };
+
+  // Handle pressing Enter in category input
+  const handleCategoryKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCategory();
+    }
+  };
+
+  // Show the category input field
+  const toggleCategoryInput = () => {
+    setShowCategoryInput(!showCategoryInput);
+    // Focus the input when showing
+    if (!showCategoryInput) {
+      setTimeout(() => {
+        if (categoryInputRef.current) {
+          categoryInputRef.current.focus();
+        }
+      }, 100);
+    }
   };
 
   // Location handlers
@@ -111,7 +167,7 @@ const AdminPanel = () => {
     });
   };
 
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
+  const API_URL = 'http://localhost:5000/api';
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  
@@ -216,8 +272,6 @@ const AdminPanel = () => {
   
       // Handle tenureOptions specifically to make sure it's in the correct format
       if (formData.tenureOptions) {
-
-        
         formDataToSend.append('tenureOptions', JSON.stringify(formData.tenureOptions));
       }
   
@@ -589,6 +643,13 @@ const AdminPanel = () => {
             <Plus size={18} className="mr-3" />
             Add Product
           </button>
+          <button 
+            onClick={() => setActiveView('Carousel')}
+            className={`flex items-center px-6 py-3 w-full text-left ${activeView === 'addProduct' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+          >
+            <Plus size={18} className="mr-3" />
+            Add Carousel Items
+          </button>
           <div className="mt-auto pt-6 border-t border-gray-200 pb-4">
             <button className="flex items-center px-6 py-3 w-full text-left text-gray-700">
               <User size={18} className="mr-3" />
@@ -602,8 +663,11 @@ const AdminPanel = () => {
         </nav>
       </div>
 
+     
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-8">
+      {activeView === 'Carousel' && <CarouselAdmin />}
+
         {activeView === 'dashboard' && (
           <div>
             <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
@@ -626,7 +690,7 @@ const AdminPanel = () => {
           </div>
         )}
 
-{activeView === 'products' && (
+        {activeView === 'products' && (
           <div>
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">Products ({products.length})</h1>
@@ -750,25 +814,58 @@ const AdminPanel = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Category
                   </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="" disabled>Select a category</option>
-                    {productCategories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex">
+                    <div className="flex-grow relative">
+                      <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-l-md"
+                        required
+                      >
+                        <option value="" disabled>Select a category</option>
+                        {productCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={toggleCategoryInput}
+                      className="bg-gray-200 text-gray-700 px-3 rounded-r-md flex items-center justify-center"
+                    >
+                      {showCategoryInput ? <X size={16} /> : <Plus size={16} />}
+                    </button>
+                  </div>
+                  
+                  {/* New Category Input - Only appears when 'Add New' button is clicked */}
+                  {showCategoryInput && (
+                    <div className="mt-2 flex">
+                      <input
+                        type="text"
+                        ref={categoryInputRef}
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        onKeyPress={handleCategoryKeyPress}
+                        placeholder="Enter new category"
+                        className="w-full p-2 border border-gray-300 rounded-l-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCategory}
+                        className="bg-blue-600 text-white px-3 rounded-r-md"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Base Price ($)
+                    Base Price (₹)
                   </label>
                   <input
                     type="number"
@@ -897,7 +994,7 @@ const AdminPanel = () => {
                     
                     <div className="flex-1">
                       <label className="block text-xs text-gray-500 mb-1">
-                        Price ($)
+                        Price (₹)
                       </label>
                       <input
                         type="number"

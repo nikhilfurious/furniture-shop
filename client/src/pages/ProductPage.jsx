@@ -306,7 +306,7 @@ const ProductPage = () => {
                     </span>
                     <span className="text-base text-gray-400 line-through">
                       ₹{product.tenureOptions && product.tenureOptions[selectedTenure] 
-                        ? Math.round(product.tenureOptions[selectedTenure].price * 1.2) 
+                        ? Math.round(product.tenureOptions[0].price) 
                         : '1337'}
                     </span>
                   </div>
@@ -337,8 +337,13 @@ const ProductPage = () => {
                 >
                   Add to Cart 🛒
                 </button>
+                
               </div>
+              
             </div>
+            <div className='bg-gray-50 p-4 rounded-lg border border-gray-100'>
+              {product.description}
+              </div>
             
           </div>
         </div>
@@ -354,38 +359,7 @@ const ProductPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {/* Features & Specs */}
-            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
-              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
-                <NotebookPen className="text-primary" size={20} />
-                Features & Specs
-              </h3>
-              <ul className="space-y-3">
-                <li className="pb-2 border-b border-gray-100">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Brand</span>
-                    <span className="font-medium">{product.brand || 'Not specified'}</span>
-                  </div>
-                </li>
-                <li className="pb-2 border-b border-gray-100">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Color</span>
-                    <span className="font-medium">{product.color || 'Not specified'}</span>
-                  </div>
-                </li>
-                <li className="pb-2 border-b border-gray-100">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Material</span>
-                    <span className="font-medium">{product.material || 'Premium Quality'}</span>
-                  </div>
-                </li>
-                <li className="pb-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Warranty</span>
-                    <span className="font-medium">{product.warranty || '12 months'}</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
+          
 
             {/* Dimensions Section */}
             <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
@@ -409,32 +383,7 @@ const ProductPage = () => {
             </div>
 
             {/* Safety & Usage */}
-            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
-              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
-                <ShieldCheck className="text-primary" size={20} />
-                Safety & Usage
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-1">Safe Usage</h4>
-                  <p className="text-gray-600 text-sm">
-                    Always follow the manufacturer's guidelines for proper usage and maintenance. Keep away from children without supervision.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-1">Maintenance</h4>
-                  <p className="text-gray-600 text-sm">
-                    Regular cleaning with a soft, dry cloth is recommended. Avoid using harsh chemicals that may damage the finish.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-1">Care Instructions</h4>
-                  <p className="text-gray-600 text-sm">
-                    {product.care || 'For detailed care instructions, please refer to the user manual included with the product.'}
-                  </p>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>

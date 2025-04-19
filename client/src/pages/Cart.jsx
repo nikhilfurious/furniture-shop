@@ -11,7 +11,7 @@ const CartPage = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingItems, setUpdatingItems] = useState(new Set());
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000';
   const auth = getAuth();
   const navigate = useNavigate();
 
@@ -27,6 +27,8 @@ const CartPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      
+      
       setCart(response.data);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -167,7 +169,7 @@ const CartPage = () => {
 
                 <div className="col-span-2 text-right">
                   <p className="font-bold text-gray-900">₹{item.price}</p>
-                  <p className="text-xs text-gray-500">₹{item.price * item.quantity} total</p>
+                  
                 </div>
 
                 <div className="col-span-2 flex justify-end">

@@ -20,7 +20,7 @@ const CategoryPage = () => {
 
 
   const navigate = useNavigate();
-  const API_URL = "https://furniture-shop-dvh6.vercel.app";
+  const API_URL = "http://localhost:5000";
 
   // Initialize AOS
   useEffect(() => {

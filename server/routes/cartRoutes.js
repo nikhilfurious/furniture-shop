@@ -18,32 +18,26 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
     const cartItems = await Cart.find({ userId })
       .populate({
         path: 'productId',
-        select: 'name images basePrice description tenureOptions'
+        select: 'name images description'
       });
 
-    // Transform data into a single array response
+    // Transform data into a single array response with the price from Cart schema
     const formattedCartItems = cartItems
-    .filter(item => item.productId !== null)
-    .map(item => {
-      const product = item.productId;
-      
-      // Extract tenure-based pricing if applicable
-      const tenurePricing = product.tenureOptions?.find(opt => opt.tenure === item.tenure);
-      const price = tenurePricing ? tenurePricing.price : product.basePrice;
-
-      return {
-        id: item._id,
-        userId: item.userId,
-        productId: product._id,
-        name: product.name,
-        images: product.images,
-        description: product.description,
-        basePrice: product.basePrice,  // Base price of the product
-        price: price,                  // Adjusted price based on tenure
-        tenure: item.tenure || 'default', // Default if tenure is missing
-        quantity: item.quantity
-      };
-    });
+      .filter(item => item.productId !== null)
+      .map(item => {
+        const product = item.productId;
+        
+        return {
+          id: item._id,
+          userId: item.userId,
+          name: product.name,
+          images: product.images,
+          description: product.description,
+          price: item.price,
+          tenure: item.tenure,
+          quantity: item.quantity
+        };
+      });
 
     return res.status(200).json(formattedCartItems);
   } catch (error) {

@@ -2,8 +2,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], months: [] } }) => {
   // Sample categories and tenure options
-  const categories = ["Appliances", "Electronics", "Furniture", "sample" ,"Air Conditioners"];
+  const API_URL = 'http://localhost:5000'; // Replace with your actual API URL
+  const [categories, setCategories] = useState([]);
+
   const tenureOptions = [3, 6, 9, 12, 18, 24];
+
+  useEffect(() => {
+    
+    const fetchCategories = async () => {
+      
+      const response = await fetch(`${API_URL}/api/category`); 
+      const data = await response.json();
+      setCategories(data.categories);
+    
+    };
+    fetchCategories();
+  }, []);
+
   
   // Use local state to manage filters to prevent flickering
   const [localFilters, setLocalFilters] = useState({
@@ -73,7 +88,7 @@ const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], month
       <div>
         <h3 className="font-bold text-gray-700 mb-3">Product Categories</h3>
         <div className="space-y-2">
-          {categories.map(category => (
+          {categories.map(({category,count}) => (
             <div key={category} className="flex items-center">
               <input
                 type="checkbox"

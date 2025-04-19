@@ -8,6 +8,40 @@ const storage = require('../middleware/upload')
 const cloudinary = require('../config/cloudinary');
 const fs = require("fs");
 
+
+
+
+function normalizeLocations(raw) {
+  let arr = [];
+
+  // 1) Try JSON.parse (expecting an array or single value)
+  try {
+    arr = JSON.parse(raw);
+    // Ensure array
+    if (!Array.isArray(arr)) {
+      arr = [arr];
+    }
+  } catch {
+    // 2) Fallback: comma-separated string or single value
+    if (typeof raw === 'string') {
+      arr = raw.split(',').map(i => i.trim()).filter(Boolean);
+    } else {
+      arr = [raw];
+    }
+  }
+
+  // 3) Map objects → their id (or name)
+  return arr.map(item => {
+    if (item && typeof item === 'object') {
+      // pick whichever you want stored
+      return String(item.name ?? '');
+    }
+    return String(item);
+  }).filter(i => i); // remove any empty strings
+}
+
+
+
 // @desc    Get all products
 // @route   GET /api/products
 // @access  Public
@@ -69,17 +103,9 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
     const imageUrls = await Promise.all(uploadPromises);
 
 
-    let parsedLocation = [];
+    let parsedLocations = [];
     if (locations) {
-      try {
-        parsedLocation = JSON.parse(locations);
-        if (!Array.isArray(parsedLocation)) {
-          parsedLocation = [parsedLocation];
-        }
-      } catch (e) {
-        // If parsing fails, assume it's a plain string
-        parsedLocation = [locations];
-      }
+      parsedLocations = normalizeLocations(locations);
     }
 
     let parsedTenureOptions = [];
@@ -107,7 +133,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       color,
       tenureOptions: parsedTenureOptions, 
       images: imageUrls,
-      location: parsedLocation,
+      location: parsedLocations,
     });
 
     await product.save();
@@ -174,24 +200,9 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
     }
 
     // Optionally handle location field if needed (similar to tenureOptions)
-    if (req.body.location !== undefined && req.body.location !== null) {
-      try {
-        let parsedLocation = JSON.parse(req.body.location);
-        if (!Array.isArray(parsedLocation)) {
-          if (typeof parsedLocation === 'string') {
-            parsedLocation = parsedLocation.split(',').map(l => l.trim()).filter(Boolean);
-          } else {
-            parsedLocation = [parsedLocation];
-          }
-        }
-        updateData.location = parsedLocation;
-      } catch (e) {
-        let locValue = req.body.location;
-        if (typeof locValue === 'string') {
-          locValue = locValue.split(',').map(l => l.trim()).filter(Boolean);
-        }
-        updateData.location = Array.isArray(locValue) ? locValue : [locValue];
-      }
+    const rawLoc = req.body.locations ?? req.body.location;
+    if (rawLoc != null) {
+      updateData.location = normalizeLocations(rawLoc);
     }
 
     // Handle images

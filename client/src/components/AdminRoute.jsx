@@ -7,7 +7,7 @@ import AdminPanel from "../pages/admin/AdminPanel";
 const AdminRoute = () => {
   const [isAdmin, setIsAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000';
   const auth = getAuth(); // Initialize Firebase auth
 
   useEffect(() => {
