@@ -22,7 +22,7 @@ const FeaturedProducts = ({featuredProducts}) => {
         <h2 className="text-3xl font-display font-bold">Featured Products</h2>
         <button 
           className="text-green-600 hover:text-green-800 transition-colors text-sm font-medium"
-          onClick={() => navigate('/category/all')}
+          onClick={() => navigate('/category')}
         >
           View All Products →
         </button>

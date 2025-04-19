@@ -7,14 +7,7 @@ import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useCart } from '../Context/CartContext';
 
-const categories = [
-  'All Categories',
-  'Electronics',
-  'Living Room Furniture',
-  'Bedroom Furniture',
-  'Office Furniture',
-  'Dining Room Furniture',
-];
+
 
 function Navbar({ products, openModal, locationData }) {
   const { user, logout } = useAuth();
@@ -25,13 +18,16 @@ function Navbar({ products, openModal, locationData }) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [cart, setCart] = useState([]);
+  const [categories, setCategories] = useState([]);
   //const {cart} = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+
   
   const auth = getAuth();
   const navigate = useNavigate();
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000';
   
   // Reference to the search input so we can handle blur/focus
   const searchInputRef = useRef(null);
@@ -57,6 +53,19 @@ function Navbar({ products, openModal, locationData }) {
       console.error('Error fetching cart:', error);
     }
   };
+
+
+  useEffect(() => {
+      
+    const fetchCategories = async () => {
+      
+      const response = await fetch(`${API_URL}/api/category`); 
+      const data = await response.json();
+      setCategories(data.categories);
+    
+    };
+    fetchCategories();
+  }, []);
 
   // Set up interval to poll for cart updates
   useEffect(() => {
@@ -288,7 +297,7 @@ function Navbar({ products, openModal, locationData }) {
 
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <Store className="h-7 w-7 text-green-600" />
+              <img src="/logo.jpeg" alt="" className='w-24 mt-4'/>
               <span className="font-display text-xl md:text-2xl font-bold text-green-700">Spot Furnish</span>
             </Link>
 
@@ -305,7 +314,7 @@ function Navbar({ products, openModal, locationData }) {
                   onChange={handleCategoryChange}
                   className="px-3 py-2 rounded-l-xl bg-green-50 border-r border-green-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer hover:bg-green-100 transition-colors"
                 >
-                  {categories.map((category) => (
+                  {categories.map(({category,count}) => (
                     <option key={category} value={category}>
                       {category}
                     </option>

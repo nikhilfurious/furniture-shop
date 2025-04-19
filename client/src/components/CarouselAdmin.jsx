@@ -13,7 +13,7 @@ const CarouselAdmin = () => {
     imagePreview: null
   });
 
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+  const API_URL = 'http://localhost:5000';
 
   // Fetch existing carousel items on component mount
   useEffect(() => {

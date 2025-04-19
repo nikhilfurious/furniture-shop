@@ -25,7 +25,7 @@ function Home() {
   };
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Update this to your API URL
+  const API_URL = 'http://localhost:5000'; // Update this to your API URL
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -47,7 +47,7 @@ function Home() {
   
 /*   const CategorySection = () => {
 
-    const API_URL = 'https://furniture-shop-dvh6.vercel.app';
+    const API_URL = 'http://localhost:5000';
 
 
     const fetchCategories = async () => {
@@ -142,6 +142,7 @@ function Home() {
   };
   
   const CategorySection = () => {
+    const navigate = useNavigate();
     const rawCategories = [
       {
         title: "Living Room Furniture",
@@ -225,8 +226,17 @@ function Home() {
     ];
   
     return (
-      <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Categories</h1>
+      <div className="container mx-auto px-4 py-8 mb-8">
+      <div className='flex items-center justify-between'>
+      <h1 className="text-3xl font-bold">Categories</h1>
+      <button 
+          className="text-green-600 hover:text-green-800 transition-colors text-sm font-medium cursor-pointer"
+          onClick={() => navigate('/category')}
+        >
+          View All Category →
+        </button>
+
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rawCategories.map(({ title, icon }, idx) => {
           // build query-param route on the fly
