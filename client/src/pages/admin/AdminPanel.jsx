@@ -167,7 +167,7 @@ const AdminPanel = () => {
     });
   };
 
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app/api';
+  const API_URL = 'http://localhost:5000/api';
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  
@@ -645,7 +645,7 @@ const AdminPanel = () => {
           </button>
           <button 
             onClick={() => setActiveView('Carousel')}
-            className={`flex items-center px-6 py-3 w-full text-left ${activeView === 'addProduct' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+            className={`flex items-center px-6 py-3 w-full text-left ${activeView === 'Carousel' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
           >
             <Plus size={18} className="mr-3" />
             Add Carousel Items

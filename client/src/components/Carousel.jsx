@@ -6,7 +6,7 @@ const Carousel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const API_URL = 'https://furniture-shop-dvh6.vercel.app'; // Adjust this to your API URL
+  const API_URL = 'http://localhost:5000'; // Adjust this to your API URL
 
   useEffect(() => {
     // Fetch carousel items when component mounts
@@ -138,9 +138,7 @@ const Carousel = () => {
                 <p className="text-2xl text-white mb-8 drop-shadow-md opacity-90">
                   {item.subtitle}
                 </p>
-                <button className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
-                  Explore Now
-                </button>
+                
               </div>
             </div>
           </div>

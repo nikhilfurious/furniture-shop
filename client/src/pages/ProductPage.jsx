@@ -182,10 +182,17 @@ const ProductPage = () => {
         </div>
 
         {/* Right side - Product details */}
-        <div className="md:w-[25%] min-w-[300px]">
+        <div className="md:w-[25%] min-w-[300px] mb-16">
           <div className="space-y-6">
             {/* Product Title */}
             <h1 className="text-2xl font-medium text-gray-900">{product.name}</h1>
+            <div className='bg-gray-50 p-4 rounded-lg border border-gray-100'>
+              <h2 className='font-semibold mb-2'>Product Description:</h2>
+              {product.description}
+              <div className='m-2'></div>
+              <h2 className='font-semibold mb-2'>Product Dimensions:</h2>
+              {product.dimensions}
+              </div>
 
             {/* Tenure Selector */}
             <div className="space-y-4 border-2 p-4 border-gray-100 rounded-lg">
@@ -341,52 +348,14 @@ const ProductPage = () => {
               </div>
               
             </div>
-            <div className='bg-gray-50 p-4 rounded-lg border border-gray-100'>
-              {product.description}
-              </div>
+            
             
           </div>
         </div>
       </div>
 
       {/* Styled Product Details Section */}
-      <div className="mt-12 w-full">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800">Product Details</h2>
-            <p className="text-gray-500 text-sm mt-1">Everything you need to know about this product</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {/* Features & Specs */}
-          
-
-            {/* Dimensions Section */}
-            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
-              <h3 className="text-xl font-medium text-gray-800 mb-4 flex items-center gap-2">
-                <FaTape className="text-primary" size={20} />
-                Dimensions
-              </h3>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <p className="text-gray-700 leading-relaxed">
-                  {product.dimensions || 
-                    'Height: 80cm, Width: 120cm, Depth: 60cm. Please allow for minor variations as all measurements are approximate.'}
-                </p>
-              </div>
-              
-              <div className="mt-4">
-                <h4 className="font-medium text-gray-700 mb-2">Packed Dimensions</h4>
-                <p className="text-gray-600">
-                  Our products are carefully packed to ensure safe delivery. Package dimensions may vary slightly from actual product dimensions.
-                </p>
-              </div>
-            </div>
-
-            {/* Safety & Usage */}
-            
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 };
