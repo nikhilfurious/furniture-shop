@@ -15,7 +15,7 @@ const app = express();
 // Middleware
 app.use(express.json()); // Body parser
 const corsOptions = {
-  origin: ['http://localhost:5173','https://furniture-shop-jet.vercel.app'],
+  origin: ['http://localhost:5173','https://furniture-shop-jet.vercel.app','https://furniture-shop-dvh6.vercel.app'],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
 };
@@ -49,7 +49,7 @@ app.options('*', cors(corsOptions));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/ProductRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
-app.use('/api/', require('./routes/purchaseRoutes'));
+app.use('/api', require('./routes/purchaseRoutes'));
 app.use('/api/category', require('./routes/categoryRoutes'));
 app.use('/api/carousel', require('./routes/carouselRoutes'));
 

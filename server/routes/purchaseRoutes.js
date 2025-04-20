@@ -735,6 +735,12 @@ remainingTerms.forEach(term => {
     console.error("Error processing purchase:", error);
     res.status(500).json({ success: false, message: "Failed to generate quotation", error: error.message });
   }
+
+
+  router.use((err, req, res, next) => {
+    console.error('💥 Unhandled error in purchaseRoutes:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  });
 });
 
 
