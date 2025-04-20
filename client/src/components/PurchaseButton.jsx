@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Input, message } from 'antd';
 import axios from 'axios';
+  import { API_URL } from "../endpoint";
 
 const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const API_URL = 'http://localhost:5000';
+  
 
   // Calculate total price from all products
   const totalPrice = products?.reduce((sum, product) => sum + (product.price || 0), 0);

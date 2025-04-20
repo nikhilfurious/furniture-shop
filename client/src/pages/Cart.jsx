@@ -5,13 +5,14 @@ import { Trash2, ShoppingBag } from 'lucide-react';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+  import { API_URL } from "../endpoint";
 
 const CartPage = () => {
   const { removeFromCart, getTotalPrice, updateQuantity } = useCart();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingItems, setUpdatingItems] = useState(new Set());
-  const API_URL = 'http://localhost:5000';
+  
   const auth = getAuth();
   const navigate = useNavigate();
 

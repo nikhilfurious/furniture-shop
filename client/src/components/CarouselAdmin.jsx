@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, Save, Image, Edit, Loader } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from "../endpoint";
 
 const CarouselAdmin = () => {
   const [carouselItems, setCarouselItems] = useState([]);
@@ -13,7 +14,7 @@ const CarouselAdmin = () => {
     imagePreview: null
   });
 
-  const API_URL = 'http://localhost:5000';
+  
 
   // Fetch existing carousel items on component mount
   useEffect(() => {

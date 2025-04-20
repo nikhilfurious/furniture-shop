@@ -1,4 +1,5 @@
 import { getAuth } from "firebase/auth";
+import { API_URL } from "../endpoint";
 
 export const sendAuthRequest = async () => {
   const auth = getAuth();
@@ -13,7 +14,7 @@ export const sendAuthRequest = async () => {
     const token = await user.getIdToken(); // Get Firebase ID token
     console.log("🔹 Sending request with token:", token);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

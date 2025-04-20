@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from "../endpoint";
 
 const Carousel = () => {
   const [carouselItems, setCarouselItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const API_URL = 'http://localhost:5000'; // Adjust this to your API URL
+  
 
   useEffect(() => {
     // Fetch carousel items when component mounts

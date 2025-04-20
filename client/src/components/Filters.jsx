@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_URL } from "../endpoint";
 
 const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], months: [] } }) => {
   // Sample categories and tenure options
-  const API_URL = 'http://localhost:5000'; // Replace with your actual API URL
+ 
   const [categories, setCategories] = useState([]);
 
   const tenureOptions = [3, 6, 9, 12, 18, 24];

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PurchaseButton from '../components/PurchaseButton';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import axios from 'axios';
+  import { API_URL } from "../endpoint";
 
 const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,7 @@ const PaymentPage = () => {
   
   const navigate = useNavigate();
   const auth = getAuth();
-  const API_URL = 'http://localhost:5000';
+ 
 
   const adminEmail = "pragarajesh779jd@gmail.com";
 

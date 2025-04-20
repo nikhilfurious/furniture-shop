@@ -6,6 +6,7 @@ import Breadcrumb from './BreadCrumb';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useCart } from '../Context/CartContext';
+import { API_URL } from "../endpoint";
 
 
 
@@ -24,10 +25,11 @@ function Navbar({ products, openModal, locationData }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
 
+
   
   const auth = getAuth();
   const navigate = useNavigate();
-  const API_URL = 'http://localhost:5000';
+  
   
   // Reference to the search input so we can handle blur/focus
   const searchInputRef = useRef(null);

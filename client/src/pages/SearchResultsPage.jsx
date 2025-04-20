@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from "../endpoint";
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'http://localhost:5000/api';
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${API_URL}/products/search/${query}`, {
+        const res = await axios.get(`${API_URL}/api/products/search/${query}`, {
           params: { q: query }
         });
         setProducts(res.data);

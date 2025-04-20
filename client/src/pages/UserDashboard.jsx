@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Context/AuthContext';
 import axios from 'axios';
+  import { API_URL } from "../endpoint";
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'http://localhost:5000';
+ 
 
   useEffect(() => {
     const fetchOrders = async () => {

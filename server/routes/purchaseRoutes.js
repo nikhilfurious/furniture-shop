@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const { jsPDF } = require('jspdf');
 require('jspdf-autotable');
 const fs = require('fs');
 const path = require('path');
-const { PDFDocument, StandardFonts,rgb } = require("pdf-lib");
+//const { PDFDocument, StandardFonts,rgb } = require("pdf-lib");
 const Orders = require('../models/Orders');
+const PDFDocument = require('pdfkit');
+
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -84,6 +87,39 @@ router.get('/get-user-details', async (req, res) => {
   
 
 // Process purchase and generate invoice
+
+
+// Helper function to get ordinal suffix
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) return 'th';
+  switch (day % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+
+// Helper function to format date
+function formatDate(date) {
+  const day = date.getDate();
+  const month = date.toLocaleString('en-GB', { month: 'short' });
+  const year = date.getFullYear();
+  return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
+}
+
+
+const fetchImageBuffer = async (imageUrl) => {
+  try {
+    // Use axios or node-fetch to get the image
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    return Buffer.from(response.data, 'binary');
+  } catch (err) {
+    console.error(`Error fetching image from ${imageUrl}:`, err);
+    return null;
+  }
+};
+
 router.post("/process-purchase", async (req, res) => {
   try {
     const { userId, totalAmount, products, customer, adminEmail } = req.body;
@@ -95,7 +131,7 @@ router.post("/process-purchase", async (req, res) => {
     // Calculate delivery date (default to 3 days from now)
     const deliveryDate = new Date(today);
     deliveryDate.setDate(deliveryDate.getDate() + 3);
-    const formattedDeliveryDate = `${deliveryDate.getDate()}${getOrdinalSuffix(deliveryDate.getDate())} ${deliveryDate.toLocaleString('en-GB', { month: 'short' })} ${deliveryDate.getFullYear()}`;
+    const formattedDeliveryDate = formatDate(deliveryDate);
     
     // Calculate totals from products
     let monthlyTotal = 0;
@@ -110,585 +146,204 @@ router.post("/process-purchase", async (req, res) => {
     const transportationFee = 4500;
 
     // Create a new PDF document
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // A4 size
-    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const doc = new PDFDocument({
+      size: 'A4',
+      margin: 50,
+      bufferPages: true // Enable buffering to add page numbers later
+    });
 
-    // Colors & positions
-    const textColor = rgb(0, 0, 0);
-    const greenColor = rgb(0, 0.5, 0.2); // Green color for the title
-    const marginLeft = 74;
-    let yPos = 780;
+    // Pipe the PDF into a file
+    const pdfPath = `./quotation-${invoiceNumber}.pdf`;
+    const pdfStream = fs.createWriteStream(pdfPath);
+    doc.pipe(pdfStream);
+
+    // Define colors
+    const greenColor = '#00802E';
+    const blackColor = '#000000';
+    const redColor = '#CC0000';
+
+    // Set positions
+    const marginLeft = 50;
+    const marginRight = 550;
+    let yPos = 80;
     const lineHeight = 15;
-
-    // Company Logo at top right
+    
+    // Add company logo
     try {
-      const logoUrl = process.env.COMPANY_LOGO_URL || "https://yourcompany.com/logo.png";
-      const logoResponse = await fetch(logoUrl);
-      const logoBytes = await logoResponse.arrayBuffer();
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      
-      // Calculate dimensions maintaining aspect ratio
-      const maxWidth = 100;
-      const maxHeight = 100;
-      const scaleFactor = Math.min(
-        maxWidth / logoImage.width,
-        maxHeight / logoImage.height
-      );
-      
-      const logoWidth = logoImage.width * scaleFactor;
-      const logoHeight = logoImage.height * scaleFactor;
-      
-      // Position logo at top right
-      page.drawImage(logoImage, {
-        x: 495 - logoWidth,
-        y: yPos - logoHeight + 20,
-        width: logoWidth,
-        height: logoHeight,
-      });
+      const logoUrl = path.join(__dirname, "../uploads/logo.jpeg"); // Adjust the path as needed
+      doc.image(logoUrl, marginRight - 100, yPos - 20, { width: 100 });
     } catch (err) {
-      console.error("Error embedding logo:", err);
-      // Continue without logo
+      console.error("Error adding logo:", err);
     }
 
-    // Header: "Spot Furnish Rentals" with green color
-    page.setFont(helveticaBold);
-    page.setFontSize(24);
-    page.drawText("Spot Furnish Rentals", {
-      x: marginLeft,
-      y: yPos,
-      color: greenColor,
-    });
+    // Add company name
+    doc.font('Helvetica-Bold')
+      .fontSize(24)
+      .fillColor(greenColor)
+      .text('Spot Furnish Rentals', marginLeft, yPos);
 
-    // Address and contact information
-    page.setFont(helveticaFont);
-    page.setFontSize(12);
-    yPos -= 30;
-    page.drawText("8th Main, Ramamurthy Nagar main Road", {
-      x: marginLeft,
-      y: yPos,
-      color: textColor,
-    });
+    // Add company address and contact information
+    yPos += 40;
+    doc.font('Helvetica')
+      .fontSize(12)
+      .fillColor(blackColor)
+      .text('8th Main, Ramamurthy Nagar main Road', marginLeft, yPos)
+      .text('Bengaluru, Karnataka 560016', marginLeft, yPos + lineHeight)
+      .text('+91 8123096928', marginLeft, yPos + lineHeight * 2)
+      .text('+91 9844311875', marginLeft, yPos + lineHeight * 3);
 
-    yPos -= lineHeight;
-    page.drawText("Bengaluru, Karnataka 560016", {
-      x: marginLeft,
-      y: yPos,
-      color: textColor,
-    });
+    // Add quotation title
+    yPos += lineHeight * 5;
+    doc.font('Helvetica-Bold')
+      .fontSize(16)
+      .text('Quotation', marginLeft, yPos);
 
-    yPos -= lineHeight;
-    page.drawText("+91 8123096928", {
-      x: marginLeft,
-      y: yPos,
-      color: textColor,
-    });
+    // Add delivery to and date sections
+    yPos += 25;
+    doc.font('Helvetica-Bold')
+      .fontSize(12)
+      .text('Delivery To :', marginLeft, yPos);
 
-    yPos -= lineHeight;
-    page.drawText("+91 9844311875", {
-      x: marginLeft,
-      y: yPos,
-      color: textColor,
-    });
+    // Add customer details
+    doc.font('Helvetica')
+      .text(customer.company || 'Toyota Financial Services India Ltd,', marginLeft, yPos + lineHeight)
+      .text(`${customer.location || customer.city || 'Bengaluru'}-${customer.zipCode || '560001'}`, marginLeft, yPos + lineHeight * 2);
 
-    // Quotation title
-    yPos -= 30;
-    page.setFont(helveticaBold);
-    page.setFontSize(16);
-    page.drawText("Quotation", {
-      x: marginLeft,
-      y: yPos,
-      color: textColor,
-    });
-
-    // Delivery To and Date sections in two columns
-    yPos -= 25;
-    const leftColumnX = marginLeft;
-    const rightColumnX = 350;
-
-    // Delivery To label and underline (Left column)
-    page.setFont(helveticaBold);
-    page.setFontSize(12);
-    page.drawText("Delivery To :", {
-      x: leftColumnX,
-      y: yPos,
-      color: textColor,
-    });
-
-    // Customer details
-    yPos -= lineHeight;
-    page.setFont(helveticaFont);
-    page.drawText(`${customer.company || "Toyota Financial Services India Ltd,"}`, {
-      x: leftColumnX,
-      y: yPos,
-      color: textColor,
-    });
-
-    // Customer location
-    yPos -= lineHeight;
-    page.drawText(`${customer.location || customer.city || "Bengaluru"}-${customer.zipCode || "560001"}`, {
-      x: leftColumnX,
-      y: yPos,
-      color: textColor,
-    });
-
-    // Date label and info (Right column)
-    const dateY = yPos + lineHeight; // Align with first line of customer details
-    page.setFont(helveticaBold);
-    page.drawText("Date", {
-      x: rightColumnX,
-      y: dateY,
-      color: textColor,
-    });
-
-    // Format date as shown in the reference (e.g., "27th Feb 2025")
-    const formattedDisplayDate = `${today.getDate()}${getOrdinalSuffix(today.getDate())} ${today.toLocaleString('en-GB', { month: 'short' })} ${today.getFullYear()}`;
+    // Add date on the right
+    doc.font('Helvetica-Bold')
+      .text('Date', 400, yPos);
     
-    page.setFont(helveticaFont);
-    page.drawText(formattedDisplayDate, {
-      x: rightColumnX,
-      y: dateY - lineHeight,
-      color: textColor,
-    });
+    doc.font('Helvetica')
+      .text(date, 400, yPos + lineHeight);
 
-    // Draw underlines for both sections
-    const underlineY = yPos - 10;
-    page.drawLine({
-      start: { x: leftColumnX, y: underlineY },
-      end: { x: leftColumnX + 250, y: underlineY },
-      thickness: 1,
-      color: textColor,
-    });
+    // Add underlines
+    doc.moveTo(marginLeft, yPos + lineHeight * 3)
+      .lineTo(marginLeft + 250, yPos + lineHeight * 3)
+      .stroke();
 
-    page.drawLine({
-      start: { x: rightColumnX, y: underlineY },
-      end: { x: rightColumnX + 150, y: underlineY },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.moveTo(400, yPos + lineHeight * 3)
+      .lineTo(550, yPos + lineHeight * 3)
+      .stroke();
 
-    // Table dimensions - MATCHING REFERENCE DESIGN
-    yPos -= 40;
-    const tableStartX = 75;
-    const tableWidth = 450;
-    
-    // Define column widths based on reference
-    const colItemsWidth = 230;
-    const colAmountWidth = 75;
-    const colQtyWidth = 50;
-    const colTotalWidth = 95;
-    
-    // Define column positions
-    const colItemsX = tableStartX;
-    const colAmountX = colItemsX + colItemsWidth;
-    const colQtyX = colAmountX + colAmountWidth;
-    const colTotalX = colQtyX + colQtyWidth;
-    const tableEndX = colTotalX + colTotalWidth;
+    // Table setup
+    yPos += lineHeight * 4;
+    const tableTop = yPos;
+    const tableWidth = 500;
+    const colWidth = [250, 75, 50, 125];
+    const colStart = [marginLeft, marginLeft + colWidth[0], marginLeft + colWidth[0] + colWidth[1], marginLeft + colWidth[0] + colWidth[1] + colWidth[2]];
     
     // Draw table header
-    // Draw outer border of the table header
-    page.drawRectangle({
-      x: tableStartX,
-      y: yPos - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
     
-    // Draw vertical lines for table header
-    page.drawLine({
-      start: { x: colAmountX, y: yPos },
-      end: { x: colAmountX, y: yPos - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    // Draw table header vertical lines
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
+    doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
+    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
     
-    page.drawLine({
-      start: { x: colQtyX, y: yPos },
-      end: { x: colQtyX, y: yPos - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    // Add table header text
+    doc.font('Helvetica-Bold')
+      .text('Items', colStart[0] + 90, yPos + 7)
+      .text('Amount', colStart[1] + 15, yPos + 7)
+      .text('Qty', colStart[2] + 15, yPos + 7)
+      .text('Total Amount', colStart[3] + 25, yPos + 7);
     
-    page.drawLine({
-      start: { x: colTotalX, y: yPos },
-      end: { x: colTotalX, y: yPos - 20 },
-      thickness: 1,
-      color: textColor,
-    });
-    
-    // Table header text - centered in each column
-    page.setFont(helveticaBold);
-    page.setFontSize(12);
-    
-    // Draw header texts centered in their columns
-    page.drawText("Items", {
-      x: colItemsX + (colItemsWidth / 2) - 20,
-      y: yPos - 15,
-      color: textColor,
-    });
-    
-    page.drawText("Amount", {
-      x: colAmountX + (colAmountWidth / 2) - 25,
-      y: yPos - 15,
-      color: textColor,
-    });
-    
-    page.drawText("Qty", {
-      x: colQtyX + (colQtyWidth / 2) - 10,
-      y: yPos - 15,
-      color: textColor,
-    });
-    
-    page.drawText("Total Amount", {
-      x: colTotalX + (colTotalWidth / 2) - 40,
-      y: yPos - 15,
-      color: textColor,
-    });
-    
-    // Start drawing product rows
-    let currentY = yPos - 20;
-    page.setFont(helveticaFont);
+    // Draw product rows
+    yPos += 20;
+    doc.font('Helvetica');
     
     // Draw each product row
     for (const product of products) {
       const itemTotal = product.price * product.quantity;
       
-      // Draw row border
-      page.drawRectangle({
-        x: tableStartX,
-        y: currentY - 20,
-        width: tableWidth,
-        height: 20,
-        borderColor: textColor,
-        borderWidth: 1,
-      });
+      // Draw row borders
+      doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
       
-      // Draw vertical lines
-      page.drawLine({
-        start: { x: colAmountX, y: currentY },
-        end: { x: colAmountX, y: currentY - 20 },
-        thickness: 1,
-        color: textColor,
-      });
+      // Draw row vertical lines
+      doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
+      doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
+      doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
       
-      page.drawLine({
-        start: { x: colQtyX, y: currentY },
-        end: { x: colQtyX, y: currentY - 20 },
-        thickness: 1,
-        color: textColor,
-      });
+      // Add product details
+      doc.text(product.name, colStart[0] + 5, yPos + 7)
+        .text(product.price.toString(), colStart[1] + 15, yPos + 7)
+        .text(product.quantity.toString(), colStart[2] + 15, yPos + 7)
+        .text(itemTotal.toString(), colStart[3] + 45, yPos + 7);
       
-      page.drawLine({
-        start: { x: colTotalX, y: currentY },
-        end: { x: colTotalX, y: currentY - 20 },
-        thickness: 1,
-        color: textColor,
-      });
-      
-      // Product details
-      page.setFont(helveticaFont);
-      
-      // Product name - left aligned with padding
-      page.drawText(product.name, {
-        x: colItemsX + 5,
-        y: currentY - 15,
-        color: textColor,
-        maxWidth: colItemsWidth - 10,
-      });
-      
-      // Price - center aligned in amount column
-      const priceText = product.price.toString();
-      const priceWidth = helveticaFont.widthOfTextAtSize(priceText, 12);
-      page.drawText(priceText, {
-        x: colAmountX + (colAmountWidth / 2) - (priceWidth / 2),
-        y: currentY - 15,
-        color: textColor,
-      });
-      
-      // Quantity - center aligned
-      const qtyText = product.quantity.toString();
-      const qtyWidth = helveticaFont.widthOfTextAtSize(qtyText, 12);
-      page.drawText(qtyText, {
-        x: colQtyX + (colQtyWidth / 2) - (qtyWidth / 2),
-        y: currentY - 15,
-        color: textColor,
-      });
-      
-      // Total - center aligned
-      const totalText = itemTotal.toString();
-      const totalWidth = helveticaFont.widthOfTextAtSize(totalText, 12);
-      page.drawText(totalText, {
-        x: colTotalX + (colTotalWidth / 2) - (totalWidth / 2),
-        y: currentY - 15,
-        color: textColor,
-      });
-      
-      currentY -= 20; // Move to next row
+      yPos += 20;
     }
     
     // Total Monthly Package row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
+    doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
+    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
     
-    // Draw vertical lines
-    page.drawLine({
-      start: { x: colAmountX, y: currentY },
-      end: { x: colAmountX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.font('Helvetica-Bold')
+      .text('Total Monthly Package', colStart[0] + 5, yPos + 7);
     
-    page.drawLine({
-      start: { x: colQtyX, y: currentY },
-      end: { x: colQtyX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.text(monthlyTotal.toString(), colStart[3] + 45, yPos + 7);
     
-    page.drawLine({
-      start: { x: colTotalX, y: currentY },
-      end: { x: colTotalX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
-    
-    // Total Monthly Package text
-    page.setFont(helveticaBold);
-    page.drawText("Total Monthly Package", {
-      x: colItemsX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    // Total Monthly Package amount
-    const monthlyTotalText = monthlyTotal.toString();
-    const monthlyTotalWidth = helveticaBold.widthOfTextAtSize(monthlyTotalText, 12);
-    page.drawText(monthlyTotalText, {
-      x: colTotalX + (colTotalWidth / 2) - (monthlyTotalWidth / 2),
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 20;
+    yPos += 20;
     
     // Fully Refundable Deposit row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
     
-    // Draw vertical line at total column
-    page.drawLine({
-      start: { x: colAmountX, y: currentY },
-      end: { x: colAmountX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.font('Helvetica')
+      .text('Fully Refundable Deposit', colStart[0] + 5, yPos + 7)
+      .text(`2 Months' Rent (${deposit})`, colStart[1] + 5, yPos + 7);
     
-    // Fully Refundable Deposit text
-    page.setFont(helveticaFont);
-    page.drawText("Fully Refundable Deposit", {
-      x: colItemsX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    // Deposit amount (2 Months' Rent)
-    const depositText = `2 Months' Rent (${deposit})`;
-    page.drawText(depositText, {
-      x: colAmountX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 20;
+    yPos += 20;
     
     // Minimum Lock in Period row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
     
-    // Draw vertical line at amount column
-    page.drawLine({
-      start: { x: colAmountX, y: currentY },
-      end: { x: colAmountX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.text('Minimum Lock in Period', colStart[0] + 5, yPos + 7)
+      .text(req.body.lockInPeriod || '6 Months', colStart[1] + 5, yPos + 7);
     
-    // Minimum Lock in Period text
-    page.drawText("Minimum Lock in Period", {
-      x: colItemsX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    // Lock in period value
-    const lockInPeriod = req.body.lockInPeriod || "6 Months";
-    page.drawText(lockInPeriod, {
-      x: colAmountX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 20;
+    yPos += 20;
     
     // Delivery Date row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
     
-    // Draw vertical line at amount column
-    page.drawLine({
-      start: { x: colAmountX, y: currentY },
-      end: { x: colAmountX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.text('Delivery Date', colStart[0] + 5, yPos + 7)
+      .text(req.body.deliveryDate ? formatDate(new Date(req.body.deliveryDate)) : formattedDeliveryDate, colStart[1] + 5, yPos + 7);
     
-    // Delivery Date text
-    page.drawText("Delivery Date", {
-      x: colItemsX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    // Delivery date value
-    const orderDeliveryDate = req.body.deliveryDate 
-      ? formatDate(new Date(req.body.deliveryDate)) 
-      : `${deliveryDate.getDate()}${getOrdinalSuffix(deliveryDate.getDate())} ${deliveryDate.toLocaleString('en-GB', { month: 'short' })} ${deliveryDate.getFullYear()}`;
-      
-    page.drawText(orderDeliveryDate, {
-      x: colAmountX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 20;
+    yPos += 20;
     
     // One time Transportation row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
     
-    // Draw vertical line at amount column
-    page.drawLine({
-      start: { x: colTotalX, y: currentY },
-      end: { x: colTotalX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.text('One time Transportation', colStart[0] + 5, yPos + 7)
+      .text(req.body.transportationFee || transportationFee, colStart[3] + 45, yPos + 7);
     
-    // One time Transportation text
-    page.drawText("One time Transportation", {
-      x: colItemsX + 5,
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    // Transportation fee value
-    const transportation = req.body.transportationFee || transportationFee;
-    const transportationText = transportation.toString();
-    page.drawText(transportationText, {
-      x: colTotalX + (colTotalWidth / 2) - (helveticaFont.widthOfTextAtSize(transportationText, 12) / 2),
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 20;
+    yPos += 20;
     
     // Rent payment terms row
-    // Draw row border
-    page.drawRectangle({
-      x: tableStartX,
-      y: currentY - 20,
-      width: tableWidth,
-      height: 20,
-      borderColor: textColor,
-      borderWidth: 1,
-    });
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
     
-    // Draw vertical line at total column
-    page.drawLine({
-      start: { x: colTotalX, y: currentY },
-      end: { x: colTotalX, y: currentY - 20 },
-      thickness: 1,
-      color: textColor,
-    });
+    doc.fontSize(10)
+      .text('Rent will be due beginning of the month, need to pay before 5th of every month', colStart[0] + 5, yPos + 5)
+      
     
-    // Rent payment terms text
-    page.drawText("Rent will be due beginning of the month, need to pay before 5th of", {
-      x: colItemsX + 5,
-      y: currentY - 10,
-      color: textColor,
-    });
+    doc.fontSize(12)
+      .text(req.body.paymentTerm || 'Prepaid Rent', colStart[3] + 30, yPos + 7);
     
-    page.drawText("every month.", {
-      x: colItemsX + 5,
-      y: currentY - 20,
-      color: textColor,
-    });
-    
-    // Payment term
-    const paymentTerm = req.body.paymentTerm || "Prepaid Rent";
-    page.drawText(paymentTerm, {
-      x: colTotalX + (colTotalWidth / 2) - (helveticaFont.widthOfTextAtSize(paymentTerm, 12) / 2),
-      y: currentY - 15,
-      color: textColor,
-    });
-    
-    currentY -= 30;
+    yPos += 30;
     
     // Payment instructions
     const advanceAmount = req.body.advanceAmount || 20000;
     
-    page.setFont(helveticaFont);
-    page.setFontSize(11);
-    page.drawText(`To confirm the order, you need to pay rupees ${advanceAmount}/- as a token advance in below account and`, {
-      x: tableStartX,
-      y: currentY,
-      color: textColor,
-    });
+    doc.font('Helvetica')
+      .fontSize(11)
+      .text(`To confirm the order, you need to pay rupees ${advanceAmount}/- as a token advance in below account and`, marginLeft, yPos)
+      .text('the remaining amount to be paid at the time of delivery.', marginLeft, yPos + lineHeight);
     
-    currentY -= lineHeight;
-    page.drawText("the remaining amount to be paid at the time of delivery.", {
-      x: tableStartX,
-      y: currentY,
-      color: textColor,
-    });
+    yPos += lineHeight * 3;
     
     // Bank details
     const bankName = process.env.BANK_NAME || "AXIS Bank";
@@ -697,176 +352,383 @@ router.post("/process-purchase", async (req, res) => {
     const ifscCode = process.env.IFSC_CODE || "UTIB0003569";
     const upiId = process.env.UPI_ID || "9844723432";
     
-    currentY -= 25;
-    page.setFont(helveticaBold);
-    page.drawText(`${bankName}`, {
-      x: tableStartX,
-      y: currentY,
-      color: textColor,
-    });
+    doc.font('Helvetica-Bold')
+      .text(`${bankName}`, marginLeft, yPos, { continued: true });
+      
+    doc.font('Helvetica')
+      .text(`: ${accountName} : A/C ${accountNumber} : IFSC- ${ifscCode}`);
     
-    page.setFont(helveticaFont);
-    page.drawText(`: ${accountName} : A/C ${accountNumber} : IFSC- ${ifscCode}`, {
-      x: tableStartX + helveticaBold.widthOfTextAtSize(bankName, 11) + 5,
-      y: currentY,
-      color: textColor,
-    });
-    
-    currentY -= lineHeight;
-    page.drawText(`Gpay/ Phone Pay/Paytm/Cred: ${upiId}`, {
-      x: tableStartX,
-      y: currentY,
-      color: textColor,
-    });
+    yPos += lineHeight;
+    doc.text(`Gpay/ Phone Pay/Paytm/Cred: ${upiId}`, marginLeft, yPos);
     
     // Document requirements note
-    currentY -= 25;
-    page.setFont(helveticaBold);
-    page.setFontSize(11);
-    page.drawText("Documents required before delivery: PAN, AADHAR, Company Incorporation or GST", {
-      x: tableStartX,
-      y: currentY,
-      color: rgb(0.8, 0, 0), // Red color
-    });
+    yPos += lineHeight * 2;
+    doc.font('Helvetica-Bold')
+      .fillColor(redColor)
+      .text('Documents required before delivery: PAN, AADHAR, Company Incorporation or GST', marginLeft, yPos)
+      .text('Certificate and Rental Agreement of office.', marginLeft, yPos + lineHeight);
     
-    currentY -= lineHeight;
-    page.drawText("Certificate and Rental Agreement of office.", {
-      x: tableStartX,
-      y: currentY,
-      color: rgb(0.8, 0, 0), // Red color
-    });
+    // Add product images
+    yPos += lineHeight * 3;
     
-    // Add product images at bottom
-    currentY -= 40;
-    
-    // Draw product images in a row
-    const imageWidth = Math.min(150, tableWidth / products.length);
-    const imageHeight = 120;
-    let imageX = tableStartX;
-    
-    for (const product of products) {
-      if (product.images[0]) {
-        try {
-          
-          const imageUrl = product.images[0];
-      
-      // Fetch the image
-          const imageResponse = await fetch(imageUrl);
-    
-          const imageBytes = await imageResponse.arrayBuffer();
-          
-          // Determine image type and embed accordingly
-          let productImage;
-          if (product.imageUrl?.toLowerCase().endsWith('.jpg') || product.imageUrl?.toLowerCase().endsWith('.jpeg')) {
-            productImage = await pdfDoc.embedJpg(imageBytes);
-          } else if (product.imageUrl.toLowerCase().endsWith('.png')) {
-            productImage = await pdfDoc.embedPng(imageBytes);
-          } else {
-            throw new Error("Unsupported image format");
-          }
-          
-          // Calculate image dimensions maintaining aspect ratio
-          const scaleFactor = Math.min(
-            imageWidth / productImage.width,
-            imageHeight / productImage.height
-          );
-          
-          const scaledWidth = productImage.width * scaleFactor;
-          const scaledHeight = productImage.height * scaleFactor;
-          
-          // Draw the image
-          page.drawImage(productImage, {
-            x: imageX,
-            y: currentY - scaledHeight,
-            width: scaledWidth,
-            height: scaledHeight,
-          });
-          
-          imageX += imageWidth + 10; // Add some spacing between images
-        } catch (err) {
-          console.error(`Error embedding image for product ${product.name}:`, err);
-          // Continue to next product if image fails
-        }
-      }
+// Add product images
+yPos += lineHeight * 3;
+
+let imageX = marginLeft; // This was missing in your updated code
+const imageWidth = 150;
+const imageHeight = 120;
+
+const imagePromises = products.map(product => {
+  if (product.images && product.images[0]) {
+    return fetchImageBuffer(product.images[0]);
+  }
+  return null;
+});
+
+try {
+  const imageBuffers = await Promise.all(imagePromises);
+  
+  // Now add the images using the buffers
+  let imageX = marginLeft; // This needs to be declared here
+  for (let i = 0; i < products.length; i++) {
+    const buffer = imageBuffers[i];
+    if (buffer) {
+      doc.image(buffer, imageX, yPos, { 
+        width: imageWidth,
+        height: imageHeight,
+        fit: [imageWidth, imageHeight] 
+      });
+      imageX += imageWidth + 10;
     }
+  }
+} catch (err) {
+  console.error('Error processing product images:', err);
+}
+    
+    // Add new page for terms and conditions
+    doc.addPage();
+    
+    // Terms and conditions title
+    doc.font('Helvetica-Bold')
+      .fontSize(16)
+      .fillColor(blackColor)
+      .text('TERMS AND CONDITIONS', marginLeft, 50, { align: 'center' });
+    
 
-    // Save and send the PDF
-    const pdfBytes = await pdfDoc.save();
-
-    // Setup Email Transport
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+    
+    // Define terms and conditions content
+    const termsAndConditions = [
+      {
+        title: '1. Terms of Agreement',
+        content: [
+          'The agreement starts when the products are delivered and lasts until the tenure chosen by the customer.',
+          'Early closure or extension can be done based on this agreement.'
+        ]
+      },
+      {
+        title: '2. Tenure Policy:',
+        content: [
+          'Early closure incurs charges based on the chosen tenure.',
+          'Extension follows the monthly rate applicable at the time of extension.',
+          'Rates can be revised by the company at its discretion.'
+        ]
+      },
+      {
+        title: '3. Payments',
+        content: [
+          'The first month\'s rent is charged on prorate basis from the delivery date to end of Month,',
+          'Customer need to pay the agreed monthly rent before the 5th of every month via Gpay, Phonepay, paytm or bank transfer. (No cash Accepted)'
+        ]
+      },
+      {
+        title: '4. Refundable Deposit',
+        content: [
+          'A refundable security deposit is collected at the time of ordering the rental items.',
+          'It is refunded within 7 to 15 working days after the agreement ends, provided there\'s no damage.',
+          'Deductions may occur for damages, non-payment, or default.'
+        ]
+      },
+      {
+        title: '5. Confirmation of Order',
+        content: [
+          'Confirmation occurs after receiving the order and security deposit.',
+          'If a product is unavailable, the company may offer a substitute.',
+          'KYC verification is required, and orders may be rejected if unsuccessful.'
+        ]
+      },
+      {
+        title: '6. Delivery',
+        content: [
+          'Products are delivered to the specified location as mentioned in the order.',
+          'The customer or a representative must be present during delivery.',
+          'Quality checks are performed, and any damage must be reported during delivery.'
+        ]
+      },
+      {
+        title: '7. Damage',
+        content: [
+          'Customers are liable for repair or replacement costs for damage, theft, or loss.'
+        ]
       }
+    ];
+    
+    // Add terms and conditions to the document
+    doc.font('Helvetica-Bold')
+  .fontSize(16)
+  .fillColor(blackColor)
+  .text('TERMS AND CONDITIONS', marginLeft, 50, { align: 'center' });
+
+let currentY = 80;  // Start a bit lower for better spacing
+const termsLineHeight = 18;  // Increased for better readability
+const bulletPointIndent = 15;
+const contentIndent = bulletPointIndent + 10;
+
+// Add terms and conditions to the document with better spacing
+termsAndConditions.forEach(term => {
+  // Add title with more space above
+  currentY += 10; // Extra space before each section
+  doc.font('Helvetica-Bold')
+     .fontSize(12)
+     .text(term.title, marginLeft, currentY);
+  
+  currentY += termsLineHeight + 5; // More space after title
+  
+  // Add content with bullet points
+  doc.font('Helvetica')
+     .fontSize(11);
+  
+  term.content.forEach(paragraph => {
+    // Add bullet point
+    doc.text('•', marginLeft + 5, currentY);
+    
+    // Add paragraph text with indent
+    doc.text(paragraph, marginLeft + contentIndent, currentY, {
+      width: 495 - contentIndent,
+      align: 'left'
     });
-
-    // Create dynamic email content
-    const productList = products.map(product => 
-      `<li><strong>${product.name}</strong> - ₹${product.price} x ${product.quantity} = ₹${product.price * product.quantity}</li>`
-    ).join("");
-
-    // Email Content
-    const emailContent = `
-      <h2>Thank you for your purchase!</h2>
-      <p>Please find your quotation attached.</p>
-      <p>Order details:</p>
-      <ul>
-        ${productList}
-      </ul>
-      <p><strong>Total Monthly Package:</strong> ₹${monthlyTotal}</p>
-      <p>To confirm your order, please pay ₹${advanceAmount} as token advance to the bank account mentioned in the quotation.</p>
-      <p>If you have any questions, please contact us at +91 8123096928 or +91 9844311875.</p>
-    `;
-
-    // Send Invoice to Customer
-    await transporter.sendMail({
-      from: `"Spot Furnish Rentals" <${process.env.SMTP_USER}>`,
-      to: customer.email,
-      subject: `Quotation #${invoiceNumber} from Spot Furnish Rentals`,
-      html: emailContent,
-      attachments: [
-        {
-          filename: `Quotation-${invoiceNumber}.pdf`,
-          content: pdfBytes,
-          encoding: "base64"
-        }
-      ]
+    
+    // Calculate height needed for this paragraph
+    const textHeight = doc.heightOfString(paragraph, {
+      width: 495 - contentIndent
     });
+    
+    // Advance position with calculated height plus padding
+    currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
+  });
+  
+  currentY += 10; // Add more space between sections
+});
 
-    // Send Invoice to Admin
-    await transporter.sendMail({
-      from: `"Spot Furnish Rentals" <${process.env.SMTP_USER}>`,
-      to: adminEmail,
-      subject: `New Quotation Generated - #${invoiceNumber}`,
-      html: `<h2>New Quotation Alert</h2><p>A new quotation has been generated for ${customer.company || customer.name}.</p>`,
-      attachments: [
-        {
-          filename: `Quotation-${invoiceNumber}.pdf`,
-          content: pdfBytes,
-          encoding: "base64"
-        }
-      ]
+const remainingTerms = [
+  {
+    title: '8. Relocation',
+    content: [
+      'Customers wishing to relocate must request it two weeks in advance.',
+      'Relocation is subject to KYC verification and service availability of the new location, but an additional delivery charge will be applicable.'
+    ]
+  },
+  {
+    title: '9. Notice',
+    content: [
+      'Customers need to provide 1 months\' notice to terminate the contract. If the customer wishes to end the contract before the agreed tenure they need to pay full rent for the remaining period.',
+      'The company can terminate the agreement for non-payment or breach of terms.'
+    ]
+  },
+  {
+    title: '10. Assignment',
+    content: [
+      'Customers cannot transfer the agreement without written consent.',
+      'The company can assign the agreement to third parties without notice.'
+    ]
+  },
+  {
+    title: '11. Governing Law',
+    content: [
+      'The agreement is governed by Indian laws, with exclusive jurisdiction in Bangalore.'
+    ]
+  },
+  {
+    title: '12. Limitation of Liability',
+    content: [
+      'The company\'s liability is limited, and it is not liable for indirect or consequential damages.',
+      'The company will not be responsible for any loss or damage to the renter\'s place and human liability due to the malfunction of any item.'
+    ]
+  },
+  {
+    title: '13. Refund Policy',
+    content: [
+      'Cancellation Requests: We can only cancel your order if you ask right after placing it. Once we\'ve told the location partner to send your stuff and they\'ve started, we might not be able to cancel.',
+      'Damaged Items: If something arrives damaged, tell our Customer Service team within 2 days. We\'ll sort it out after the delivery team checks and confirms the damage.',
+      'Not Working Right: If you\'re not happy with something because it doesn\'t work, you can return it at the time of delivery. Just let us know during delivery because you can\'t return it once our team leaves after confirming the delivery.',
+      'Check Product Dimensions: Before you order, check how big things are. If you reject something based on size, we can\'t take it back when it\'s delivered.',
+      'Refund Processing: If we approve a refund, it\'ll take about 8-10 days to get the money back in your bank account.'
+    ]
+  },
+  {
+    title: '14. REPAIRS, SERVICE & REPLACEMENT',
+    content: [
+      'After the reporting of any issue or defect burgeoned in the product during usage of the product, Company product experts will analyze the issue and ensure resolution in 7-15 working days. Company appointed third party will repair and/ or service for the issues which have burgeoned in the product due to normal usage. In case after analysis, the Company product experts team finds the issues or defect is due to misuse of the product or damage beyond repair, the customer shall be liable to pay for repair/ service and in case of damage beyond repair customer shall be liable to pay Company the market price of the Product. The decision on service or replacement will be at sole discretion of Company\'s product experts\' team.'
+    ]
+  }
+];
+
+// Apply the same improved formatting to remaining terms
+if (currentY > 700) {
+  doc.addPage();
+  currentY = 50;
+}
+
+remainingTerms.forEach(term => {
+  // Check if we need a new page
+  if (currentY > 680) { // Start new page earlier to avoid cramped content
+    doc.addPage();
+    currentY = 50;
+  }
+  
+  // Add title with more space above
+  currentY += 10; // Extra space before each section
+  doc.font('Helvetica-Bold')
+     .fontSize(12)
+     .text(term.title, marginLeft, currentY);
+  
+  currentY += termsLineHeight + 5; // More space after title
+  
+  // Add content with bullet points
+  doc.font('Helvetica')
+     .fontSize(11);
+  
+  term.content.forEach(paragraph => {
+    // Check if we need a new page for a long paragraph
+    if (currentY > 730) {
+      doc.addPage();
+      currentY = 50;
+    }
+    
+    // Add bullet point
+    doc.text('•', marginLeft + 5, currentY);
+    
+    // Add paragraph text with indent
+    doc.text(paragraph, marginLeft + contentIndent, currentY, {
+      width: 495 - contentIndent,
+      align: 'left'
     });
-
-    // Store in database
-    const newOrder = new Orders({
-      userId,
-      productIds: products.map(product => product.productId || product.id),
-      totalAmount: monthlyTotal,
-      orderDate: new Date(),
-      invoiceNumber,
-      status: 'Pending',
+    
+    // Calculate height needed for this paragraph
+    const textHeight = doc.heightOfString(paragraph, {
+      width: 495 - contentIndent
     });
+    
+    // Advance position with calculated height plus padding
+    currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
+  });
+  
+  currentY += 10; // Add more space between sections
+});
+    
 
-    const savedOrder = await newOrder.save();
+    
+    // Get the total number of pages
+    const totalPages = doc.bufferedPageCount;
+    
+    // Add page numbers
+    for (let i = 0; i < totalPages; i++) {
+      doc.switchToPage(i);
+      doc.font('Helvetica')
+         .fontSize(10)
+         .text(`Page ${i + 1} of ${totalPages}`, 
+                marginLeft, 
+                800, 
+                { align: 'center', width: 500 });
+    }
+    
+    // Finalize the PDF
+    doc.end();
 
-    res.status(201).json({ 
-      success: true, 
-      message: 'Quotation generated and sent successfully',
-      invoiceNumber: invoiceNumber,
-      orderId: savedOrder._id
+    // Wait for PDF to be written
+    pdfStream.on('finish', async () => {
+      try {
+        // Setup Email Transport
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+
+        // Create dynamic email content
+        const productList = products.map(product => 
+          `<li><strong>${product.name}</strong> - ₹${product.price} x ${product.quantity} = ₹${product.price * product.quantity}</li>`
+        ).join("");
+
+        // Email Content
+        const emailContent = `
+          <h2>Thank you for your purchase!</h2>
+          <p>Please find your quotation attached.</p>
+          <p>Order details:</p>
+          <ul>
+            ${productList}
+          </ul>
+          <p><strong>Total Monthly Package:</strong> ₹${monthlyTotal}</p>
+          <p>To confirm your order, please pay ₹${advanceAmount} as token advance to the bank account mentioned in the quotation.</p>
+          <p>If you have any questions, please contact us at +91 8123096928 or +91 9844311875.</p>
+        `;
+
+        // Send Invoice to Customer
+        await transporter.sendMail({
+          from: `"Spot Furnish Rentals" <${process.env.SMTP_USER}>`,
+          to: customer.email,
+          subject: `Quotation #${invoiceNumber} from Spot Furnish Rentals`,
+          html: emailContent,
+          attachments: [
+            {
+              filename: `Quotation-${invoiceNumber}.pdf`,
+              content: fs.readFileSync(pdfPath),
+              encoding: 'base64'
+            }
+          ]
+        });
+
+        // Send Invoice to Admin
+        await transporter.sendMail({
+          from: `"Spot Furnish Rentals" <${process.env.SMTP_USER}>`,
+          to: adminEmail,
+          subject: `New Quotation Generated - #${invoiceNumber}`,
+          html: `<h2>New Quotation Alert</h2><p>A new quotation has been generated for ${customer.company || customer.name}.</p>`,
+          attachments: [
+            {
+              filename: `Quotation-${invoiceNumber}.pdf`,
+              content: fs.readFileSync(pdfPath),
+              encoding: 'base64'
+            }
+          ]
+        });
+
+        // Clean up the file
+        fs.unlinkSync(pdfPath);
+
+        // Store in database
+        const newOrder = new Orders({
+          userId,
+          productIds: products.map(product => product.productId || product.id),
+          totalAmount: monthlyTotal,
+          orderDate: new Date(),
+          invoiceNumber,
+          status: 'Pending',
+        });
+
+        const savedOrder = await newOrder.save();
+
+        res.status(201).json({ 
+          success: true, 
+          message: 'Quotation generated and sent successfully',
+          invoiceNumber: invoiceNumber,
+          orderId: savedOrder._id
+        });
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        res.status(500).json({ success: false, message: "Failed to send quotation email", error: emailError.message });
+      }
     });
 
   } catch (error) {
@@ -874,6 +736,8 @@ router.post("/process-purchase", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to generate quotation", error: error.message });
   }
 });
+
+
 
 // Helper function to format date
 function formatDate(date) {
