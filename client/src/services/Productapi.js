@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from "../endpoint";
 
 export const fetchProducts = async () => {
-  const response = await axios.get(API_URL);
+  const response = await axios.get(`${API_URL}/api/products`);
   return response.data;
   
 };

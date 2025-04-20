@@ -18,7 +18,7 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
     const cartItems = await Cart.find({ userId })
       .populate({
         path: 'productId',
-        select: 'name images description'
+        select: 'name images description refundableDeposit tenureOptions'
       });
 
     // Transform data into a single array response with the price from Cart schema
@@ -33,9 +33,12 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
           name: product.name,
           images: product.images,
           description: product.description,
+          refundableDeposit: product.refundableDeposit,
+          productId: item.productId,
           price: item.price,
           tenure: item.tenure,
-          quantity: item.quantity
+          quantity: item.quantity,
+          tenureOptions: item.productId.tenureOptions
         };
       });
 
