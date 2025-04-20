@@ -14,14 +14,16 @@ const app = express();
 
 // Middleware
 app.use(express.json()); // Body parser
-app.use(cors({
-  origin: [
-    'http://localhost:5173',            // your Vite dev server
-    'https://furniture-shop-jet.vercel.app/' // your deployed front‑end
-  ],
+const corsOptions = {
+  origin: ['http://localhost:5173','https://furniture-shop-jet.vercel.app'],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
+
+// if you need to handle preflights for all routes
+app.options('*', cors(corsOptions));
 
 
 
