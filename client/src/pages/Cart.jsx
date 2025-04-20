@@ -1,228 +1,327 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../Context/CartContext';
 import QuantitySelector from '../components/QuantitySelector';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import { Trash2, ShoppingBag, ChevronDown, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-  import { API_URL } from "../endpoint";
+import { API_URL } from "../endpoint";
 
 const CartPage = () => {
-  const { removeFromCart, getTotalPrice, updateQuantity } = useCart();
+  const { removeFromCart, updateQuantity } = useCart();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingItems, setUpdatingItems] = useState(new Set());
-  
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [showDeposit, setShowDeposit] = useState({});
   const auth = getAuth();
   const navigate = useNavigate();
+  const DELIVERY_CHARGE = 650; // Define delivery charge constant
 
-  const fetchCart = async (initialLoad = false) => {
+  // 1) Fetch cart on mount
+  const fetchCart = async (initial = false) => {
     try {
-      if (initialLoad) {
-        setLoading(true);
-      }
-      
-      const token = await auth.currentUser?.getIdToken();
-      const response = await axios.get(`${API_URL}/api/cart/${auth.currentUser?.uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      
-      setCart(response.data);
-    } catch (error) {
-      console.error('Error fetching cart:', error);
+      if (initial) setLoading(true);
+      const token = await auth.currentUser.getIdToken();
+      const { data } = await axios.get(
+        `${API_URL}/api/cart/${auth.currentUser.uid}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // init deposit flags
+      const depositFlags = {};
+      data.forEach(item => depositFlags[item.id] = false);
+      setShowDeposit(depositFlags);
+      setCart(data);
+    } catch (err) {
+      console.error('Error fetching cart:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCart(true);
+    if (auth.currentUser) fetchCart(true);
   }, [auth.currentUser]);
 
-  const handleRemove = async (itemId) => {
+  // 2) Remove item
+  const handleRemove = async id => {
+    setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
+    setCart(c => c.filter(i => i.id !== id));
     try {
-      setUpdatingItems(prev => new Set(prev).add(itemId));
-      
-      // Optimistically update UI
-      setCart(currentCart => currentCart.filter(item => item.id !== itemId));
-      
-      // Then update server
-      await removeFromCart(itemId);
-      
-      // No need to refresh the entire cart - we've already removed the item locally
-    } catch (error) {
-      console.error('Error removing item:', error);
-      // If there was an error, refresh to get the correct state
+      await removeFromCart(id);
+    } catch {
       fetchCart();
     } finally {
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        return newSet;
-      });
+      setUpdatingItems(s => { const c = new Set(s); c.delete(id); return c; });
     }
   };
 
-  const handleQuantityChange = async (itemId, newQuantity) => {
+  // 3) Change quantity
+  const handleQuantityChange = async (id, qty) => {
+    setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
+    setCart(c => c.map(i => i.id === id ? { ...i, quantity: qty } : i));
     try {
-      setUpdatingItems(prev => new Set(prev).add(itemId));
-      
-      // Optimistically update UI
-      setCart(currentCart => 
-        currentCart.map(item => 
-          item.id === itemId ? { ...item, quantity: newQuantity } : item
-        )
+      await updateQuantity(id, qty);
+    } catch {
+      fetchCart();
+    } finally {
+      setUpdatingItems(s => { const c = new Set(s); c.delete(id); return c; });
+    }
+  };
+
+  // 4) Change tenure & price locally, then persist via generic update route
+  const handleTenureChange = async (id, months) => {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+
+    // find the matching option
+    const opt = item.tenureOptions.find(o => String(o.months) === String(months));
+    const newPrice = opt ? opt.price : item.price;
+
+    // update UI
+    setCart(c =>
+      c.map(i => i.id === id
+        ? { ...i, tenure: months, price: newPrice }
+        : i
+      )
+    );
+    setOpenDropdown(null);
+    setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
+
+    // persist
+    try {
+      const token = await auth.currentUser.getIdToken();
+      await axios.put(
+        `${API_URL}/api/cart/update/${id}`,
+        { tenure: months, price: newPrice },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      // Then update server
-      await updateQuantity(itemId, newQuantity);
-      
-      // No need to refresh the entire cart - we've already updated the quantity locally
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      // If there was an error, refresh to get the correct state
+    } catch {
       fetchCart();
     } finally {
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        return newSet;
-      });
+      setUpdatingItems(s => { const c = new Set(s); c.delete(id); return c; });
     }
   };
 
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+  // 5) Deposit logic unchanged
+  const toggleDeposit = id => setShowDeposit(s => ({ ...s, [id]: !s[id] }));
+  const updateDeposit = async (id, include) => {
+    setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
+    toggleDeposit(id);
+    try {
+      const token = await auth.currentUser.getIdToken();
+      await axios.put(
+        `${API_URL}/api/cart/update/${id}`,
+        { includeDeposit: include },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch {
+      toggleDeposit(id);
+    } finally {
+      setUpdatingItems(s => { const c = new Set(s); c.delete(id); return c; });
+    }
   };
 
-  return (
-    <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
-      <div className="flex items-center gap-3 mb-8">
-        <ShoppingBag className="h-8 w-8 text-green-600" />
-        <h2 className="text-3xl font-bold text-gray-800">Your Cart</h2>
-      </div>
+  // Calculate totals
+  const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0).toFixed(2);
+  const depositTotal = cart.reduce((sum, i) =>
+    showDeposit[i.id] ? sum + (i.refundableDeposit||0)*i.quantity : sum
+  ,0).toFixed(2);
+  // Include delivery charge in total
+  const total = (parseFloat(subtotal) + parseFloat(depositTotal) + DELIVERY_CHARGE).toFixed(2);
 
-      {loading ? (
-        <p className="text-xl m-4">Loading cart...</p>
-      ) : cart.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
-          <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
-          <p className="text-xl text-gray-500 font-medium">Your cart is empty</p>
-          <p className="text-gray-400 mt-2">Add some items to get started</p>
-          <button
-            className="mt-6 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+  if (!loading && cart.length === 0) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-12 min-h-screen bg-gray-50">
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="flex justify-center mb-6">
+            <ShoppingBag size={64} className="text-gray-300" />
+          </div>
+          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
+          <button 
             onClick={() => navigate('/product')}
+            className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors"
           >
-            Continue Shopping
+            Browse Products
           </button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen bg-gray-50">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Your Shopping Cart</h1>
+      
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-          <div className="hidden md:grid grid-cols-12 gap-4 p-4 bg-gray-50 rounded-t-lg border-b text-sm font-medium text-gray-500">
-            <div className="col-span-6">Product</div>
-            <div className="col-span-2 text-center">Quantity</div>
-            <div className="col-span-2 text-right">Price</div>
-            <div className="col-span-2 text-right">Actions</div>
+        <>
+          {/* Cart Header - visible on larger screens */}
+          <div className="hidden md:grid md:grid-cols-12 gap-4 p-4 bg-gray-100 rounded-t-lg font-medium text-gray-600">
+            <div className="md:col-span-6">Product</div>
+            <div className="md:col-span-2 text-center">Quantity</div>
+            <div className="md:col-span-2 text-center">Duration</div>
+            <div className="md:col-span-2 text-right">Price</div>
           </div>
-
-          <div className="divide-y">
-            {cart.map((item, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center">
-                <div className="col-span-6 flex items-center">
-                  <div className="h-24 w-24 rounded-lg overflow-hidden border flex-shrink-0">
-                    {item.images && (
-                      <img
-                        src={item.images[0]}
-                        alt={item.name}
-                        className="w-full h-full object-cover z-10"
-                      />
-                    )}
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-lg font-semibold text-gray-800">{item.name}</p>
-                    <p className="text-sm text-gray-500">Tenure: {item.tenure} months</p>
-                  </div>
-                </div>
-
-                <div className="col-span-2 flex justify-center">
-                  <div className="relative">
-                    <QuantitySelector
-                      quantity={item.quantity}
-                      onIncrease={() => handleQuantityChange(item.id, item.quantity + 1)}
-                      onDecrease={() => {
-                        if (item.quantity > 1) {
-                          handleQuantityChange(item.id, item.quantity - 1);
-                        }
-                      }}
-                      className={`shadow-sm ${updatingItems.has(item.id) ? 'opacity-50' : ''}`}
-                      disabled={updatingItems.has(item.id)}
-                    />
-                    {updatingItems.has(item.id) && (
-                      <div className="absolute left-0 right-8 top-0 bottom-0 flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-span-2 text-right">
-                  <p className="font-bold text-gray-900">₹{item.price}</p>
-                  
-                </div>
-
-                <div className="col-span-2 flex justify-end">
-                  <button
-                    onClick={() => handleRemove(item.id)}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-md hover:bg-red-50 text-red-500 transition-colors ${
-                      updatingItems.has(item.id) ? 'opacity-50 cursor-not-allowed' : ''
+        
+          <div className="grid lg:grid-cols-12 gap-8">
+            {/* Items */}
+            <div className="lg:col-span-8">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                {cart.map((item, index) => (
+                  <div 
+                    key={item.id} 
+                    className={`grid md:grid-cols-12 gap-4 p-6 items-center hover:bg-gray-50 transition-colors ${
+                      index !== cart.length - 1 ? 'border-b border-gray-200' : ''
                     }`}
-                    disabled={updatingItems.has(item.id)}
                   >
-                    {updatingItems.has(item.id) ? (
-                      <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin mr-1"></div>
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                    <span className="hidden sm:inline">Remove</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    {/* Image + Name */}
+                    <div className="md:col-span-6 flex">
+                      <div className="h-28 w-28 rounded-md bg-gray-100 overflow-hidden flex-shrink-0">
+                        <img 
+                          src={item.images[0]} 
+                          className="h-full w-full object-cover" 
+                          alt={item.name}
+                        />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="flex justify-between">
+                          <p className="font-semibold text-lg text-gray-800">{item.name}</p>
+                          <button
+                            onClick={() => handleRemove(item.id)}
+                            disabled={updatingItems.has(item.id)}
+                            className="text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        {item.refundableDeposit > 0 && (
+                          <label className="flex items-center text-sm mt-2 text-gray-600">
+                            
+                            Deposit (₹{item.refundableDeposit})
+                          </label>
+                        )}
+                      </div>
+                    </div>
 
-          <div className="p-6 bg-gray-50 rounded-b-lg border-t">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{calculateTotal()}</span>
-            </div>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-gray-600">Delivery</span>
-              <span className="font-medium">₹0.00</span>
-            </div>
-            <div className="h-px bg-gray-200 mb-6"></div>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-lg font-semibold">Total</span>
-              <span className="text-xl font-bold text-green-600">₹{calculateTotal()}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+                    {/* Quantity */}
+                    <div className="md:col-span-2 flex justify-center">
+                      <QuantitySelector
+                        quantity={item.quantity}
+                        onIncrease={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onDecrease={() => item.quantity > 1 && handleQuantityChange(item.id, item.quantity - 1)}
+                        disabled={updatingItems.has(item.id)}
+                      />
+                    </div>
+
+                    {/* Tenure Dropdown */}
+                    <div className="md:col-span-2 flex justify-center relative">
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === item.id ? null : item.id)}
+                        disabled={updatingItems.has(item.id)}
+                        className="flex items-center border border-gray-300 px-3 py-2 rounded-md w-32 justify-between bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <span>{item.tenure} mo</span>
+                        <ChevronDown size={16} />
+                      </button>
+                      {openDropdown === item.id && (
+                        <ul className="absolute z-10 bg-white border w-32 mt-1 rounded-md shadow-lg py-1 top-full">
+                          {item.tenureOptions?.map(opt => (
+                            <li
+                              key={opt.months}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors ${
+                                String(opt.months) === String(item.tenure)
+                                  ? 'bg-green-50 text-green-700 font-medium'
+                                  : 'text-gray-700'
+                              }`}
+                              onClick={() => handleTenureChange(item.id, opt.months)}
+                            >
+                              {opt.months} mo — ₹{opt.price}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    {/* Price - Show total for quantity + unit price */}
+                    <div className="md:col-span-2 text-right">
+                      <p className="font-bold text-lg text-gray-800">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </p>
+                      {item.quantity > 1 && (
+                        <p className="text-sm text-gray-500">
+                          ₹{item.price} each
+                        </p>
+                      )}
+                      {showDeposit[item.id] && item.refundableDeposit > 0 && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          +₹{(item.refundableDeposit * item.quantity).toFixed(2)} deposit
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Continue Shopping Button */}
               <button
-                className="px-6 py-3 cursor-pointer bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 onClick={() => navigate('/product')}
+                className="mt-6 flex items-center text-green-600 hover:text-green-800 transition-colors font-medium"
               >
+                <ArrowLeft size={18} className="mr-2" />
                 Continue Shopping
               </button>
-              <button
-                className="px-6 py-3 cursor-pointer bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex-1"
-                onClick={() => navigate('/checkout')}
-              >
-                Proceed to Checkout
-              </button>
+            </div>
+
+            {/* Summary */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-gray-200">Order Summary</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-700">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal}</span>
+                  </div>
+                  
+                  {parseFloat(depositTotal) > 0 && (
+                    <div className="flex justify-between text-gray-700">
+                      <span>Refundable Deposits</span>
+                      <span>₹{depositTotal}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between text-gray-700">
+                    <span>Delivery</span>
+                    <span>₹{DELIVERY_CHARGE.toFixed(2)}</span>
+                  </div>
+                  
+                  <div className="pt-4 mt-2 border-t border-gray-200">
+                    <div className="flex justify-between font-semibold text-lg">
+                      <span>Total</span>
+                      <span>₹{total}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => navigate('/checkout')}
+                  className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md font-medium transition-colors flex items-center justify-center"
+                >
+                  <ShoppingBag size={18} className="mr-2" />
+                  Proceed to Checkout
+                </button>
+              </div>
+             
+              
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
