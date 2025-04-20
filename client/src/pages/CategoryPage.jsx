@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+  import { API_URL } from "../endpoint";
 
 const CategoryPage = () => {
   // Get the category slug from the URL (e.g., "living-room")
@@ -20,7 +21,7 @@ const CategoryPage = () => {
 
 
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
+  
 
   // Initialize AOS
   useEffect(() => {

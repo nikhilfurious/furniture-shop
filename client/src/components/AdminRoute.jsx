@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import Firebase auth
 import AdminPanel from "../pages/admin/AdminPanel";
+import { API_URL } from "../endpoint"; 
 
 const AdminRoute = () => {
   const [isAdmin, setIsAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'http://localhost:5000';
   const auth = getAuth(); // Initialize Firebase auth
 
   useEffect(() => {

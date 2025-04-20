@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import axios from 'axios';
 import Testimonials from '../components/Testimonials';
+  import { API_URL } from "../endpoint";
 
 
 
@@ -25,7 +26,7 @@ function Home() {
   };
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const API_URL = 'http://localhost:5000'; // Update this to your API URL
+
 
   const fetchFeaturedProducts = async () => {
     try {

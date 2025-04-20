@@ -4,6 +4,7 @@ import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import LocationSelector from '../../components/LocationSelector';
 import CarouselAdmin from '../../components/CarouselAdmin';
+  import { API_URL } from "../../endpoint";
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -167,7 +168,7 @@ const AdminPanel = () => {
     });
   };
 
-  const API_URL = 'http://localhost:5000/api';
+  
 
   const uploadImageToCloudinary = async (file) => {
     if(!file) return null;  
@@ -221,7 +222,7 @@ const AdminPanel = () => {
       });
       
       // Send POST request with proper content-type for FormData
-      const response = await axios.post(`${API_URL}/products`, formDataToSend, {
+      const response = await axios.post(`${API_URL}/api/products`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data', // Important for file uploads
           'Authorization': `Bearer ${await user.getIdToken()}`
@@ -318,7 +319,7 @@ const AdminPanel = () => {
   
       // Make the API request
       const response = await axios.put(
-        `${API_URL}/products/${currentProduct}`,
+        `${API_URL}/api/products/${currentProduct}`,
         formDataToSend,
         {
           headers: {
@@ -375,7 +376,7 @@ const AdminPanel = () => {
     try {
       setIsLoading(true);
       // Get the latest product data from the server
-      const response = await axios.get(`${API_URL}/products/${id}`, {
+      const response = await axios.get(`${API_URL}/api/products/${id}`, {
         headers: {
           'Authorization': `Bearer ${await user.getIdToken()}`
         }
@@ -418,7 +419,7 @@ const AdminPanel = () => {
       try {
         setIsLoading(true);
         // Send DELETE request
-        await axios.delete(`${API_URL}/products/${id}`, {
+        await axios.delete(`${API_URL}/api/products/${id}`, {
           headers: {
             'Authorization': `Bearer ${await user.getIdToken()}`
           }
@@ -442,7 +443,7 @@ const AdminPanel = () => {
     setIsLoading(true);
     try {
       const token = await user?.getIdToken();
-      const response = await axios.get(`${API_URL}/products`, {
+      const response = await axios.get(`${API_URL}/api/products`, {
         headers: {
           'Authorization': token ? `Bearer ${token}` : undefined
         }

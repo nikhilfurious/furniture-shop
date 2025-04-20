@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { getAuth } from "firebase/auth";
+  import { API_URL } from "../endpoint";
 
 // Create the cart context
 export const CartContext = createContext();
@@ -15,7 +16,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_URL = "http://localhost:5000";
+
   
   const auth = getAuth();
   

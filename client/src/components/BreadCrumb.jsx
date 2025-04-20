@@ -3,12 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from "../endpoint";
 
 const Breadcrumb = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
   const [lastName, setLastName] = useState('');
-  const API_URL = 'http://localhost:5000'; // Replace with your API URL
+ 
 
   // If the route is /products/:id, fetch the product name.
   useEffect(() => {
