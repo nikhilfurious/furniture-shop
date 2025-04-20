@@ -6,18 +6,21 @@ const Product = require('../models/Product'); // Ensure Product model is set up
 
 router.get('/', async (req, res) => {
   try {
-    // find all the categories and their product counts from the products collection
-    // returun just array
-    
-    const categories = await Product.aggregate([
-    { $group: { _id: "$category", count: { $sum: 1 } } },
-    { $project: { category: "$_id", count: 1, _id: 0 } }
+    // Find all unique categories from the products collection
+    const categoriesResult = await Product.aggregate([
+      { $group: { _id: "$category" } },
+      { $project: { _id: 0, category: "$_id" } }
     ]);
-    res.json({ categories });
+    
+    // Extract just the category names into a simple array
+    const categories = categoriesResult.map(item => item.category);
+    
+    // Return just the array directly, not wrapped in an object
+    res.json(categories);
   } catch (error) {
     res.status(500).json({ message: "Error fetching categories" });
   }
-  });
+});
 
 
   const getCategoryFromSlug = (slug) => {

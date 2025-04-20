@@ -2,24 +2,40 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { API_URL } from "../endpoint";
 
 const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], months: [] } }) => {
-  // Sample categories and tenure options
- 
+  // State for categories
   const [categories, setCategories] = useState([]);
 
+  // Tenure options
   const tenureOptions = [3, 6, 9, 12, 18, 24];
 
+  // Fetch categories from API
   useEffect(() => {
-    
     const fetchCategories = async () => {
-      
-      const response = await fetch(`${API_URL}/api/category`); 
-      const data = await response.json();
-      setCategories(data.categories);
-    
+      try {
+        const response = await fetch(`${API_URL}/api/category`); 
+        const data = await response.json();
+        
+        // Process categories properly to ensure we have an array of strings
+        if (Array.isArray(data.categories)) {
+          // If categories is an array of objects with a 'category' property
+          if (typeof data.categories[0] === 'object' && data.categories[0].category) {
+            setCategories(data.categories.map(item => item.category));
+          } else {
+            // If it's already an array of strings
+            setCategories(data.categories);
+          }
+        } else {
+          console.error('Categories data is not in expected format', data);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      }
     };
+    
     fetchCategories();
   }, []);
-
   
   // Use local state to manage filters to prevent flickering
   const [localFilters, setLocalFilters] = useState({
@@ -89,7 +105,7 @@ const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], month
       <div>
         <h3 className="font-bold text-gray-700 mb-3">Product Categories</h3>
         <div className="space-y-2">
-          {categories.map(({category,count}) => (
+          {categories.map((category) => (
             <div key={category} className="flex items-center">
               <input
                 type="checkbox"
@@ -109,8 +125,8 @@ const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], month
         </div>
       </div>
 
-      {/* Tenure Options */}
-     {/*  <div>
+      {/* Tenure Options (commented out in original code) */}
+      {/*  <div>
         <h3 className="font-bold text-gray-700 mb-3">Rental Duration</h3>
         <div className="grid grid-cols-2 gap-2">
           {tenureOptions.map(month => (

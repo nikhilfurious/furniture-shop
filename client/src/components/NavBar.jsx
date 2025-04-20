@@ -8,8 +8,6 @@ import { getAuth } from 'firebase/auth';
 import { useCart } from '../Context/CartContext';
 import { API_URL } from "../endpoint";
 
-
-
 function Navbar({ products, openModal, locationData }) {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,16 +18,11 @@ function Navbar({ products, openModal, locationData }) {
   const [isVisible, setIsVisible] = useState(true);
   const [cart, setCart] = useState([]);
   const [categories, setCategories] = useState([]);
-  //const {cart} = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-
-
-  
   const auth = getAuth();
   const navigate = useNavigate();
-  
   
   // Reference to the search input so we can handle blur/focus
   const searchInputRef = useRef(null);
@@ -56,15 +49,28 @@ function Navbar({ products, openModal, locationData }) {
     }
   };
 
-
   useEffect(() => {
-      
     const fetchCategories = async () => {
-      
-      const response = await fetch(`${API_URL}/api/category`); 
-      const data = await response.json();
-      setCategories(data.categories);
-    
+      try {
+        const response = await fetch(`${API_URL}/api/category`); 
+        const data = await response.json();
+        // Make sure we're working with an array of strings for categories
+        if (Array.isArray(data.categories)) {
+          // If categories is an array of objects with a 'category' property
+          if (typeof data.categories[0] === 'object' && data.categories[0].category) {
+            setCategories(data.categories.map(item => item.category));
+          } else {
+            // If it's already an array of strings
+            setCategories(data.categories);
+          }
+        } else {
+          console.error('Categories data is not in expected format', data);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      }
     };
     fetchCategories();
   }, []);
@@ -89,7 +95,6 @@ function Navbar({ products, openModal, locationData }) {
 
   // Additional useEffect to listen for specific cart update events if you have them
   useEffect(() => {
-    
     const handleCartUpdate = () => {
       fetchCart();
     };
@@ -102,8 +107,6 @@ function Navbar({ products, openModal, locationData }) {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
   }, []);
-
- 
 
   // Handler for search filtering
   const handleSearch = (query) => {
@@ -299,12 +302,12 @@ function Navbar({ products, openModal, locationData }) {
 
             {/* Logo */}
             <Link to="/" className="flex items-center">
-                <img
-                  src="/logo.jpeg"
-                  alt="Spot Furnish"
-                  className="w-24 h-12 md:h-10 lg:h-14 lg:mt-4 object-contain max-w-full"
-                />
-              </Link>
+              <img
+                src="/logo.jpeg"
+                alt="Spot Furnish"
+                className="w-24 h-12 md:h-10 lg:h-14 lg:mt-4 object-contain max-w-full"
+              />
+            </Link>
 
             {/* Location Dropdown - Hide on mobile */}
             <div className="hidden md:block">
@@ -319,8 +322,9 @@ function Navbar({ products, openModal, locationData }) {
                   onChange={handleCategoryChange}
                   className="px-3 py-2 rounded-l-xl bg-green-50 border-r border-green-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer hover:bg-green-100 transition-colors"
                 >
-                  {categories.map(({category,count}) => (
-                    <option key={category} value={category}>
+                  <option value="All Categories">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category}>
                       {category}
                     </option>
                   ))}
@@ -479,7 +483,7 @@ function Navbar({ products, openModal, locationData }) {
           ></div>
           
           {/* Menu Content */}
-          <div className="absolute top-0 left-0 w-4/5 max-w-sm h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+          <div className="absolute top-0 left-0 w-4/5 max-w-sm h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out overflow-scroll">
             {/* Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-green-100">
               <div className="flex items-center space-x-2">
