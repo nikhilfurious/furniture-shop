@@ -152,7 +152,7 @@ const PaymentPage = () => {
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Left Column - Products */}
           <div className="w-full lg:w-2/3 bg-white rounded-lg shadow-md p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4">Your Cart</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">Your Cart</h2>
             
             <div className="divide-y divide-gray-200">
               {products.map(product => (
@@ -184,24 +184,6 @@ const PaymentPage = () => {
               ))}
             </div>
             
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                <input
-                  type="text"
-                  placeholder="Coupon code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <button
-                  onClick={applyCoupon}
-                  className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Apply
-                </button>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">Try code: DISCOUNT20 for 20% off</p>
-            </div>
           </div>
 
           {/* Right Column - Summary */}

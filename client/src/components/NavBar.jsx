@@ -298,10 +298,13 @@ function Navbar({ products, openModal, locationData }) {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <img src="/logo.jpeg" alt="" className='w-24 mt-4'/>
-              <span className="font-display text-xl md:text-2xl font-bold text-green-700">Spot Furnish</span>
-            </Link>
+            <Link to="/" className="flex items-center">
+                <img
+                  src="/logo.jpeg"
+                  alt="Spot Furnish"
+                  className="w-24 h-12 md:h-10 lg:h-14 lg:mt-4 object-contain max-w-full"
+                />
+              </Link>
 
             {/* Location Dropdown - Hide on mobile */}
             <div className="hidden md:block">
