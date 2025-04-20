@@ -14,7 +14,15 @@ const app = express();
 
 // Middleware
 app.use(express.json()); // Body parser
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: [
+    'http://localhost:5173',            // your Vite dev server
+    'https://furniture-shop-jet.vercel.app/' // your deployed front‑end
+  ],
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
 
 
 

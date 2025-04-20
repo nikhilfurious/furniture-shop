@@ -134,11 +134,11 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
               <>
                 {products.map((product) => (
                   <div key={product._id} style={{ marginBottom: 10 }}>
-                    <p>{product.name} - ${product.price?.toFixed(2)}</p>
+                    <p>{product.name} - ₹{product.price?.toFixed(2)}</p>
                   </div>
                 ))}
                 <p style={{ fontWeight: 'bold', borderTop: '1px solid #eee', paddingTop: 10 }}>
-                  Total Price: ${totalPrice?.toFixed(2)}
+                  Total Price: ₹{totalPrice?.toFixed(2)}
                 </p>
               </>
             ) : (
