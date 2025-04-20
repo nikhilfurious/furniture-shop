@@ -739,7 +739,7 @@ remainingTerms.forEach(term => {
 
   router.use((err, req, res, next) => {
     console.error('💥 Unhandled error in purchaseRoutes:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' ,err:err.message});
   });
 });
 
