@@ -16,9 +16,9 @@ const CartPage = () => {
   const [showDeposit, setShowDeposit] = useState({});
   const auth = getAuth();
   const navigate = useNavigate();
-  const DELIVERY_CHARGE = 650; // Define delivery charge constant
+  const DELIVERY_CHARGE = 650; // Changed from 650 to 400
 
-  // 1) Fetch cart on mount
+  // Using all existing logic
   const fetchCart = async (initial = false) => {
     try {
       if (initial) setLoading(true);
@@ -43,7 +43,6 @@ const CartPage = () => {
     if (auth.currentUser) fetchCart(true);
   }, [auth.currentUser]);
 
-  // 2) Remove item
   const handleRemove = async id => {
     setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
     setCart(c => c.filter(i => i.id !== id));
@@ -56,7 +55,6 @@ const CartPage = () => {
     }
   };
 
-  // 3) Change quantity
   const handleQuantityChange = async (id, qty) => {
     setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
     setCart(c => c.map(i => i.id === id ? { ...i, quantity: qty } : i));
@@ -69,7 +67,6 @@ const CartPage = () => {
     }
   };
 
-  // 4) Change tenure & price locally, then persist via generic update route
   const handleTenureChange = async (id, months) => {
     const item = cart.find(i => i.id === id);
     if (!item) return;
@@ -103,7 +100,6 @@ const CartPage = () => {
     }
   };
 
-  // 5) Deposit logic unchanged
   const toggleDeposit = id => setShowDeposit(s => ({ ...s, [id]: !s[id] }));
   const updateDeposit = async (id, include) => {
     setUpdatingItems(s => { const c = new Set(s); c.add(id); return c; });
@@ -127,7 +123,6 @@ const CartPage = () => {
   const depositTotal = cart.reduce((sum, i) =>
     showDeposit[i.id] ? sum + (i.refundableDeposit||0)*i.quantity : sum
   ,0).toFixed(2);
-  // Include delivery charge in total
   const total = (parseFloat(subtotal) + parseFloat(depositTotal) + DELIVERY_CHARGE).toFixed(2);
 
   if (!loading && cart.length === 0) {
@@ -141,7 +136,7 @@ const CartPage = () => {
           <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
           <button 
             onClick={() => navigate('/product')}
-            className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors"
+            className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors"
           >
             Browse Products
           </button>
@@ -152,176 +147,212 @@ const CartPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Your Shopping Cart</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Your Cart</h1>
       
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <>
-          {/* Cart Header - visible on larger screens */}
-          <div className="hidden md:grid md:grid-cols-12 gap-4 p-4 bg-gray-100 rounded-t-lg font-medium text-gray-600">
-            <div className="md:col-span-6">Product</div>
-            <div className="md:col-span-2 text-center">Quantity</div>
-            <div className="md:col-span-2 text-center">Duration</div>
-            <div className="md:col-span-2 text-right">Price</div>
-          </div>
-        
-          <div className="grid lg:grid-cols-12 gap-8">
-            {/* Items */}
-            <div className="lg:col-span-8">
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                {cart.map((item, index) => (
-                  <div 
-                    key={item.id} 
-                    className={`grid md:grid-cols-12 gap-4 p-6 items-center hover:bg-gray-50 transition-colors ${
-                      index !== cart.length - 1 ? 'border-b border-gray-200' : ''
-                    }`}
-                  >
-                    {/* Image + Name */}
-                    <div className="md:col-span-6 flex">
-                      <div className="h-28 w-28 rounded-md bg-gray-100 overflow-hidden flex-shrink-0">
-                        <img 
-                          src={item.images[0]} 
-                          className="h-full w-full object-cover" 
-                          alt={item.name}
-                        />
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex justify-between">
-                          <p className="font-semibold text-lg text-gray-800">{item.name}</p>
-                          <button
-                            onClick={() => handleRemove(item.id)}
-                            disabled={updatingItems.has(item.id)}
-                            className="text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
-                            aria-label="Remove item"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                        {item.refundableDeposit > 0 && (
-                          <label className="flex items-center text-sm mt-2 text-gray-600">
-                            
-                            Deposit (₹{item.refundableDeposit})
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="md:col-span-2 flex justify-center">
-                      <QuantitySelector
-                        quantity={item.quantity}
-                        onIncrease={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        onDecrease={() => item.quantity > 1 && handleQuantityChange(item.id, item.quantity - 1)}
-                        disabled={updatingItems.has(item.id)}
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Items Column */}
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              {cart.map((item, index) => (
+                <div 
+                  key={item.id} 
+                  className={`p-6 hover:bg-gray-50 transition-colors ${
+                    index !== cart.length - 1 ? 'border-b border-gray-200' : ''
+                  }`}
+                >
+                  <div className="flex flex-col md:flex-row gap-6">
+                    {/* Product Image */}
+                    <div className="w-full md:w-36 h-36 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                      <img 
+                        src={item.images[0]} 
+                        className="h-full w-full object-cover" 
+                        alt={item.name}
                       />
                     </div>
-
-                    {/* Tenure Dropdown */}
-                    <div className="md:col-span-2 flex justify-center relative">
-                      <button
-                        onClick={() => setOpenDropdown(openDropdown === item.id ? null : item.id)}
-                        disabled={updatingItems.has(item.id)}
-                        className="flex items-center border border-gray-300 px-3 py-2 rounded-md w-32 justify-between bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        <span>{item.tenure} mo</span>
-                        <ChevronDown size={16} />
-                      </button>
-                      {openDropdown === item.id && (
-                        <ul className="absolute z-10 bg-white border w-32 mt-1 rounded-md shadow-lg py-1 top-full">
-                          {item.tenureOptions?.map(opt => (
-                            <li
-                              key={opt.months}
-                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors ${
-                                String(opt.months) === String(item.tenure)
-                                  ? 'bg-green-50 text-green-700 font-medium'
-                                  : 'text-gray-700'
-                              }`}
-                              onClick={() => handleTenureChange(item.id, opt.months)}
+                    
+                    {/* Product Details */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-xl text-gray-800">{item.name}</h3>
+                          <div className="flex items-center mt-1 text-gray-600">
+                            <span className="font-medium">₹{item.price}</span>
+                            <span className="text-sm ml-1">/Month</span>
+                          </div>
+                          {item.refundableDeposit > 0 && (
+                            <div className="text-sm mt-1 text-gray-600">
+                              ₹{item.refundableDeposit} Deposit
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleRemove(item.id)}
+                          disabled={updatingItems.has(item.id)}
+                          className="text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                      
+                      {/* Bottom controls grid */}
+                      <div className="grid grid-cols-3 gap-4 mt-6">
+                        {/* Duration */}
+                        <div className="relative">
+                          <p className="text-sm font-medium text-gray-600 mb-2">Duration</p>
+                          <button
+                            onClick={() => setOpenDropdown(openDropdown === item.id ? null : item.id)}
+                            disabled={updatingItems.has(item.id)}
+                            className="flex items-center border border-gray-300 px-3 py-2 rounded-md w-full justify-between bg-white hover:bg-gray-50 transition-colors"
+                          >
+                            <span>{item.tenure} Month</span>
+                            <ChevronDown size={16} />
+                          </button>
+                          {openDropdown === item.id && (
+                            <ul className="absolute z-10 bg-white border w-full mt-1 rounded-md shadow-lg py-1">
+                              {item.tenureOptions?.map(opt => (
+                                <li
+                                  key={opt.months}
+                                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors ${
+                                    String(opt.months) === String(item.tenure)
+                                      ? 'bg-green-50 text-green-700 font-medium'
+                                      : 'text-gray-700'
+                                  }`}
+                                  onClick={() => handleTenureChange(item.id, opt.months)}
+                                >
+                                  {opt.months} Month
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                        
+                        {/* Quantity */}
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 mb-2">Quantity</p>
+                          <div className="flex border border-gray-300 rounded-md bg-white">
+                            <button
+                              onClick={() => item.quantity > 1 && handleQuantityChange(item.id, item.quantity - 1)}
+                              disabled={updatingItems.has(item.id) || item.quantity <= 1}
+                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                             >
-                              {opt.months} mo — ₹{opt.price}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Price - Show total for quantity + unit price */}
-                    <div className="md:col-span-2 text-right">
-                      <p className="font-bold text-lg text-gray-800">
-                        ₹{(item.price * item.quantity).toFixed(2)}
-                      </p>
-                      {item.quantity > 1 && (
-                        <p className="text-sm text-gray-500">
-                          ₹{item.price} each
-                        </p>
-                      )}
-                      {showDeposit[item.id] && item.refundableDeposit > 0 && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          +₹{(item.refundableDeposit * item.quantity).toFixed(2)} deposit
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Continue Shopping Button */}
-              <button
-                onClick={() => navigate('/product')}
-                className="mt-6 flex items-center text-green-600 hover:text-green-800 transition-colors font-medium"
-              >
-                <ArrowLeft size={18} className="mr-2" />
-                Continue Shopping
-              </button>
-            </div>
-
-            {/* Summary */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-gray-200">Order Summary</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Subtotal</span>
-                    <span>₹{subtotal}</span>
-                  </div>
-                  
-                  {parseFloat(depositTotal) > 0 && (
-                    <div className="flex justify-between text-gray-700">
-                      <span>Refundable Deposits</span>
-                      <span>₹{depositTotal}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between text-gray-700">
-                    <span>Delivery</span>
-                    <span>₹{DELIVERY_CHARGE.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="pt-4 mt-2 border-t border-gray-200">
-                    <div className="flex justify-between font-semibold text-lg">
-                      <span>Total</span>
-                      <span>₹{total}</span>
+                              -
+                            </button>
+                            <div className="flex-1 flex items-center justify-center font-medium">
+                              {item.quantity}
+                            </div>
+                            <button
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              disabled={updatingItems.has(item.id)}
+                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Price */}
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-600 mb-2">Price</p>
+                          <p className="font-bold text-lg text-gray-800">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          {showDeposit[item.id] && item.refundableDeposit > 0 && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              +₹{(item.refundableDeposit * item.quantity).toFixed(2)} deposit
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* Continue Shopping Button */}
+            <button
+              onClick={() => navigate('/product')}
+              className="mt-6 flex items-center text-green-600 hover:text-green-800 transition-colors font-medium"
+            >
+              <ArrowLeft size={18} className="mr-2" />
+              Continue Shopping
+            </button>
+          </div>
+
+          {/* Summary Column */}
+          <div className="lg:col-span-4">
+            <div className="bg-white p-6 rounded-lg shadow-md sticky top-6">
+              <h3 className="text-xl font-semibold mb-6">Delivery Address</h3>
+              <button className="flex items-center text-green-600 font-medium hover:text-green-700">
+                + Add address
+              </button>
+              
+              <div className="mt-4">
+                <p className="text-green-600 font-medium hover:text-green-700 cursor-pointer">
+                  Do you have promo code?
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 mt-6 rounded-md">
+                <div className="bg-green-100 text-green-800 font-medium py-2 px-4 mb-4 rounded">
+                  Monthly Payable
+                </div>
                 
-                <button
-                  onClick={() => navigate('/checkout')}
-                  className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md font-medium transition-colors flex items-center justify-center"
-                >
-                  <ShoppingBag size={18} className="mr-2" />
-                  Proceed to Checkout
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Monthly Rent</span>
+                    <span className="font-medium">₹{subtotal}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Discount</span>
+                    <span className="font-medium">₹0</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-gray-200 mt-2">
+                    <span className="font-medium">Total Monthly Payout</span>
+                    <span className="font-medium">₹{subtotal}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-600 mt-4 mb-6">
+                After delivery of the items, monthly payable will be deducted
+              </p>
+              
+              <div className="bg-green-100 text-green-800 font-medium py-2 px-4 rounded text-center mb-4">
+                Pay Now
+              </div>
+              
+              <div className="space-y-3 mb-8">
+                <div className="flex justify-between">
+                  <span>Refundable Deposit</span>
+                  <span className="font-medium">₹{depositTotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Charges</span>
+                  <span className="font-medium">₹{DELIVERY_CHARGE.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                <div>
+                  <p className="font-medium text-gray-700">Total</p>
+                  <p className="text-2xl font-bold">₹{total}</p>
+                </div>
+                <button 
+                onClick={() => navigate('/checkout')}
+                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full font-medium transition-colors">
+                  Checkout
                 </button>
               </div>
-             
-              
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

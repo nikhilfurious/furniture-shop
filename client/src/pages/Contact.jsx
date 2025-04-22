@@ -84,13 +84,13 @@ const ContactPage = () => {
 
       {/* Contact Info + Form Section */}
       <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className=" grid-cols-1 gap-12">
           {/* Contact Information */}
           <div data-aos="fade-right">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Contact Information</h2>
             <div className="w-20 h-1 bg-green-500 mb-8"></div>
             
-            <div className="space-y-8">
+            <div className="space-y-8 flex">
               <div className="flex items-start">
                 <div className="flex-shrink-0 bg-green-500 p-3 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -173,7 +173,7 @@ const ContactPage = () => {
           </div>
           
           {/* Contact Form */}
-          <div data-aos="fade-left">
+         {/*  <div data-aos="fade-left">
             <div className="bg-white rounded-lg shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Send Us a Message</h2>
               
@@ -275,7 +275,7 @@ const ContactPage = () => {
                 </form>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -354,7 +354,7 @@ const ContactPage = () => {
       </div>
 
       {/* Newsletter Section */}
-      <div className="bg-gray-800 py-16 px-4 sm:px-6 lg:px-8">
+      {/* <div className="bg-gray-800 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center" data-aos="fade-up">
           <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
           <p className="text-xl text-gray-300 mb-8">
@@ -376,7 +376,7 @@ const ContactPage = () => {
             By subscribing, you agree to our Privacy Policy and consent to receive our promotional emails.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

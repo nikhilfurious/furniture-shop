@@ -55,14 +55,9 @@ function Navbar({ products, openModal, locationData }) {
         const response = await fetch(`${API_URL}/api/category`); 
         const data = await response.json();
         // Make sure we're working with an array of strings for categories
-        if (Array.isArray(data.categories)) {
-          // If categories is an array of objects with a 'category' property
-          if (typeof data.categories[0] === 'object' && data.categories[0].category) {
-            setCategories(data.categories.map(item => item.category));
-          } else {
-            // If it's already an array of strings
-            setCategories(data.categories);
-          }
+        if (Array.isArray(data)) {
+          // We don't add "All Categories" here as it's handled in the select element
+          setCategories(data);
         } else {
           console.error('Categories data is not in expected format', data);
           setCategories([]);
@@ -317,14 +312,16 @@ function Navbar({ products, openModal, locationData }) {
             {/* Search Bar - Hide on mobile */}
             <div className="hidden md:block flex-1 max-w-2xl mx-8">
               <div className="flex items-center bg-white rounded-xl hover:shadow-lg transition-shadow duration-200 border-2 border-green-100 focus-within:border-green-300">
+                {/* Category Dropdown - Make sure it's visible */}
                 <select
                   value={selectedCategory}
                   onChange={handleCategoryChange}
                   className="px-3 py-2 rounded-l-xl bg-green-50 border-r border-green-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer hover:bg-green-100 transition-colors"
+                  style={{ display: 'block' }} /* Force display */
                 >
                   <option value="All Categories">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category}>
+                  {categories && categories.length > 0 && categories.map((category) => (
+                    <option key={category} value={category}>
                       {category}
                     </option>
                   ))}
@@ -544,6 +541,16 @@ function Navbar({ products, openModal, locationData }) {
             <div className="p-4">
               <h3 className="font-medium mb-3">Browse Categories</h3>
               <div className="space-y-2">
+                {/* Add "All Categories" option first */}
+                <button
+                  onClick={() => handleCategoryChange({ target: { value: 'All Categories' } })}
+                  className={`w-full text-left p-2 rounded-lg hover:bg-green-50 transition-colors ${
+                    selectedCategory === 'All Categories' ? 'bg-green-50 text-green-600 font-medium' : ''
+                  }`}
+                >
+                  All Categories
+                </button>
+                {/* Then list the API categories */}
                 {categories.map((category) => (
                   <button
                     key={category}

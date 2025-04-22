@@ -126,7 +126,7 @@ const PaymentPage = () => {
     );
   }
 
-  const shipping = 0;
+  const shipping = 650;
   const tax = 0;
   const total = subtotal + shipping + tax - discount;
 

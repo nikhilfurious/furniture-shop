@@ -13,21 +13,17 @@ const ProductFilter = ({ onFilterChange, activeFilters = { categories: [], month
     const fetchCategories = async () => {
       try {
         const response = await fetch(`${API_URL}/api/category`); 
+
         const data = await response.json();
         
         // Process categories properly to ensure we have an array of strings
-        if (Array.isArray(data.categories)) {
-          // If categories is an array of objects with a 'category' property
-          if (typeof data.categories[0] === 'object' && data.categories[0].category) {
-            setCategories(data.categories.map(item => item.category));
-          } else {
-            // If it's already an array of strings
-            setCategories(data.categories);
-          }
+        if (Array.isArray(data)) {
+          setCategories(data);
         } else {
           console.error('Categories data is not in expected format', data);
           setCategories([]);
         }
+        
       } catch (error) {
         console.error('Error fetching categories:', error);
         setCategories([]);

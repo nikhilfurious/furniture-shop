@@ -143,7 +143,7 @@ router.post("/process-purchase", async (req, res) => {
     const deposit = monthlyTotal * 2;
     
     // Transportation fee
-    const transportationFee = 4500;
+    const transportationFee = 650;
 
     // Create a new PDF document
     const doc = new PDFDocument({
