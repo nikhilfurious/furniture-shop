@@ -63,9 +63,7 @@ const AdminPanel = () => {
     category: '',
     description: '',
     refundableDeposit: 0,
-    brand: '',
     dimensions: '',
-    color: '',
     images: [],
     locations: [],
     tenureOptions: [
@@ -206,9 +204,8 @@ const AdminPanel = () => {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('refundableDeposit', formData.refundableDeposit);
-      formDataToSend.append('brand', formData.brand);
       formDataToSend.append('dimensions', formData.dimensions);
-      formDataToSend.append('color', formData.color);
+      
       
       // Add locations data
       formDataToSend.append('locations', JSON.stringify(formData.locations));
@@ -261,9 +258,8 @@ const AdminPanel = () => {
         'category',
         'quantity',
         'refundableDeposit',
-        'brand',
         'dimensions',
-        'color'
+        
       ];
       textFields.forEach(field => {
         if (formData[field] !== undefined && formData[field] !== null) {
@@ -593,9 +589,7 @@ const AdminPanel = () => {
       category: '',
       description: '',
       refundableDeposit: 0,
-      brand: '',
       dimensions: '',
-      color: '',
       images: [],
       existingImages: [],
       locations: [],
@@ -892,18 +886,7 @@ const AdminPanel = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Brand
-                  </label>
-                  <input
-                    type="text"
-                    name="brand"
-                    value={formData.brand}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Dimensions
@@ -916,18 +899,7 @@ const AdminPanel = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Color
-                  </label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
+                
 
                 {/* Location Selector - Full width in mobile, half width in desktop */}
                 <div className="md:col-span-2">

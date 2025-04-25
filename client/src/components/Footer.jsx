@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold border-b-2 border-green-500 inline-block pb-2">
-              Furniture Haven
+              Spot Furnish
             </h2>
             <p className="text-gray-300 mt-4">
               Quality furniture for every home. We specialize in crafting beautiful, functional pieces
@@ -20,16 +20,20 @@ const Footer = () => {
             <div className="pt-4">
               <div className="flex items-center space-x-3 text-gray-300 py-1">
                 <MdLocationOn className="text-green-400" />
-                <span>123 Furniture Lane, Comfort City</span>
+                <span>8th Main, Ramamurthy Nagar main Road,Bengaluru, Karnataka 560016</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-300 py-1">
                 <MdPhone className="text-green-400" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 8123096928</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-300 py-1">
+                <MdPhone className="text-green-400" />
+                <span>+91 9844311875</span>
+              </div>
+              {/* <div className="flex items-center space-x-3 text-gray-300 py-1">
                 <MdEmail className="text-green-400" />
                 <span>info@furniturehaven.com</span>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -77,12 +81,12 @@ const Footer = () => {
           </div>
           {/* Newsletter and Social */}
           <div>
-            <h3 className="text-xl font-semibold mb-6 border-b-2 border-green-500 inline-block pb-2">
+            {/* <h3 className="text-xl font-semibold mb-6 border-b-2 border-green-500 inline-block pb-2">
               Stay Connected
             </h3>
-            <p className="text-gray-300 mb-4">Subscribe to our newsletter for updates and exclusive offers.</p>
+            <p className="text-gray-300 mb-4">Subscribe to our newsletter for updates and exclusive offers.</p> */}
             
-            <div className="flex mb-6">
+            {/* <div className="flex mb-6">
               <input 
                 type="email" 
                 placeholder="Your email" 
@@ -91,7 +95,7 @@ const Footer = () => {
               <button className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-r-md transition duration-300">
                 Subscribe
               </button>
-            </div>
+            </div> */}
             
             <h4 className="text-lg font-medium mb-3">Follow Us</h4>
             <div className="flex space-x-4">

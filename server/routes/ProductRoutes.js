@@ -79,7 +79,7 @@ router.get('/:id', async (req, res) => {
 // @desc    Create new product
 // @route   POST /api/products
 // @access  Private/Admin
-router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
+router.post('/', upload.array('images', 10), checkAdmin, async (req, res) => {
   try {
     const {
       name,
@@ -87,9 +87,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       category,
       description,
       refundableDeposit,
-      brand,
       dimensions,
-      color,
       tenureOptions,
       locations,
     } = req.body;
@@ -128,9 +126,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
       category,
       description,
       refundableDeposit,
-      brand,
       dimensions,
-      color,
       tenureOptions: parsedTenureOptions, 
       images: imageUrls,
       location: parsedLocations,
@@ -147,7 +143,7 @@ router.post('/', upload.array('images', 5), checkAdmin, async (req, res) => {
 // @desc    Update product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
-router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
+router.put('/:id', checkAdmin, upload.array('images', 10), async (req, res) => {
   try {
     const productId = req.params.id;
 
@@ -175,9 +171,8 @@ router.put('/:id', checkAdmin, upload.array('images', 5), async (req, res) => {
       'category',
       'quantity',
       'refundableDeposit',
-      'brand',
       'dimensions',
-      'color'
+      
     ];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined && req.body[field] !== null) {

@@ -17,7 +17,6 @@ cloudinary.config({
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, '../uploads');
-    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -30,10 +29,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: function (req, file, cb) {
-    // Accept images only
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
       return cb(new Error('Only image files are allowed!'), false);
     }
@@ -41,121 +39,65 @@ const upload = multer({
   }
 }).single('image');
 
-// Function to upload to Cloudinary
-const uploadToCloudinary = async (filePath) => {
+// Helper to upload to Cloudinary
+async function uploadToCloudinary(filePath) {
   try {
-    // Upload the image
     const result = await cloudinary.uploader.upload(filePath, {
       folder: 'carousel',
-      use_filename: true,
-      unique_filename: true,
-      overwrite: false,
       resource_type: 'image'
     });
-
-    // Remove the locally saved temporary file
     fs.unlinkSync(filePath);
-    
-    // Return the secure URL of the uploaded image
     return result.secure_url;
   } catch (error) {
-    // Remove the locally saved temporary file in case of error
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-    throw new Error(`Error uploading to Cloudinary: ${error.message}`);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    throw error;
   }
-};
+}
 
 // GET all carousel items
 router.get('/', async (req, res) => {
   try {
-    const carouselItems = await CarouselItem.find().sort({ createdAt: -1 });
-    res.json(carouselItems);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const items = await CarouselItem.find().sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
-// POST create a new carousel item
+// POST create a new carousel item (image only)
 router.post('/', (req, res) => {
-  upload(req, res, async function (err) {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ message: `Multer error: ${err.message}` });
-    } else if (err) {
-      return res.status(400).json({ message: err.message });
-    }
-    
+  upload(req, res, async (err) => {
+    if (err instanceof multer.MulterError) return res.status(400).json({ message: err.message });
+    if (err) return res.status(400).json({ message: err.message });
     try {
-      // Check if image was uploaded
-      if (!req.file) {
-        return res.status(400).json({ message: 'Image is required' });
-      }
-      
-      // Upload to Cloudinary
+      if (!req.file) return res.status(400).json({ message: 'Image is required' });
       const imageUrl = await uploadToCloudinary(req.file.path);
-      
-      // Create new carousel item
-      const carouselItem = new CarouselItem({
-        title: req.body.title,
-        subtitle: req.body.subtitle,
-        image: imageUrl
-      });
-      
-      const savedItem = await carouselItem.save();
-      res.status(201).json(savedItem);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+      const newItem = new CarouselItem({ image: imageUrl });
+      const saved = await newItem.save();
+      res.status(201).json(saved);
+    } catch (e) {
+      res.status(500).json({ message: e.message });
     }
   });
 });
 
-// GET a specific carousel item
-router.get('/:id', async (req, res) => {
-  try {
-    const carouselItem = await CarouselItem.findById(req.params.id);
-    if (!carouselItem) {
-      return res.status(404).json({ message: 'Carousel item not found' });
-    }
-    res.json(carouselItem);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// PUT update a carousel item
+// PUT update a carousel item (image only)
 router.put('/:id', (req, res) => {
-  upload(req, res, async function (err) {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ message: `Multer error: ${err.message}` });
-    } else if (err) {
-      return res.status(400).json({ message: err.message });
-    }
-    
+  upload(req, res, async (err) => {
+    if (err instanceof multer.MulterError) return res.status(400).json({ message: err.message });
+    if (err) return res.status(400).json({ message: err.message });
     try {
-      const updateData = {
-        title: req.body.title,
-        subtitle: req.body.subtitle
-      };
-      
-      // If a new image was uploaded, update the image URL
-      if (req.file) {
-        updateData.image = await uploadToCloudinary(req.file.path);
-      }
-      
-      const updatedItem = await CarouselItem.findByIdAndUpdate(
+      if (!req.file) return res.status(400).json({ message: 'Image is required' });
+      const imageUrl = await uploadToCloudinary(req.file.path);
+      const updated = await CarouselItem.findByIdAndUpdate(
         req.params.id,
-        updateData,
+        { image: imageUrl },
         { new: true }
       );
-      
-      if (!updatedItem) {
-        return res.status(404).json({ message: 'Carousel item not found' });
-      }
-      
-      res.json(updatedItem);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+      if (!updated) return res.status(404).json({ message: 'Carousel item not found' });
+      res.json(updated);
+    } catch (e) {
+      res.status(500).json({ message: e.message });
     }
   });
 });
@@ -163,20 +105,12 @@ router.put('/:id', (req, res) => {
 // DELETE a carousel item
 router.delete('/:id', async (req, res) => {
   try {
-    const carouselItem = await CarouselItem.findById(req.params.id);
-    
-    if (!carouselItem) {
-      return res.status(404).json({ message: 'Carousel item not found' });
-    }
-    
+    const item = await CarouselItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Carousel item not found' });
     await CarouselItem.findByIdAndDelete(req.params.id);
-    
-    // Note: You may want to also delete the image from Cloudinary
-    // This would require extracting and storing the public_id when uploading
-    
-    res.json({ message: 'Carousel item deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json({ message: 'Deleted successfully' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 });
 

@@ -2,16 +2,6 @@ const mongoose = require('mongoose');
 
 const CarouselItemSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: [true, 'Please provide a title'],
-      trim: true,
-    },
-    subtitle: {
-      type: String,
-      required: [true, 'Please provide a subtitle'],
-      trim: true,
-    },
     image: {
       type: String,
       required: [true, 'Please provide an image URL'],
