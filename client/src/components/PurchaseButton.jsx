@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Input, message } from 'antd';
 import axios from 'axios';
   import { API_URL } from "../endpoint";
+import { useNavigate } from 'react-router-dom';
 
 const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   
 
   // Calculate total price from all products
@@ -91,6 +93,7 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
       if (response.data.success) {
         message.success('Invoice generated and sent successfully!');
         alert('Purchase successful!'); // Alert after successful purchase
+        navigate('/dashboard'); // Redirect to dashboard
         setIsModalVisible(false);
         form.resetFields();
 
@@ -115,7 +118,7 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
         type="button"
         disabled={disabled}
         onClick={showModal}
-        className={`bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-md flex-1 transition duration-300 shadow-md hover:shadow-lg ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:from-green-700 hover:to-emerald-600'}`}
+        className={`text-xl cursor-pointer bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-4 rounded-[100vh] flex-1 transition duration-300 shadow-md hover:shadow-lg ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:from-green-700 hover:to-emerald-600'}`}
       >
         {children}
       </button>

@@ -3,9 +3,10 @@ import { useCart } from '../Context/CartContext';
 import QuantitySelector from '../components/QuantitySelector';
 import { Trash2, ShoppingBag, ChevronDown, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from "../endpoint";
+import PurchaseButton from '../components/PurchaseButton';
 
 const CartPage = () => {
   const { removeFromCart, updateQuantity } = useCart();
@@ -14,9 +15,13 @@ const CartPage = () => {
   const [updatingItems, setUpdatingItems] = useState(new Set());
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showDeposit, setShowDeposit] = useState({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [customer, setCustomer] = useState(null);
   const auth = getAuth();
   const navigate = useNavigate();
-  const DELIVERY_CHARGE = 650; // Changed from 650 to 400
+  const DELIVERY_CHARGE = 650; 
+
+  const adminEmail = "pragarajesh779jd@gmail.com";
 
   // Using all existing logic
   const fetchCart = async (initial = false) => {
@@ -124,6 +129,24 @@ const CartPage = () => {
     showDeposit[i.id] ? sum + (i.refundableDeposit||0)*i.quantity : sum
   ,0).toFixed(2);
   const total = (parseFloat(subtotal) + parseFloat(depositTotal) + DELIVERY_CHARGE).toFixed(2);
+
+
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setCustomer({
+            userId: user.uid,
+            customerName: user.displayName || 'Unknown User',
+            email: user.email || "email",
+          });
+          fetchCartData(user.uid);
+        } else {
+          navigate('/login');
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [auth, navigate]);
 
   if (!loading && cart.length === 0) {
     return (
@@ -287,19 +310,10 @@ const CartPage = () => {
 
           {/* Summary Column */}
           <div className="lg:col-span-4">
-            <div className="bg-white p-6 rounded-lg shadow-md sticky top-6">
-              <h3 className="text-xl font-semibold mb-6">Delivery Address</h3>
-              <button className="flex items-center text-green-600 font-medium hover:text-green-700">
-                + Add address
-              </button>
+            <div className="bg-white p-6 rounded-lg shadow-md sticky top-4">
               
-              <div className="mt-4">
-                <p className="text-green-600 font-medium hover:text-green-700 cursor-pointer">
-                  Do you have promo code?
-                </p>
-              </div>
               
-              <div className="bg-gray-50 p-4 mt-6 rounded-md">
+              <div className="bg-gray-50 p-4  rounded-md">
                 <div className="bg-green-100 text-green-800 font-medium py-2 px-4 mb-4 rounded">
                   Monthly Payable
                 </div>
@@ -339,16 +353,31 @@ const CartPage = () => {
                 </div>
               </div>
               
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <div>
-                  <p className="font-medium text-gray-700">Total</p>
-                  <p className="text-2xl font-bold">₹{total}</p>
+              <div className="flex flex-col justify-between items-center pt-4 border-t border-gray-200">
+                  <div className="mb-6">
+                    <label className="flex items-start">
+                      <input  
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={() => setTermsAccepted(!termsAccepted)}
+                        className="mt-1 h-4 w-4 text-green-600"
+                      />
+                      <span className="ml-2 text-sm text-gray-600">
+                        I agree to the <a href="/policy" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">Terms and Conditions</a> and
+                        <a href="/policy" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline"> Privacy Policy</a>
+                      </span>
+                    </label>
+                  </div>
+                <div className='flex items-center justify-between w-full gap-8'>
+                  <div>
+                    <p className="font-medium text-gray-700">Total</p>
+                    <p className="text-2xl font-bold">₹{total}</p>
+                  </div>
+                  
+                  <PurchaseButton disabled={!termsAccepted} products={cart} customer={customer} adminEmail={adminEmail}>
+                  Pay ₹{total}
+                  </PurchaseButton>
                 </div>
-                <button 
-                onClick={() => navigate('/checkout')}
-                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full font-medium transition-colors">
-                  Checkout
-                </button>
               </div>
             </div>
           </div>
