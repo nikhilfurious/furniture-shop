@@ -60,10 +60,10 @@ const AdminPanel = () => {
   // Product form state
   const [formData, setFormData] = useState({
     name: '',
-    basePrice: 0,
+    //basePrice: 0,
     category: '',
     description: '',
-    refundableDeposit: 0,
+    //refundableDeposit: 0,
     dimensions: '',
     images: [],
     locations: [],
@@ -201,10 +201,10 @@ const AdminPanel = () => {
       
       // Add text fields directly to FormData
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('basePrice', formData.basePrice);
+      //formDataToSend.append('basePrice', formData.basePrice);
       formDataToSend.append('category', formData.category);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('refundableDeposit', formData.refundableDeposit);
+      //formDataToSend.append('refundableDeposit', formData.refundableDeposit);
       formDataToSend.append('dimensions', formData.dimensions);
       
       
@@ -586,10 +586,10 @@ const AdminPanel = () => {
     
     setFormData({
       name: '',
-      basePrice: 0,
+      //basePrice: 0,
       category: '',
       description: '',
-      refundableDeposit: 0,
+      //refundableDeposit: 0,
       dimensions: '',
       images: [],
       existingImages: [],
@@ -720,9 +720,9 @@ const AdminPanel = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Base Price
-                    </th>
+                    </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Locations
                     </th>
@@ -756,9 +756,9 @@ const AdminPanel = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {product.category}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ₹{product.basePrice}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {Array.isArray(product.location) 
                           ? product.location.join(', ')
@@ -867,7 +867,7 @@ const AdminPanel = () => {
                   )}
                 </div>
                 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Base Price (₹)
                   </label>
@@ -893,7 +893,7 @@ const AdminPanel = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     required
                   />
-                </div>
+                </div> */}
 
                 
                 <div>

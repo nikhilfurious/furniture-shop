@@ -24,7 +24,7 @@ const ProductSchema = new Schema({
   },
   basePrice: {
     type: Number,
-    required: [true, 'Base price is required'],
+    required: [false, 'Base price is required'],
     min: [0, 'Base price cannot be negative']
   },
   images: {
@@ -32,17 +32,17 @@ const ProductSchema = new Schema({
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
+    required: [false, 'Category is required'],
     trim: true
   },
   description: {
     type: String,
-    required: [true, 'Description is required'],
+    required: [false, 'Description is required'],
     trim: true
   },
   refundableDeposit: {
     type: Number,
-    required: [true, 'Refundable deposit is required'],
+    required: [false, 'Refundable deposit is required'],
     min: [0, 'Deposit cannot be negative']
   },
   brand:{

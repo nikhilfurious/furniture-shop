@@ -19,7 +19,7 @@ const CartPage = () => {
   const [customer, setCustomer] = useState(null);
   const auth = getAuth();
   const navigate = useNavigate();
-  const DELIVERY_CHARGE = 650; 
+  const DELIVERY_CHARGE = 750; 
 
   const adminEmail = "pragarajesh779jd@gmail.com";
 
@@ -191,7 +191,7 @@ const CartPage = () => {
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Items Column */}
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md overflow-visible">
               {cart.map((item, index) => (
                 <div 
                   key={item.id} 
@@ -248,7 +248,7 @@ const CartPage = () => {
                             <ChevronDown size={16} />
                           </button>
                           {openDropdown === item.id && (
-                            <ul className="absolute z-10 bg-white border w-full mt-1 rounded-md shadow-lg py-1">
+                            <ul className="absolute z-50 bg-white border w-full mt-1 rounded-md shadow-lg py-1">
                               {item.tenureOptions?.map(opt => (
                                 <li
                                   key={opt.months}

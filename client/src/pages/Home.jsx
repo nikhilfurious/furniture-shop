@@ -271,7 +271,7 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">Shipping</h3>
-              <p className="text-gray-600">WWe provide shipping in 72 hours.</p>
+              <p className="text-gray-600">We provide shipping in 72 hours.</p>
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">

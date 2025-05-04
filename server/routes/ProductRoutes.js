@@ -83,10 +83,10 @@ router.post('/', upload.array('images', 10), checkAdmin, async (req, res) => {
   try {
     const {
       name,
-      basePrice,
+      //basePrice,
       category,
       description,
-      refundableDeposit,
+      //refundableDeposit,
       dimensions,
       tenureOptions,
       locations,
@@ -122,10 +122,10 @@ router.post('/', upload.array('images', 10), checkAdmin, async (req, res) => {
 
     const product = new Product({
       name,
-      basePrice,
+      //basePrice,
       category,
       description,
-      refundableDeposit,
+      //refundableDeposit,
       dimensions,
       tenureOptions: parsedTenureOptions, 
       images: imageUrls,

@@ -78,7 +78,7 @@ const SearchResultsPage = () => {
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
                   
                   <div className="flex justify-between items-center mt-4">
-                    <p className="text-lg font-bold text-green-600">₹{product.basePrice}</p>
+                    <p className="text-lg font-bold text-green-600">₹{product.tenureOptions[product.tenureOptions.length - 1].price}</p>
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();

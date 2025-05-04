@@ -311,11 +311,11 @@ const ProductPage = () => {
                         ? `₹${product.tenureOptions[selectedTenure].price}` 
                         : 'Price not available'}
                     </span>
-                    <span className="text-base text-gray-400 line-through">
+                    {/* <span className="text-base text-gray-400 line-through">
                       ₹{product.tenureOptions && product.tenureOptions[selectedTenure] 
                         ? Math.round(product.tenureOptions[0].price) 
                         : '1337'}
-                    </span>
+                    </span> */}
                   </div>
                   <p className="text-sm text-gray-500">Monthly Rent for {getCurrentTenure().months} months</p>
                 </div>

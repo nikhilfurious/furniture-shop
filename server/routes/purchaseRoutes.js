@@ -234,6 +234,11 @@ router.post("/process-purchase", async (req, res) => {
       addressYPos += lineHeight;
     });
 
+    doc.font('Helvetica-Bold').text('Contact No:', marginLeft, addressYPos)
+   .font('Helvetica').text(customer.phoneNumber, marginLeft + 100, addressYPos);
+
+
+
 
 
     // Add date information on the right
