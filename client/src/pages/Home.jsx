@@ -213,17 +213,20 @@ function Home() {
         )
       },
       {
-        title: "Storage & Organization",
-        route: "/category/storage-organization",
+        title: "Kitchen Appliance and Furniture",
+        route: "/category/kitchen-appliance-and-furniture",
         icon: (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="20" y="20" width="40" height="50" rx="2" stroke="#000" strokeWidth="2" />
-            <rect x="25" y="25" width="30" height="10" rx="1" stroke="#000" strokeWidth="2" />
-            <rect x="25" y="40" width="30" height="10" rx="1" stroke="#000" strokeWidth="2" />
-            <rect x="25" y="55" width="30" height="10" rx="1" fill="#FFC107" stroke="#000" strokeWidth="2" />
+            <rect x="15" y="30" width="50" height="30" rx="4" stroke="#000" strokeWidth="2" fill="#FFF3E0" />
+            <rect x="20" y="25" width="40" height="5" rx="2" stroke="#000" strokeWidth="2" fill="#FFCC80" />
+            <line x1="25" y1="15" x2="25" y2="25" stroke="#000" strokeWidth="2" />
+            <circle cx="25" cy="13" r="2" fill="#000" />
+            <line x1="55" y1="15" x2="55" y2="25" stroke="#000" strokeWidth="2" />
+            <circle cx="55" cy="13" r="2" fill="#000" />
           </svg>
         )
       }
+      
     ];
   
     return (
