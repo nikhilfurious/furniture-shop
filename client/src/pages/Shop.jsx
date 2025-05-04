@@ -408,7 +408,8 @@ function ProductListPage() {
                       
                       <div className="flex justify-between items-center mb-3">
                         <div>
-                          <span className="text-xl font-bold text-green-700">₹{product.basePrice}</span>
+                          
+                          <span className="text-xl font-bold text-green-700">₹{product?.tenureOptions[product.tenureOptions?.length -1]?.price}</span>
                           <span className="text-gray-500 text-sm">/month</span>
                         </div>
                       </div>

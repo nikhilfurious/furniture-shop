@@ -52,6 +52,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api', require('./routes/purchaseRoutes'));
 app.use('/api/category', require('./routes/categoryRoutes'));
 app.use('/api/carousel', require('./routes/carouselRoutes'));
+app.use('/api/cities', require('./routes/locationRoutes'));
 
 
 

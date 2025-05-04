@@ -7,6 +7,7 @@ import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useCart } from '../Context/CartContext';
 import { API_URL } from "../endpoint";
+import CartIcon from './CartIcon';
 
 function Navbar({ products, openModal, locationData }) {
   const { user, logout } = useAuth();
@@ -20,6 +21,7 @@ function Navbar({ products, openModal, locationData }) {
   const [categories, setCategories] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [cities, setCities] = useState([]);
 
   const auth = getAuth();
   const navigate = useNavigate();
@@ -29,6 +31,20 @@ function Navbar({ products, openModal, locationData }) {
   
   // Create a ref to store the interval ID
   const cartIntervalRef = useRef(null);
+
+  // Fetch cities data
+  useEffect(() => {
+    async function getCities() {
+      try {
+        const res = await axios.get(`${API_URL}/api/cities`);
+        setCities(res.data.map(c => c.name));
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+        setCities([]);
+      }
+    }
+    getCities();
+  }, []);
 
   // Fetch cart data function
   const fetchCart = async () => {
@@ -70,23 +86,7 @@ function Navbar({ products, openModal, locationData }) {
     fetchCategories();
   }, []);
 
-  // Set up interval to poll for cart updates
-  useEffect(() => {
-    // Fetch cart immediately on mount
-    fetchCart();
-    
-    // Set up interval to check for cart updates every 2 seconds
-    cartIntervalRef.current = setInterval(() => {
-      fetchCart();
-    }, 2000);
-    
-    // Clean up interval on unmount
-    return () => {
-      if (cartIntervalRef.current) {
-        clearInterval(cartIntervalRef.current);
-      }
-    };
-  }, [auth.currentUser]); 
+
 
   // Additional useEffect to listen for specific cart update events if you have them
   useEffect(() => {
@@ -222,15 +222,6 @@ function Navbar({ products, openModal, locationData }) {
       };
     }, [locationData]);
 
-    const cities = [
-      'Chennai',
-      'Delhi',
-      'Mumbai',
-      'Bangalore',
-      'Kolkata',
-      'Hyderabad',
-    ];
-
     return (
       <div className="relative">
         <button
@@ -248,25 +239,29 @@ function Navbar({ products, openModal, locationData }) {
           <div className="absolute mt-2 w-64 bg-white rounded-lg shadow-lg border border-green-100 z-50">
             <div className="py-2">
               <div className="font-medium text-sm text-gray-500 px-4 py-1">Popular Cities</div>
-              {cities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => {
-                    localStorage.setItem('userLocation', city);
-                    setSelectedLocation(city);
-                    setDropdownVisible(false);
-                  }}
-                  className={`w-full text-left px-4 py-2 hover:bg-green-50 transition-colors flex items-center ${
-                    selectedLocation === city ? 'bg-green-50 text-green-600' : ''
-                  }`}
-                >
-                  <MapPin className="h-4 w-4 mr-2 text-green-400" />
-                  {city}
-                  {selectedLocation === city && (
-                    <span className="ml-auto text-green-600 text-sm">✓</span>
-                  )}
-                </button>
-              ))}
+              {cities.length > 0 ? (
+                cities.map((city) => (
+                  <button
+                    key={city}
+                    onClick={() => {
+                      localStorage.setItem('userLocation', city);
+                      setSelectedLocation(city);
+                      setDropdownVisible(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 hover:bg-green-50 transition-colors flex items-center ${
+                      selectedLocation === city ? 'bg-green-50 text-green-600' : ''
+                    }`}
+                  >
+                    <MapPin className="h-4 w-4 mr-2 text-green-400" />
+                    {city}
+                    {selectedLocation === city && (
+                      <span className="ml-auto text-green-600 text-sm">✓</span>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-gray-500">Loading cities...</div>
+              )}
             </div>
           </div>
         )}
@@ -382,14 +377,7 @@ function Navbar({ products, openModal, locationData }) {
             {/* Right Icons - Simplified on mobile */}
             <div className="flex items-center space-x-4 md:space-x-6">
               <Link to="/cart" className="text-gray-600 hover:text-green-600 transition-colors relative">
-                <div className="relative">
-                  <ShoppingCart className="h-6 w-6" />
-                  {cart && cart.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full px-2 py-0.5 flex items-center justify-center min-w-5 h-5">
-                      {cart.length}
-                    </span>
-                  )}
-                </div>
+                <CartIcon/>
               </Link>
               <div className="hidden md:block">
                 {user ? (

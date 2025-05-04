@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth';
 import LocationSelector from '../../components/LocationSelector';
 import CarouselAdmin from '../../components/CarouselAdmin';
   import { API_URL } from "../../endpoint";
+import CityAdmin from '../../components/LocationAdmin';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -645,6 +646,13 @@ const AdminPanel = () => {
             <Plus size={18} className="mr-3" />
             Add Carousel Items
           </button>
+          <button 
+            onClick={() => setActiveView('Location')}
+            className={`flex items-center px-6 py-3 w-full text-left ${activeView === 'Location' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+          >
+            <Plus size={18} className="mr-3" />
+            Add Locations
+          </button>
           <div className="mt-auto pt-6 border-t border-gray-200 pb-4">
             <button className="flex items-center px-6 py-3 w-full text-left text-gray-700">
               <User size={18} className="mr-3" />
@@ -662,6 +670,7 @@ const AdminPanel = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-8">
       {activeView === 'Carousel' && <CarouselAdmin />}
+      {activeView === 'Location' && <CityAdmin />}
 
         {activeView === 'dashboard' && (
           <div>
@@ -748,7 +757,7 @@ const AdminPanel = () => {
                         {product.category}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${product.basePrice}
+                        ₹{product.basePrice}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {Array.isArray(product.location) 

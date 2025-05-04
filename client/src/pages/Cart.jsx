@@ -125,10 +125,21 @@ const CartPage = () => {
 
   // Calculate totals
   const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0).toFixed(2);
-  const depositTotal = cart.reduce((sum, i) =>
-    showDeposit[i.id] ? sum + (i.refundableDeposit||0)*i.quantity : sum
-  ,0).toFixed(2);
-  const total = (parseFloat(subtotal) + parseFloat(depositTotal) + DELIVERY_CHARGE).toFixed(2);
+  const calculateDepositTotal = () => {
+    return cart.reduce((sum, item) => {
+      
+      
+  
+      // tenure comes in as a string like "3" or "6"
+      const months = parseInt(item.tenure, 10) || 0;
+      const monthlyPayout = item.price;  // price is your monthly rate
+  
+      // deposit for this line = monthly rate * months * quantity
+      return sum + monthlyPayout * months * item.quantity;
+    }, 0).toFixed(2);
+  };
+  const depositTotal = calculateDepositTotal();
+  const total = (parseFloat(subtotal) + DELIVERY_CHARGE + parseFloat(depositTotal)).toFixed(2);
 
 
     useEffect(() => {
@@ -323,10 +334,6 @@ const CartPage = () => {
                     <span>Monthly Rent</span>
                     <span className="font-medium">₹{subtotal}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Discount</span>
-                    <span className="font-medium">₹0</span>
-                  </div>
                   <div className="flex justify-between pt-2 border-t border-gray-200 mt-2">
                     <span className="font-medium">Total Monthly Payout</span>
                     <span className="font-medium">₹{subtotal}</span>
@@ -345,7 +352,7 @@ const CartPage = () => {
               <div className="space-y-3 mb-8">
                 <div className="flex justify-between">
                   <span>Refundable Deposit</span>
-                  <span className="font-medium">₹{depositTotal}</span>
+                  <span className="font-medium">₹{calculateDepositTotal()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>

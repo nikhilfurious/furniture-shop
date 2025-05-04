@@ -120,6 +120,12 @@ const fetchImageBuffer = async (imageUrl) => {
   }
 };
 
+
+const formatAddress = (address) => {
+  if (!address) return '';
+  return address.split(',').join(',\n');
+};
+
 router.post("/process-purchase", async (req, res) => {
   try {
     const { userId, totalAmount, products, customer, adminEmail } = req.body;
@@ -143,7 +149,7 @@ router.post("/process-purchase", async (req, res) => {
     const deposit = monthlyTotal * 2;
     
     // Transportation fee
-    const transportationFee = 650;
+    const transportationFee = 750;
 
     // Create a new PDF document
     const doc = new PDFDocument({
@@ -204,33 +210,70 @@ router.post("/process-purchase", async (req, res) => {
       .fontSize(12)
       .text('Delivery To :', marginLeft, yPos);
 
-    // Add customer details
-    doc.font('Helvetica')
-      .text(customer.company || 'Toyota Financial Services India Ltd,', marginLeft, yPos + lineHeight)
-      .text(`${customer.location || customer.city || 'Bengaluru'}-${customer.zipCode || '560001'}`, marginLeft, yPos + lineHeight * 2);
+    // Format the customer address with each part on a new line
+    // Split address into parts and format properly
+    const addressParts = [];
+    if (customer.address) {
+      // Split by commas and format each part on a new line
+      const addressComponents = customer.address.split(',').map(part => part.trim());
+      addressParts.push(...addressComponents);
+    } else {
+      addressParts.push('Address not provided');
+    }
+    
+    // Add city and zip separately if available
+    if (customer.location || customer.city) {
+      addressParts.push(customer.location || customer.city);
+    }
+    
+    // Add formatted address
+    let addressYPos = yPos + lineHeight;
+    addressParts.forEach((part, index) => {
+      doc.font('Helvetica')
+         .text(part, marginLeft, addressYPos);
+      addressYPos += lineHeight;
+    });
 
-    // Add date on the right
+
+
+    // Add date information on the right
     doc.font('Helvetica-Bold')
       .text('Date', 400, yPos);
     
     doc.font('Helvetica')
       .text(date, 400, yPos + lineHeight);
+      
+    // Add delivery date near purchase date
+    doc.font('Helvetica-Bold')
+      .text('Delivery Date', 400, yPos + lineHeight * 2);
+      
+    doc.font('Helvetica')
+      .text(req.body.deliveryDate ? formatDate(new Date(req.body.deliveryDate)) : formattedDeliveryDate, 400, yPos + lineHeight * 3);
 
     // Add underlines
-    doc.moveTo(marginLeft, yPos + lineHeight * 3)
-      .lineTo(marginLeft + 250, yPos + lineHeight * 3)
+    const underlineYPos = Math.max(addressYPos + lineHeight, yPos + lineHeight * 3);
+    doc.moveTo(marginLeft, underlineYPos)
+      .lineTo(marginLeft + 250, underlineYPos)
       .stroke();
 
-    doc.moveTo(400, yPos + lineHeight * 3)
-      .lineTo(550, yPos + lineHeight * 3)
+    doc.moveTo(400, yPos + lineHeight * 5)
+      .lineTo(550, yPos + lineHeight * 5)
       .stroke();
 
-    // Table setup
-    yPos += lineHeight * 4;
+    // Table setup - adjust starting position based on address height
+    yPos = underlineYPos + lineHeight * 3;
     const tableTop = yPos;
     const tableWidth = 500;
-    const colWidth = [250, 75, 50, 125];
-    const colStart = [marginLeft, marginLeft + colWidth[0], marginLeft + colWidth[0] + colWidth[1], marginLeft + colWidth[0] + colWidth[1] + colWidth[2]];
+    
+    // Improved column widths for better spacing
+    const colWidth = [200, 80, 70, 50, 100];
+    const colStart = [
+      marginLeft, 
+      marginLeft + colWidth[0], 
+      marginLeft + colWidth[0] + colWidth[1],
+      marginLeft + colWidth[0] + colWidth[1] + colWidth[2],
+      marginLeft + colWidth[0] + colWidth[1] + colWidth[2] + colWidth[3]
+    ];
     
     // Draw table header
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
@@ -239,13 +282,15 @@ router.post("/process-purchase", async (req, res) => {
     doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
     doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
     doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
     
-    // Add table header text
+    // Add table header text with improved positioning
     doc.font('Helvetica-Bold')
-      .text('Items', colStart[0] + 90, yPos + 7)
-      .text('Amount', colStart[1] + 15, yPos + 7)
-      .text('Qty', colStart[2] + 15, yPos + 7)
-      .text('Total Amount', colStart[3] + 25, yPos + 7);
+      .text('Items', colStart[0] + 5, yPos + 7)
+      .text('Duration', colStart[1] + 5, yPos + 7)
+      .text('Amount', colStart[2] + 5, yPos + 7)
+      .text('Qty', colStart[3] + 5, yPos + 7)
+      .text('Total', colStart[4] + 35, yPos + 7);
     
     // Draw product rows
     yPos += 20;
@@ -254,6 +299,7 @@ router.post("/process-purchase", async (req, res) => {
     // Draw each product row
     for (const product of products) {
       const itemTotal = product.price * product.quantity;
+      const duration = product.duration || req.body.duration || '3 Months'; // Use product-specific duration if available
       
       // Draw row borders
       doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
@@ -262,81 +308,83 @@ router.post("/process-purchase", async (req, res) => {
       doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
       doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
       doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
+      doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
       
-      // Add product details
-      doc.text(product.name, colStart[0] + 5, yPos + 7)
-        .text(product.price.toString(), colStart[1] + 15, yPos + 7)
-        .text(product.quantity.toString(), colStart[2] + 15, yPos + 7)
-        .text(itemTotal.toString(), colStart[3] + 45, yPos + 7);
+      // Calculate text height for product name to handle possible wrapping
+      const nameHeight = doc.heightOfString(product.name, { width: colWidth[0] - 10 });
+      const cellHeight = Math.max(20, nameHeight + 10);
       
-      yPos += 20;
+      // Add product details with proper text alignment
+      doc.text(product.name, colStart[0] + 5, yPos + (cellHeight - nameHeight) / 2, { width: colWidth[0] - 10 })
+        .text(duration, colStart[1] + 5, yPos + 7)
+        .text(product.price.toString(), colStart[2] + 20, yPos + 7)
+        .text(product.quantity.toString(), colStart[3] + 15, yPos + 7)
+        .text(itemTotal.toString(), colStart[4] + 35, yPos + 7);
+      
+      yPos += cellHeight;
     }
     
     // Total Monthly Package row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
-    doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
-    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
     
     doc.font('Helvetica-Bold')
       .text('Total Monthly Package', colStart[0] + 5, yPos + 7);
     
-    doc.text(monthlyTotal.toString(), colStart[3] + 45, yPos + 7);
+    doc.text(monthlyTotal.toString(), colStart[4] + 35, yPos + 7);
     
     yPos += 20;
     
     // Fully Refundable Deposit row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
     
     doc.font('Helvetica')
-      .text('Fully Refundable Deposit', colStart[0] + 5, yPos + 7)
-      .text(`2 Months' Rent (${deposit})`, colStart[1] + 5, yPos + 7);
-    
-    yPos += 20;
-    
-    // Minimum Lock in Period row
-    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
-    
-    doc.text('Minimum Lock in Period', colStart[0] + 5, yPos + 7)
-      .text(req.body.lockInPeriod || '6 Months', colStart[1] + 5, yPos + 7);
-    
-    yPos += 20;
-    
-    // Delivery Date row
-    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
-    
-    doc.text('Delivery Date', colStart[0] + 5, yPos + 7)
-      .text(req.body.deliveryDate ? formatDate(new Date(req.body.deliveryDate)) : formattedDeliveryDate, colStart[1] + 5, yPos + 7);
+      .text('Fully Refundable Deposit @ months Rent', colStart[0] + 5, yPos + 7)
+      
+      
+    doc.text(deposit.toString(), colStart[4] + 35, yPos + 7);
     
     yPos += 20;
     
     // One time Transportation row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
     
     doc.text('One time Transportation', colStart[0] + 5, yPos + 7)
-      .text(req.body.transportationFee || transportationFee, colStart[3] + 45, yPos + 7);
+      .text('Upto 15 Kms', colStart[1] + 5, yPos + 7);
+      
+    doc.text(req.body.transportationFee || transportationFee.toString(), colStart[4] + 35, yPos + 7);
+    
+    yPos += 20;
+    
+    // Grand Total row
+    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
+    
+    const grandTotal = monthlyTotal + deposit + transportationFee;
+    
+    doc.font('Helvetica-Bold')
+      .text('Grand Total', colStart[0] + 5, yPos + 7);
+      
+    doc.text(grandTotal.toString(), colStart[4] + 35, yPos + 7);
     
     yPos += 20;
     
     // Rent payment terms row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
     
     doc.fontSize(10)
-      .text('Rent will be due beginning of the month, need to pay before 5th of every month', colStart[0] + 5, yPos + 5)
-      
+      .text('Rent will be due beginning of the month, need to pay before 5th of every month', colStart[0] + 5, yPos + 5);
     
     doc.fontSize(12)
-      .text(req.body.paymentTerm || 'Prepaid Rent', colStart[3] + 30, yPos + 7);
+      .text(req.body.paymentTerm || 'Prepaid Rent', colStart[4] + 20, yPos + 7);
     
     yPos += 30;
     
     // Payment instructions
-    const advanceAmount = req.body.advanceAmount || 20000;
+    const advanceAmount = req.body.advanceAmount || 1000;
     
     doc.font('Helvetica')
       .fontSize(11)
@@ -365,45 +413,10 @@ router.post("/process-purchase", async (req, res) => {
     yPos += lineHeight * 2;
     doc.font('Helvetica-Bold')
       .fillColor(redColor)
-      .text('Documents required before delivery: PAN, AADHAR, Company Incorporation or GST', marginLeft, yPos)
-      .text('Certificate and Rental Agreement of office.', marginLeft, yPos + lineHeight);
+      .text('Documents required before delivery: PAN, AADHAR, Company ID and  Rental  Agreement of house', marginLeft, yPos)
+      
     
-    // Add product images
-    yPos += lineHeight * 3;
-    
-// Add product images
-yPos += lineHeight * 3;
-
-let imageX = marginLeft; // This was missing in your updated code
-const imageWidth = 150;
-const imageHeight = 120;
-
-const imagePromises = products.map(product => {
-  if (product.images && product.images[0]) {
-    return fetchImageBuffer(product.images[0]);
-  }
-  return null;
-});
-
-try {
-  const imageBuffers = await Promise.all(imagePromises);
-  
-  // Now add the images using the buffers
-  let imageX = marginLeft; // This needs to be declared here
-  for (let i = 0; i < products.length; i++) {
-    const buffer = imageBuffers[i];
-    if (buffer) {
-      doc.image(buffer, imageX, yPos, { 
-        width: imageWidth,
-        height: imageHeight,
-        fit: [imageWidth, imageHeight] 
-      });
-      imageX += imageWidth + 10;
-    }
-  }
-} catch (err) {
-  console.error('Error processing product images:', err);
-}
+    // REMOVED: Product images section
     
     // Add new page for terms and conditions
     doc.addPage();
@@ -413,8 +426,6 @@ try {
       .fontSize(16)
       .fillColor(blackColor)
       .text('TERMS AND CONDITIONS', marginLeft, 50, { align: 'center' });
-    
-
     
     // Define terms and conditions content
     const termsAndConditions = [
@@ -474,158 +485,156 @@ try {
     
     // Add terms and conditions to the document
     doc.font('Helvetica-Bold')
-  .fontSize(16)
-  .fillColor(blackColor)
-  .text('TERMS AND CONDITIONS', marginLeft, 50, { align: 'center' });
+      .fontSize(16)
+      .fillColor(blackColor)
+      .text('TERMS AND CONDITIONS', marginLeft, 50, { align: 'center' });
 
-let currentY = 80;  // Start a bit lower for better spacing
-const termsLineHeight = 18;  // Increased for better readability
-const bulletPointIndent = 15;
-const contentIndent = bulletPointIndent + 10;
+    let currentY = 80;  // Start a bit lower for better spacing
+    const termsLineHeight = 18;  // Increased for better readability
+    const bulletPointIndent = 15;
+    const contentIndent = bulletPointIndent + 10;
 
-// Add terms and conditions to the document with better spacing
-termsAndConditions.forEach(term => {
-  // Add title with more space above
-  currentY += 10; // Extra space before each section
-  doc.font('Helvetica-Bold')
-     .fontSize(12)
-     .text(term.title, marginLeft, currentY);
-  
-  currentY += termsLineHeight + 5; // More space after title
-  
-  // Add content with bullet points
-  doc.font('Helvetica')
-     .fontSize(11);
-  
-  term.content.forEach(paragraph => {
-    // Add bullet point
-    doc.text('•', marginLeft + 5, currentY);
-    
-    // Add paragraph text with indent
-    doc.text(paragraph, marginLeft + contentIndent, currentY, {
-      width: 495 - contentIndent,
-      align: 'left'
+    // Add terms and conditions to the document with better spacing
+    termsAndConditions.forEach(term => {
+      // Add title with more space above
+      currentY += 10; // Extra space before each section
+      doc.font('Helvetica-Bold')
+         .fontSize(12)
+         .text(term.title, marginLeft, currentY);
+      
+      currentY += termsLineHeight + 5; // More space after title
+      
+      // Add content with bullet points
+      doc.font('Helvetica')
+         .fontSize(11);
+      
+      term.content.forEach(paragraph => {
+        // Add bullet point
+        doc.text('•', marginLeft + 5, currentY);
+        
+        // Add paragraph text with indent
+        doc.text(paragraph, marginLeft + contentIndent, currentY, {
+          width: 495 - contentIndent,
+          align: 'left'
+        });
+        
+        // Calculate height needed for this paragraph
+        const textHeight = doc.heightOfString(paragraph, {
+          width: 495 - contentIndent
+        });
+        
+        // Advance position with calculated height plus padding
+        currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
+      });
+      
+      currentY += 10; // Add more space between sections
     });
-    
-    // Calculate height needed for this paragraph
-    const textHeight = doc.heightOfString(paragraph, {
-      width: 495 - contentIndent
-    });
-    
-    // Advance position with calculated height plus padding
-    currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
-  });
-  
-  currentY += 10; // Add more space between sections
-});
 
-const remainingTerms = [
-  {
-    title: '8. Relocation',
-    content: [
-      'Customers wishing to relocate must request it two weeks in advance.',
-      'Relocation is subject to KYC verification and service availability of the new location, but an additional delivery charge will be applicable.'
-    ]
-  },
-  {
-    title: '9. Notice',
-    content: [
-      'Customers need to provide 1 months\' notice to terminate the contract. If the customer wishes to end the contract before the agreed tenure they need to pay full rent for the remaining period.',
-      'The company can terminate the agreement for non-payment or breach of terms.'
-    ]
-  },
-  {
-    title: '10. Assignment',
-    content: [
-      'Customers cannot transfer the agreement without written consent.',
-      'The company can assign the agreement to third parties without notice.'
-    ]
-  },
-  {
-    title: '11. Governing Law',
-    content: [
-      'The agreement is governed by Indian laws, with exclusive jurisdiction in Bangalore.'
-    ]
-  },
-  {
-    title: '12. Limitation of Liability',
-    content: [
-      'The company\'s liability is limited, and it is not liable for indirect or consequential damages.',
-      'The company will not be responsible for any loss or damage to the renter\'s place and human liability due to the malfunction of any item.'
-    ]
-  },
-  {
-    title: '13. Refund Policy',
-    content: [
-      'Cancellation Requests: We can only cancel your order if you ask right after placing it. Once we\'ve told the location partner to send your stuff and they\'ve started, we might not be able to cancel.',
-      'Damaged Items: If something arrives damaged, tell our Customer Service team within 2 days. We\'ll sort it out after the delivery team checks and confirms the damage.',
-      'Not Working Right: If you\'re not happy with something because it doesn\'t work, you can return it at the time of delivery. Just let us know during delivery because you can\'t return it once our team leaves after confirming the delivery.',
-      'Check Product Dimensions: Before you order, check how big things are. If you reject something based on size, we can\'t take it back when it\'s delivered.',
-      'Refund Processing: If we approve a refund, it\'ll take about 8-10 days to get the money back in your bank account.'
-    ]
-  },
-  {
-    title: '14. REPAIRS, SERVICE & REPLACEMENT',
-    content: [
-      'After the reporting of any issue or defect burgeoned in the product during usage of the product, Company product experts will analyze the issue and ensure resolution in 7-15 working days. Company appointed third party will repair and/ or service for the issues which have burgeoned in the product due to normal usage. In case after analysis, the Company product experts team finds the issues or defect is due to misuse of the product or damage beyond repair, the customer shall be liable to pay for repair/ service and in case of damage beyond repair customer shall be liable to pay Company the market price of the Product. The decision on service or replacement will be at sole discretion of Company\'s product experts\' team.'
-    ]
-  }
-];
+    const remainingTerms = [
+      {
+        title: '8. Relocation',
+        content: [
+          'Customers wishing to relocate must request it two weeks in advance.',
+          'Relocation is subject to KYC verification and service availability of the new location, but an additional delivery charge will be applicable.'
+        ]
+      },
+      {
+        title: '9. Notice',
+        content: [
+          'Customers need to provide 1 months\' notice to terminate the contract. If the customer wishes to end the contract before the agreed tenure they need to pay full rent for the remaining period.',
+          'The company can terminate the agreement for non-payment or breach of terms.'
+        ]
+      },
+      {
+        title: '10. Assignment',
+        content: [
+          'Customers cannot transfer the agreement without written consent.',
+          'The company can assign the agreement to third parties without notice.'
+        ]
+      },
+      {
+        title: '11. Governing Law',
+        content: [
+          'The agreement is governed by Indian laws, with exclusive jurisdiction in Bangalore.'
+        ]
+      },
+      {
+        title: '12. Limitation of Liability',
+        content: [
+          'The company\'s liability is limited, and it is not liable for indirect or consequential damages.',
+          'The company will not be responsible for any loss or damage to the renter\'s place and human liability due to the malfunction of any item.'
+        ]
+      },
+      {
+        title: '13. Refund Policy',
+        content: [
+          'Cancellation Requests: We can only cancel your order if you ask right after placing it. Once we\'ve told the location partner to send your stuff and they\'ve started, we might not be able to cancel.',
+          'Damaged Items: If something arrives damaged, tell our Customer Service team within 2 days. We\'ll sort it out after the delivery team checks and confirms the damage.',
+          'Not Working Right: If you\'re not happy with something because it doesn\'t work, you can return it at the time of delivery. Just let us know during delivery because you can\'t return it once our team leaves after confirming the delivery.',
+          'Check Product Dimensions: Before you order, check how big things are. If you reject something based on size, we can\'t take it back when it\'s delivered.',
+          'Refund Processing: If we approve a refund, it\'ll take about 8-10 days to get the money back in your bank account.'
+        ]
+      },
+      {
+        title: '14. REPAIRS, SERVICE & REPLACEMENT',
+        content: [
+          'After the reporting of any issue or defect burgeoned in the product during usage of the product, Company product experts will analyze the issue and ensure resolution in 7-15 working days. Company appointed third party will repair and/ or service for the issues which have burgeoned in the product due to normal usage. In case after analysis, the Company product experts team finds the issues or defect is due to misuse of the product or damage beyond repair, the customer shall be liable to pay for repair/ service and in case of damage beyond repair customer shall be liable to pay Company the market price of the Product. The decision on service or replacement will be at sole discretion of Company\'s product experts\' team.'
+        ]
+      }
+    ];
 
-// Apply the same improved formatting to remaining terms
-if (currentY > 700) {
-  doc.addPage();
-  currentY = 50;
-}
-
-remainingTerms.forEach(term => {
-  // Check if we need a new page
-  if (currentY > 680) { // Start new page earlier to avoid cramped content
-    doc.addPage();
-    currentY = 50;
-  }
-  
-  // Add title with more space above
-  currentY += 10; // Extra space before each section
-  doc.font('Helvetica-Bold')
-     .fontSize(12)
-     .text(term.title, marginLeft, currentY);
-  
-  currentY += termsLineHeight + 5; // More space after title
-  
-  // Add content with bullet points
-  doc.font('Helvetica')
-     .fontSize(11);
-  
-  term.content.forEach(paragraph => {
-    // Check if we need a new page for a long paragraph
-    if (currentY > 730) {
+    // Apply the same improved formatting to remaining terms
+    if (currentY > 700) {
       doc.addPage();
       currentY = 50;
     }
-    
-    // Add bullet point
-    doc.text('•', marginLeft + 5, currentY);
-    
-    // Add paragraph text with indent
-    doc.text(paragraph, marginLeft + contentIndent, currentY, {
-      width: 495 - contentIndent,
-      align: 'left'
-    });
-    
-    // Calculate height needed for this paragraph
-    const textHeight = doc.heightOfString(paragraph, {
-      width: 495 - contentIndent
-    });
-    
-    // Advance position with calculated height plus padding
-    currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
-  });
-  
-  currentY += 10; // Add more space between sections
-});
-    
 
+    remainingTerms.forEach(term => {
+      // Check if we need a new page
+      if (currentY > 680) { // Start new page earlier to avoid cramped content
+        doc.addPage();
+        currentY = 50;
+      }
+      
+      // Add title with more space above
+      currentY += 10; // Extra space before each section
+      doc.font('Helvetica-Bold')
+         .fontSize(12)
+         .text(term.title, marginLeft, currentY);
+      
+      currentY += termsLineHeight + 5; // More space after title
+      
+      // Add content with bullet points
+      doc.font('Helvetica')
+         .fontSize(11);
+      
+      term.content.forEach(paragraph => {
+        // Check if we need a new page for a long paragraph
+        if (currentY > 730) {
+          doc.addPage();
+          currentY = 50;
+        }
+        
+        // Add bullet point
+        doc.text('•', marginLeft + 5, currentY);
+        
+        // Add paragraph text with indent
+        doc.text(paragraph, marginLeft + contentIndent, currentY, {
+          width: 495 - contentIndent,
+          align: 'left'
+        });
+        
+        // Calculate height needed for this paragraph
+        const textHeight = doc.heightOfString(paragraph, {
+          width: 495 - contentIndent
+        });
+        
+        // Advance position with calculated height plus padding
+        currentY += Math.max(textHeight, termsLineHeight) + 6; // Better spacing between points
+      });
+      
+      currentY += 10; // Add more space between sections
+    });
     
     // Get the total number of pages
     const totalPages = doc.bufferedPageCount;
@@ -694,7 +703,7 @@ remainingTerms.forEach(term => {
           from: `"Spot Furnish Rentals" <${process.env.SMTP_USER}>`,
           to: adminEmail,
           subject: `New Quotation Generated - #${invoiceNumber}`,
-          html: `<h2>New Quotation Alert</h2><p>A new quotation has been generated for ${customer.company || customer.name}.</p>`,
+          html: `<h2>New Quotation Alert</h2><p>A new quotation has been generated for ${customer.address || customer.name}.</p>`,
           attachments: [
             {
               filename: `Quotation-${invoiceNumber}.pdf`,
@@ -742,7 +751,6 @@ remainingTerms.forEach(term => {
     res.status(500).json({ success: false, message: 'Server error' ,err:err.message});
   });
 });
-
 
 
 // Helper function to format date
@@ -848,6 +856,3 @@ module.exports = router;
     
 
 
-  
-
-module.exports = router;

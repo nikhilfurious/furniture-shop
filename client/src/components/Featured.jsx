@@ -68,7 +68,7 @@ const FeaturedProducts = ({featuredProducts}) => {
               
               <div className="flex items-center justify-between">
                 <span className="text-xl font-semibold text-gray-900">
-                  ₹{product.basePrice.toLocaleString()}
+                  ₹{product.tenureOptions[product.tenureOptions.length - 1].price}
                 </span>
                {/*  <div className="flex items-center space-x-2">
                   <div className="flex items-center">

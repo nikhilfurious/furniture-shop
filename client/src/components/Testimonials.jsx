@@ -17,29 +17,35 @@ const Testimonials = () => {
           AOS.refresh();
         };
       }, []);
-    const testimonials = [
-      {
-        id: 1,
-        name: "Sarah Johnson",
-        role: "Interior Designer",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-        text: "I've been shopping here for years and the quality of furniture never disappoints. Their customer service is exceptional and the delivery is always on time.",
-      },
-      {
-        id: 2,
-        name: "Michael Chen",
-        role: "Homeowner",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-        text: "The minimalist collection transformed my living space completely. The pieces are not only beautiful but incredibly functional and durable.",
-      },
-      {
-        id: 3,
-        name: "Emily Rodriguez",
-        role: "Architect",
-        image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-        text: "As an architect, I appreciate quality craftsmanship and attention to detail. This store consistently delivers both, which is why I recommend them to all my clients.",
-      },
-    ];
+      const testimonials = [
+        {
+          id: 1,
+          name: "Aman Gupta",
+          role: "Homeowner",
+          image: "/person1.jpg", // 
+     
+      
+          text: "I recently rented a sofa set from Spot Furnish and was blown away by the quality and comfort. The team’s professionalism and timely delivery made my move seamless. Highly recommended!",
+        },
+        {
+          id: 2,
+          name: "Priya Sharma",
+          role: "Interior Designer",
+          image: "/person3.jpg", // 
+      
+          text: "As an interior designer, I’m always looking for affordable yet stylish pieces. Spot Furnish’s collection strikes the perfect balance—my clients love the modern look and sturdy build!",
+        },
+        {
+          id: 3,
+          name: "Rohan Mehta",
+          role: "Architect",
+          image: "/person2.jpg", // 
+      
+      
+          text: "I’ve partnered with Spot Furnish on several projects. The furniture not only elevates the space but also arrives on schedule. Their customer support is top-notch—truly a pleasure to work with.",
+        }
+      ];
+      
   
     return (
       <section className="py-20 bg-gray-50">
