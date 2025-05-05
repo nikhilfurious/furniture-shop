@@ -340,17 +340,25 @@ router.post("/process-purchase", async (req, res) => {
     
     yPos += 20;
     
-    // Fully Refundable Deposit row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
-    
+
+    // Only draw the essential column lines
+    doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke(); // After Items column
+    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke(); // Before Total column
+
+    // First column: Deposit text
     doc.font('Helvetica')
-      .text('Fully Refundable Deposit @ months Rent', colStart[0] + 5, yPos + 7)
+      .fontSize(10) // Slightly smaller font to ensure it fits
+      .text('Fully Refundable Deposit @ months rent', colStart[0] + 5, yPos + 7);
+
+    // Second column: Months text (in Duration column)
+    doc.text('2 Months', colStart[1] + 5, yPos + 7);
       
-      
+    // Total column: Amount
     doc.text(deposit.toString(), colStart[4] + 35, yPos + 7);
-    
+
     yPos += 20;
+
     
     // One time Transportation row
     doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
@@ -374,19 +382,9 @@ router.post("/process-purchase", async (req, res) => {
       
     doc.text(grandTotal.toString(), colStart[4] + 35, yPos + 7);
     
-    yPos += 20;
+    yPos += 50;
     
-    // Rent payment terms row
-    doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
-    doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
-    
-    doc.fontSize(10)
-      .text('Rent will be due beginning of the month, need to pay before 5th of every month', colStart[0] + 5, yPos + 5);
-    
-    doc.fontSize(12)
-      .text(req.body.paymentTerm || 'Prepaid Rent', colStart[4] + 20, yPos + 7);
-    
-    yPos += 30;
+ 
     
     // Payment instructions
     const advanceAmount = req.body.advanceAmount || 1000;
