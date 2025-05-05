@@ -135,7 +135,7 @@ const CartPage = () => {
       const monthlyPayout = item.price;  // price is your monthly rate
   
       // deposit for this line = monthly rate * months * quantity
-      return sum + monthlyPayout * months * item.quantity;
+      return sum + monthlyPayout * item.quantity * 2;
     }, 0).toFixed(2);
   };
   const depositTotal = calculateDepositTotal();
