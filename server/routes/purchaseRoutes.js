@@ -301,32 +301,53 @@ router.post("/process-purchase", async (req, res) => {
     yPos += 20;
     doc.font('Helvetica');
     
+    yPos += 20;
+    doc.font('Helvetica');
+    
     // Draw each product row
     for (const product of products) {
       const itemTotal = product.price * product.quantity;
-      const duration = product.duration || req.body.duration || '3 Months'; // Use product-specific duration if available
+      const duration = product.duration || req.body.duration || '3 Months';
       
-      // Draw row borders
-      doc.rect(marginLeft, yPos, tableWidth, 20).stroke();
+      // Calculate text height for product name to handle wrapping
+      // Use slightly smaller width to ensure text doesn't touch borders
+      const textWidth = colWidth[0] - 10;
+      const nameHeight = doc.heightOfString(product.name, { 
+        width: textWidth,
+        align: 'left'
+      });
       
-      // Draw row vertical lines
-      doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + 20).stroke();
-      doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + 20).stroke();
-      doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + 20).stroke();
-      doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + 20).stroke();
+      // Set minimum row height but allow expansion for longer text
+      // Add extra padding (10px) to ensure text isn't cramped
+      const rowHeight = Math.max(30, nameHeight + 10);
       
-      // Calculate text height for product name to handle possible wrapping
-      const nameHeight = doc.heightOfString(product.name, { width: colWidth[0] - 10 });
-      const cellHeight = Math.max(20, nameHeight + 10);
+      // Draw row borders with dynamic height
+      doc.rect(marginLeft, yPos, tableWidth, rowHeight).stroke();
       
-      // Add product details with proper text alignment
-      doc.text(product.name, colStart[0] + 5, yPos + (cellHeight - nameHeight) / 2, { width: colWidth[0] - 10 })
-        .text(duration, colStart[1] + 5, yPos + 7)
-        .text(product.price.toString(), colStart[2] + 20, yPos + 7)
-        .text(product.quantity.toString(), colStart[3] + 15, yPos + 7)
-        .text(itemTotal.toString(), colStart[4] + 35, yPos + 7);
+      // Draw row vertical lines with dynamic height
+      doc.moveTo(colStart[1], yPos).lineTo(colStart[1], yPos + rowHeight).stroke();
+      doc.moveTo(colStart[2], yPos).lineTo(colStart[2], yPos + rowHeight).stroke();
+      doc.moveTo(colStart[3], yPos).lineTo(colStart[3], yPos + rowHeight).stroke();
+      doc.moveTo(colStart[4], yPos).lineTo(colStart[4], yPos + rowHeight).stroke();
       
-      yPos += cellHeight;
+      // Add product details with proper vertical centering
+      const textYPos = yPos + 5; // Starting position with some padding
+      
+      // Text with wrapping for product name
+      doc.text(product.name, colStart[0] + 5, textYPos, { 
+        width: textWidth,
+        align: 'left'
+      });
+      
+      // Center other fields vertically
+      const centerY = yPos + (rowHeight / 2) - 5;
+      doc.text(duration, colStart[1] + 5, centerY)
+         .text(product.price.toString(), colStart[2] + 20, centerY)
+         .text(product.quantity.toString(), colStart[3] + 15, centerY)
+         .text(itemTotal.toString(), colStart[4] + 35, centerY);
+      
+      // Move to next row
+      yPos += rowHeight;
     }
     
     // Total Monthly Package row

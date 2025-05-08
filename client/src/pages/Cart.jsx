@@ -351,7 +351,8 @@ const CartPage = () => {
               
               <div className="space-y-3 mb-8">
                 <div className="flex justify-between">
-                  <span>Refundable Deposit</span>
+                  <span>Refundable Deposit <br />(2 Months Rent)</span><span></span>
+                  
                   <span className="font-medium">₹{calculateDepositTotal()}</span>
                 </div>
                 <div className="flex justify-between">
