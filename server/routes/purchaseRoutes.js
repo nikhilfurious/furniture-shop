@@ -307,7 +307,7 @@ router.post("/process-purchase", async (req, res) => {
     // Draw each product row
     for (const product of products) {
       const itemTotal = product.price * product.quantity;
-      const duration = product.duration || req.body.duration || '3 Months';
+      const duration = product.tenure
       
       // Calculate text height for product name to handle wrapping
       // Use slightly smaller width to ensure text doesn't touch borders

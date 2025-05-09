@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Input, message } from 'antd';
 import axios from 'axios';
-  import { API_URL } from "../endpoint";
+import { API_URL } from "../endpoint";
 import { useNavigate } from 'react-router-dom';
+import { getAuth } from 'firebase/auth';
 
-const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) => {
+const PurchaseButton = ({ products, customer, adminEmail, children, disabled, total, depositTotal, monthlyRent }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const auth = getAuth();
   
-
   // Calculate total price from all products
-  const totalPrice = products?.reduce((sum, product) => sum + (product.price || 0), 0);
+  const totalPrice = total || products?.reduce((sum, product) => sum + (product.price * product.quantity || 0), 0);
 
   const [form] = Form.useForm();
 
@@ -52,6 +53,22 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
     }
   };
 
+  // Clear the user's cart
+  const clearCart = async () => {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      await axios.delete(
+        `${API_URL}/api/cart/clear/${customer.userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('Cart cleared successfully');
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      // Don't show error to user since the purchase was successful
+      // We'll just log the error for debugging
+    }
+  };
+
   const handleConfirm = async () => {
     try {
       // Validate form fields
@@ -77,11 +94,27 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
         address: values.address,
       });
 
-      // Step 2: Process the purchase
+      // Ensure each product has the tenure information
+      const productsWithTenure = products.map(product => {
+        return {
+          ...product,
+          
+          tenure: product.tenure
+        };
+      });
+
+      // Step 2: Process the purchase with all relevant information
       const response = await axios.post(`${API_URL}/api/process-purchase`, {
         userId: customer.userId,
         totalPrice,
-        products,
+        depositTotal,
+        monthlyRent,
+        products: productsWithTenure, // Send products with tenure information
+        orderDetails: {
+          totalAmount: totalPrice,
+          depositAmount: depositTotal,
+          monthlyRent: monthlyRent,
+        },
         customer: {
           ...customer,
           phoneNumber: values.phoneNumber,
@@ -91,11 +124,13 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
       });
 
       if (response.data.success) {
-        message.success('Invoice generated and sent successfully!');
-        alert('Purchase successful!'); // Alert after successful purchase
-        navigate('/dashboard'); // Redirect to dashboard
+        // Step 3: Clear the cart after successful purchase
+        await clearCart();
+        
+        message.success('Purchase successful! Your cart has been cleared.');
         setIsModalVisible(false);
         form.resetFields();
+        navigate('/dashboard'); // Redirect to dashboard
 
         // Optionally, open PDF in a new tab if provided
         if (response.data.pdfUrl) {
@@ -136,13 +171,18 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
             {products && products.length > 0 ? (
               <>
                 {products.map((product) => (
-                  <div key={product._id} style={{ marginBottom: 10 }}>
-                    <p>{product.name} - ₹{product.price?.toFixed(2)}</p>
+                  <div key={product.id || product._id} style={{ marginBottom: 10 }}>
+                    <p>
+                      {product.name} - ₹{product.price?.toFixed(2)} x {product.quantity} 
+                      {product.tenure && <span> ({product.tenure} {parseInt(product.tenure, 10) === 1 ? 'month' : 'months'})</span>}
+                    </p>
                   </div>
                 ))}
-                <p style={{ fontWeight: 'bold', borderTop: '1px solid #eee', paddingTop: 10 }}>
-                  Total Price: ₹{totalPrice?.toFixed(2)}
-                </p>
+                <div style={{ marginTop: 15, borderTop: '1px solid #eee', paddingTop: 10 }}>
+                  
+                  <p><strong>Deposit Amount:</strong> ₹{totalPrice*2 || 'N/A'}</p>
+                  <p><strong>Total Amount:</strong> ₹{totalPrice || 'N/A'}</p>
+                </div>
               </>
             ) : (
               <p>No products available</p>
@@ -155,7 +195,7 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
             initialValue='+91'
             rules={[
               { required: true, message: 'Please enter your phone number' },
-              { pattern: /^\+?[1-9]\d{11,14}$/, message: 'Please enter a valid phone number' },
+              { pattern: /^\+?[1-9]\d{8,14}$/, message: 'Please enter a valid phone number' },
             ]}
             help="We'll use this for shipping updates and order confirmation"
           >
@@ -183,7 +223,6 @@ const PurchaseButton = ({ products, customer, adminEmail, children, disabled }) 
             >
               {isLoading ? 'Processing...' : 'Confirm Purchase'}
             </button>
-
           </div>
         </Form>
       </Modal>

@@ -44,6 +44,25 @@ const CartPage = () => {
     }
   };
 
+  const fetchCartData = async (userId) => {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const { data } = await axios.get(
+        `${API_URL}/api/cart/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // init deposit flags
+      const depositFlags = {};
+      data.forEach(item => depositFlags[item.id] = false);
+      setShowDeposit(depositFlags);
+      setCart(data);
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (auth.currentUser) fetchCart(true);
   }, [auth.currentUser]);
@@ -127,9 +146,6 @@ const CartPage = () => {
   const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0).toFixed(2);
   const calculateDepositTotal = () => {
     return cart.reduce((sum, item) => {
-      
-      
-  
       // tenure comes in as a string like "3" or "6"
       const months = parseInt(item.tenure, 10) || 0;
       const monthlyPayout = item.price;  // price is your monthly rate
@@ -141,23 +157,30 @@ const CartPage = () => {
   const depositTotal = calculateDepositTotal();
   const total = (parseFloat(subtotal) + DELIVERY_CHARGE + parseFloat(depositTotal)).toFixed(2);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCustomer({
+          userId: user.uid,
+          customerName: user.displayName || 'Unknown User',
+          email: user.email || "email",
+        });
+        fetchCartData(user.uid);
+      } else {
+        navigate('/login');
+      }
+    });
 
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setCustomer({
-            userId: user.uid,
-            customerName: user.displayName || 'Unknown User',
-            email: user.email || "email",
-          });
-          fetchCartData(user.uid);
-        } else {
-          navigate('/login');
-        }
-      });
-  
-      return () => unsubscribe();
-    }, [auth, navigate]);
+    return () => unsubscribe();
+  }, [auth, navigate]);
+
+  // Make sure cart items have complete tenure information
+  const prepareCartForPurchase = () => {
+    return cart.map(item => ({
+      ...item,
+      tenure: item.tenure || (item.tenureOptions?.length > 0 ? item.tenureOptions[0].months : 1)
+    }));
+  };
 
   if (!loading && cart.length === 0) {
     return (
@@ -382,8 +405,13 @@ const CartPage = () => {
                     <p className="text-2xl font-bold">₹{total}</p>
                   </div>
                   
-                  <PurchaseButton disabled={!termsAccepted} products={cart} customer={customer} adminEmail={adminEmail}>
-                  Pay ₹{total}
+                  <PurchaseButton 
+                    disabled={!termsAccepted} 
+                    products={prepareCartForPurchase()} 
+                    customer={customer} 
+                    adminEmail={adminEmail}
+                  >
+                    Pay ₹{total}
                   </PurchaseButton>
                 </div>
               </div>
