@@ -703,7 +703,7 @@ router.post("/process-purchase", async (req, res) => {
             ${productList}
           </ul>
           <p><strong>Total Monthly Package:</strong> ₹${monthlyTotal}</p>
-          <p>To confirm your order, please pay ₹${advanceAmount} as token advance to the bank account mentioned in the quotation.</p>
+          <p>To confirm your order, please pay ₹${advanceAmount} as token advance to the bank account mentioned in the quotation or gpay/phone pay to 984472342.</p>
           <p>If you have any questions, please contact us at +91 8123096928 or +91 9844723432.</p>
         `;
 
