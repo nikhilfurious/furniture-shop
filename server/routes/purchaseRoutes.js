@@ -196,7 +196,7 @@ router.post("/process-purchase", async (req, res) => {
       .text('8th Main, Ramamurthy Nagar main Road', marginLeft, yPos)
       .text('Bengaluru, Karnataka 560016', marginLeft, yPos + lineHeight)
       .text('+91 8123096928', marginLeft, yPos + lineHeight * 2)
-      .text('+91 9844311875', marginLeft, yPos + lineHeight * 3);
+      .text('+91 9844723432', marginLeft, yPos + lineHeight * 3);
 
     // Add quotation title
     yPos += lineHeight * 5;
