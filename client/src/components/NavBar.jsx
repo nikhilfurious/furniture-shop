@@ -345,7 +345,7 @@ function Navbar({ products, openModal, locationData }) {
                         filteredProducts.map((product) => (
                           <li key={product.id} className="border-b border-green-100 last:border-none">
                             <Link
-                              to={`/product/${product.slug}`}
+                              to={`/product/${product.id}`}
                               className="block px-4 py-2 hover:bg-green-50 transition-colors"
                               onClick={() => {
                                 setSearchQuery('');

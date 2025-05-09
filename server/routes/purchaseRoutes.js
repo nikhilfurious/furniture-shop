@@ -408,7 +408,7 @@ router.post("/process-purchase", async (req, res) => {
  
     
     // Payment instructions
-    const advanceAmount = req.body.advanceAmount || 1000;
+    const advanceAmount =  1000;
     
     doc.font('Helvetica')
       .fontSize(11)
@@ -704,7 +704,7 @@ router.post("/process-purchase", async (req, res) => {
           </ul>
           <p><strong>Total Monthly Package:</strong> ₹${monthlyTotal}</p>
           <p>To confirm your order, please pay ₹${advanceAmount} as token advance to the bank account mentioned in the quotation.</p>
-          <p>If you have any questions, please contact us at +91 8123096928 or +91 9844311875.</p>
+          <p>If you have any questions, please contact us at +91 8123096928 or +91 9844723432.</p>
         `;
 
         // Send Invoice to Customer
