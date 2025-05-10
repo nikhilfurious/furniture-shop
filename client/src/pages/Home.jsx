@@ -291,7 +291,7 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">Technical Support</h3>
-              <p className="text-gray-600">Technical Maintenance Free Service for any Technical issues.</p>
+              <p className="text-gray-600">Free Technical service for all Electric Appliances.</p>
             </div>
           </div>
         

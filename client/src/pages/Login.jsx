@@ -19,7 +19,7 @@ const Login = () => {
     try {
       await login(email, password);
       await sendAuthRequest();
-      navigate("/dashboard");
+      navigate("/product");
     } catch (err) {
       setError(err.message);
       setIsLoading(false);

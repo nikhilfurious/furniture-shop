@@ -9,7 +9,7 @@ const WhatsAppButton = ({  message = "Hello! I'd like to chat with you." }) => {
   const whatsappUrl = `https://wa.me/${formattedPhoneNumber}?text=${encodeURIComponent(message)}`;
   
   return (
-    <div className="fixed left-4 bottom-4 z-50">
+    <div className="fixed right-4 bottom-4 z-50">
       <a
         href={whatsappUrl}
         target="_blank"
@@ -29,7 +29,7 @@ const WhatsAppButton = ({  message = "Hello! I'd like to chat with you." }) => {
         </svg>
         
         {/* Tooltip that appears on hover */}
-        <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-2 rounded shadow-md transition-opacity duration-300 whitespace-nowrap">
+        <span className="absolute right-16 opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-2 rounded shadow-md transition-opacity duration-300 whitespace-nowrap">
           Chat with us
         </span>
       </a>

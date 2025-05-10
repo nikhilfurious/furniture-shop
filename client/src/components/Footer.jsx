@@ -19,12 +19,12 @@ const Footer = () => {
             </p>
             <div className="pt-4">
               <div className="flex items-center space-x-3 text-gray-300 py-1">
-                <MdLocationOn className="text-green-400" />
+                <MdLocationOn className="text-green-400 text-4xl" />
                 <span>8th Main, Ramamurthy Nagar main Road,Bengaluru, Karnataka 560016</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-300 py-1">
                 <MdPhone className="text-green-400" />
-                <span>+91 8123096928</span>
+                <span>+91 8123096298</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-300 py-1">
                 <MdPhone className="text-green-400" />
@@ -52,15 +52,15 @@ const Footer = () => {
               <li>
                 <a href="/product" className="text-gray-300 hover:text-white hover:pl-2 transition-all duration-300 flex items-center">
                   <span className="bg-green-500 h-1 w-1 rounded-full mr-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                  Shop
+                  Product
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="/about" className="text-gray-300 hover:text-white hover:pl-2 transition-all duration-300 flex items-center">
                   <span className="bg-green-500 h-1 w-1 rounded-full mr-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
                   About
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a href="/contact" className="text-gray-300 hover:text-white hover:pl-2 transition-all duration-300 flex items-center">
                   <span className="bg-green-500 h-1 w-1 rounded-full mr-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
@@ -117,12 +117,7 @@ const Footer = () => {
               >
                 <FaTwitter className="text-lg" />
               </a>
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-gray-700 hover:bg-green-600 flex items-center justify-center transition duration-300"
-              >
-                <FaLinkedinIn className="text-lg" />
-              </a>
+
             </div>
           </div>
         </div>

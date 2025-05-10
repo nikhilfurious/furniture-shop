@@ -199,7 +199,7 @@ const ProductPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   <h3 className="font-medium">Choose Tenure (months)</h3>
-                  <Info className="w-4 h-4 text-gray-400 cursor-pointer" />
+                  
                 </div>
               </div>
               
@@ -318,6 +318,7 @@ const ProductPage = () => {
                     </span> */}
                   </div>
                   <p className="text-sm text-gray-500">Monthly Rent for {getCurrentTenure().months} months</p>
+                  <p className="text-sm text-gray-500 font-bold">Refundable Deposit: ₹{(product.tenureOptions[selectedTenure].price ) *2}</p>
                 </div>
               </div>
               
