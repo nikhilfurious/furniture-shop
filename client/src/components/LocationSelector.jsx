@@ -1,21 +1,32 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Check, X, MapPin, Search, ChevronDown } from "lucide-react";
-
-// Sample location data - in a real app this would come from an API
-const availableLocations = [
-  { id: "l1", name: "Chennai" },
-  { id: "l2", name: "Bangalore" },
-  { id: "l3", name: "Delhi" },
-  { id: "l4", name: "Kolkata" },
-  { id: "l5", name: "Mumbai" },
-  { id: "l6", name: "Hydrebad" },
-];
+import axios from "axios";
+import { API_URL } from "../endpoint";
 
 const LocationSelector = ({ selectedLocations, onSelectLocation, onRemoveLocation, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef(null);
+
+  // Fetch locations from API
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(`${API_URL}/api/cities`);
+        setAvailableLocations(response.data);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   // Check if mobile on component mount and when window is resized
   useEffect(() => {
@@ -35,10 +46,10 @@ const LocationSelector = ({ selectedLocations, onSelectLocation, onRemoveLocatio
     };
   }, []);
 
-  const filteredLocations = availableLocations.filter(
+  const filteredLocations = availableLocations?.filter(
     (location) =>
       location.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !selectedLocations.some((selected) => selected.id === location.id)
+      !selectedLocations.some((selected) => selected._id === location._id)
   );
 
   useEffect(() => {
@@ -94,7 +105,7 @@ const LocationSelector = ({ selectedLocations, onSelectLocation, onRemoveLocatio
         <div className="flex flex-wrap gap-2 mt-2">
           {selectedLocations.map((location) => (
             <div
-              key={location.id}
+              key={location._id}
               className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
             >
               <MapPin size={14} className="mr-1" />
@@ -103,7 +114,7 @@ const LocationSelector = ({ selectedLocations, onSelectLocation, onRemoveLocatio
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onRemoveLocation(location.id);
+                  onRemoveLocation(location._id);
                 }}
                 className="ml-1 text-blue-800 hover:text-blue-900"
               >
@@ -138,10 +149,12 @@ const LocationSelector = ({ selectedLocations, onSelectLocation, onRemoveLocatio
           <div
             className={`overflow-y-auto ${listMaxHeightClass}`}
           >
-            {filteredLocations.length > 0 ? (
+            {isLoading ? (
+              <div className="p-4 text-center text-gray-500">Loading locations...</div>
+            ) : filteredLocations?.length > 0 ? (
               filteredLocations.map((location) => (
                 <div
-                  key={location.id}
+                  key={location._id}
                   className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();

@@ -24,6 +24,7 @@ import AllCategory from './pages/AllCategory';
 import SearchResultsPage from './pages/SearchResultsPage';
 import FAQ from './components/Faq';
 import TermsAndPrivacy from './pages/TermsAndPrivacy';
+import WhatsAppButton from './components/WhatsappButton';
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -124,6 +125,7 @@ const App = () => {
               </Routes>
             </Suspense>
           </main>
+          <WhatsAppButton />
           <Footer />
         </div>
       </Router>
