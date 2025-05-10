@@ -15,15 +15,22 @@ const app = express();
 // Middleware
 app.use(express.json()); // Body parser
 const corsOptions = {
-  origin: ['http://localhost:5173','https://furniture-shop-jet.vercel.app','https://furniture-shop-dvh6.vercel.app'],
+  origin: ['http://localhost:5173','https://furniture-shop-jet.vercel.app','https://furniture-shop-dvh6.vercel.app','https://spotfurnishrental.vercel.app'],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
 };
 
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
+app.use(cors())
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
 
 // if you need to handle preflights for all routes
-app.options('*', cors(corsOptions));
+
 
 
 

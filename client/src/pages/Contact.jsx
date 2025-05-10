@@ -100,8 +100,12 @@ const ContactPage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">Visit Our Stores</h3>
-                  <p className="text-gray-600 mb-1">123 Furniture Avenue, Bangalore - 560001</p>
-                  <p className="text-gray-600">456 Decor Street, Chennai - 600001</p>
+                  <p className="text-gray-600 mb-1">Spot Furnish Rentals
+                        <p>8th Main, Sonnappa Layout, </p>
+                        <p>Ramamurty Nagar Main Road,</p>
+                        <p>Bangalore 560016</p>
+                        Landmark- Appana Bazar line</p>
+                  
                 </div>
               </div>
               
@@ -113,8 +117,8 @@ const ContactPage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">Call Us</h3>
-                  <p className="text-gray-600 mb-1">Customer Service: +91 8765 432 100</p>
-                  <p className="text-gray-600">Sales Inquiries: +91 9876 543 210</p>
+                  <p className="text-gray-600 mb-1">Customer Service: +918123096298</p>
+                  <p className="text-gray-600">+91 9844723432</p>
                 </div>
               </div>
               
@@ -126,8 +130,8 @@ const ContactPage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">Email Us</h3>
-                  <p className="text-gray-600 mb-1">Customer Support: support@furnishrent.com</p>
-                  <p className="text-gray-600">Business Inquiries: info@furnishrent.com</p>
+                  <p className="text-gray-600 mb-1">Customer Support: infospotfurnish@gmail.com</p>
+                  <p className="text-gray-600">info@spotfurnish.com</p>
                 </div>
               </div>
               
@@ -293,90 +297,27 @@ const ContactPage = () => {
           <div className="bg-gray-300 rounded-lg overflow-hidden shadow-lg h-96">
             {/* This would be your actual Google Maps or other map embed */}
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <div className="text-center p-8">
-                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                </svg>
-                <p className="text-gray-500 text-lg">Interactive Map Would Display Here</p>
-                <p className="text-gray-500">Showing our showroom locations in Bangalore, Chennai, and other cities</p>
-              </div>
+              
+              
+              <div className='w-full h-full'>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3887.368182582809!2d77.675212!3d13.012210000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTPCsDAwJzQ0LjAiTiA3N8KwNDAnMzAuOCJF!5e0!3m2!1sen!2sin!4v1746880381392!5m2!1sen!2sin" 
+               width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Spot Furnish Pune Location"
+                className="rounded-lg"></iframe>
+                </div>  
+              
+            
             </div>
           </div>
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-12" data-aos="fade-up">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Frequently Asked Questions</h2>
-          <div className="w-20 h-1 bg-green-500 mx-auto mb-6"></div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Find quick answers to common questions about our services
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6 transform transition duration-300 hover:shadow-lg" data-aos="fade-up" data-aos-delay="100">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">How does furniture rental work?</h3>
-            <p className="text-gray-600">
-              Simply browse our collection, select the items you love, choose your rental duration, and we'll deliver and set up everything for you. When your rental period ends, we'll pick everything up.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6 transform transition duration-300 hover:shadow-lg" data-aos="fade-up" data-aos-delay="200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">What if I damage the furniture?</h3>
-            <p className="text-gray-600">
-              We understand that accidents happen. Minor wear and tear is covered, but significant damage may incur additional charges. We offer an optional protection plan for complete peace of mind.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6 transform transition duration-300 hover:shadow-lg" data-aos="fade-up" data-aos-delay="300">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">Can I extend my rental period?</h3>
-            <p className="text-gray-600">
-              Absolutely! You can extend your rental period at any time through your account or by contacting our customer service team. We'll adjust your billing accordingly.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6 transform transition duration-300 hover:shadow-lg" data-aos="fade-up" data-aos-delay="400">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">Do you sanitize furniture between rentals?</h3>
-            <p className="text-gray-600">
-              Yes, all our furniture undergoes a thorough cleaning and sanitization process between rentals. We follow industry-best practices to ensure your furniture is clean and hygienic.
-            </p>
-          </div>
-        </div>
-        
-        <div className="text-center mt-12" data-aos="fade-up">
-          <p className="text-gray-600 mb-4">Still have questions? We're here to help!</p>
-          <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105">
-            View All FAQs
-          </button>
-        </div>
-      </div>
-
-      {/* Newsletter Section */}
-      {/* <div className="bg-gray-800 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center" data-aos="fade-up">
-          <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Subscribe to our newsletter for the latest collections, design tips, and exclusive offers.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-            <input
-              type="email"
-              className="flex-grow px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter your email address"
-            />
-            <button className="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300">
-              Subscribe
-            </button>
-          </div>
-          
-          <p className="text-gray-400 text-sm mt-4">
-            By subscribing, you agree to our Privacy Policy and consent to receive our promotional emails.
-          </p>
-        </div>
-      </div> */}
+      
     </div>
   );
 };

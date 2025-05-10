@@ -20,26 +20,26 @@ const Testimonials = () => {
       const testimonials = [
         {
           id: 1,
-          name: "Aman Gupta",
+          name: "Prakash Siddaradi",
           role: "Homeowner",
-          image: "/person1.jpg", // 
+          image: "/pers.png", // 
      
       
-          text: "I recently rented a sofa set from Spot Furnish and was blown away by the quality and comfort. The team’s professionalism and timely delivery made my move seamless. Highly recommended!",
+          text: "My experience at Spot Furnish Rentals was exceptional! The staff was incredibly polite and attentive, ensuring all my needs were met. Management was prompt in addressing inquiries, making the process seamless. The product installation was easy and hassle-free. Most importantly, the high-quality furnishings exceeded my expectations, elevating my space beautifully!",
         },
         {
           id: 2,
-          name: "Priya Sharma",
-          role: "Interior Designer",
-          image: "/person3.jpg", // 
+          name: "Amit Kittur",
+          role: "CTO Mememta",
+          image: "/pers.png", // 
       
-          text: "As an interior designer, I’m always looking for affordable yet stylish pieces. Spot Furnish’s collection strikes the perfect balance—my clients love the modern look and sturdy build!",
+          text: "Excellent experience with Spot Furnish Rentals. They supplied high-quality office furniture on rent, and their service was top-notch. The team was professional, responsive, and delivered the furniture on time. The furniture looks great and is comfortable too! Highly recommend for any office furniture rental needs",
         },
         {
           id: 3,
           name: "Rohan Mehta",
           role: "Architect",
-          image: "/person2.jpg", // 
+          image: "/pers.png", // 
       
       
           text: "I’ve partnered with Spot Furnish on several projects. The furniture not only elevates the space but also arrives on schedule. Their customer support is top-notch—truly a pleasure to work with.",
